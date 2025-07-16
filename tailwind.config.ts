@@ -61,6 +61,12 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				keto: {
+					green: 'hsl(var(--keto-green))',
+					'green-light': 'hsl(var(--keto-green-light))',
+					orange: 'hsl(var(--keto-orange))',
+					'orange-light': 'hsl(var(--keto-orange-light))'
 				}
 			},
 			borderRadius: {
