@@ -40,7 +40,7 @@ const ProgressDashboard = () => {
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-muted-foreground">{stat.label}</span>
                     {stat.trend === "down" && <TrendingDown className="h-4 w-4 text-keto-green" />}
-                    {stat.trend === "target" && <Target className="h-4 w-4 text-keto-orange" />}
+                    {stat.trend === "target" && <Target className="h-4 w-4 text-keto-yellow" />}
                     {stat.trend === "up" && <Award className="h-4 w-4 text-keto-green" />}
                   </div>
                   <div className="text-2xl font-bold mb-1">{stat.value}</div>
@@ -114,7 +114,7 @@ const ProgressDashboard = () => {
                         </div>
                       </div>
                       {milestone.achieved && (
-                        <Award className="h-4 w-4 text-keto-orange" />
+                        <Award className="h-4 w-4 text-keto-yellow" />
                       )}
                     </div>
                   ))}
@@ -136,9 +136,9 @@ const ProgressDashboard = () => {
                     <div className="text-sm text-muted-foreground">Days in Ketosis</div>
                   </div>
                   
-                  <div className="text-center p-6 bg-gradient-to-br from-keto-orange-light to-transparent rounded-lg">
+                  <div className="text-center p-6 bg-gradient-to-br from-keto-yellow-light to-transparent rounded-lg">
                     <div className="text-3xl mb-2">🔥</div>
-                    <div className="text-2xl font-bold text-keto-orange">28</div>
+                    <div className="text-2xl font-bold text-keto-yellow">28</div>
                     <div className="text-sm text-muted-foreground">Day Streak</div>
                   </div>
                   

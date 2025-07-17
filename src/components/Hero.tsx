@@ -7,7 +7,7 @@ const Hero = () => {
   return (
     <section className="relative py-20 lg:py-32 overflow-hidden">
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-keto-green-light via-background to-keto-orange-light opacity-50" />
+      <div className="absolute inset-0 bg-gradient-to-br from-keto-green-light via-background to-keto-yellow-light opacity-50" />
       
       <div className="container relative">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -20,7 +20,7 @@ const Hero = () => {
               
               <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
                 Master Your{" "}
-                <span className="bg-gradient-to-r from-keto-green to-keto-orange bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-keto-green to-keto-yellow bg-clip-text text-transparent">
                   Keto Journey
                 </span>
               </h1>
@@ -32,7 +32,7 @@ const Hero = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="bg-gradient-to-r from-keto-green to-keto-orange hover:opacity-90 transition-opacity" onClick={() => console.log('Start Free Today clicked')}>
+              <Button size="lg" className="bg-gradient-to-r from-keto-green to-keto-yellow hover:opacity-90 transition-opacity" onClick={() => console.log('Start Free Today clicked')}>
                 Start Free Today
                 <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
@@ -47,7 +47,7 @@ const Hero = () => {
                 <div className="text-sm text-muted-foreground">Active Users</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-keto-orange">1000+</div>
+                <div className="text-2xl font-bold text-keto-yellow">1000+</div>
                 <div className="text-sm text-muted-foreground">Keto Recipes</div>
               </div>
               <div className="text-center">
@@ -82,8 +82,8 @@ const Hero = () => {
 
             <Card className="absolute -right-4 bottom-1/4 p-4 bg-background/95 backdrop-blur shadow-lg animate-pulse">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-keto-orange-light rounded-lg">
-                  <TrendingUp className="h-4 w-4 text-keto-orange" />
+                <div className="p-2 bg-keto-yellow-light rounded-lg">
+                  <TrendingUp className="h-4 w-4 text-keto-yellow" />
                 </div>
                 <div>
                   <div className="font-semibold text-sm">Progress</div>

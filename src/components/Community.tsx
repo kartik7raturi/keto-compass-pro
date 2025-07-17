@@ -73,7 +73,7 @@ const Community = () => {
                     <div key={post.id} className="border-b last:border-b-0 pb-6 last:pb-0">
                       <div className="flex items-start gap-3 mb-3">
                         <Avatar>
-                          <AvatarFallback className="bg-gradient-to-br from-keto-green to-keto-orange text-white">
+                          <AvatarFallback className="bg-gradient-to-br from-keto-green to-keto-yellow text-white">
                             {post.avatar}
                           </AvatarFallback>
                         </Avatar>
@@ -124,7 +124,7 @@ const Community = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Trophy className="h-5 w-5 text-keto-orange" />
+                    <Trophy className="h-5 w-5 text-keto-yellow" />
                     Active Challenges
                   </CardTitle>
                 </CardHeader>
@@ -139,7 +139,7 @@ const Community = () => {
                         </div>
                         <div>{challenge.daysLeft} days left</div>
                       </div>
-                      <Button size="sm" className="w-full bg-gradient-to-r from-keto-green to-keto-orange" onClick={() => console.log(`Join Challenge: ${challenge.name}`)}>
+                      <Button size="sm" className="w-full bg-gradient-to-r from-keto-green to-keto-yellow" onClick={() => console.log(`Join Challenge: ${challenge.name}`)}>
                         Join Challenge
                       </Button>
                     </div>
@@ -158,12 +158,12 @@ const Community = () => {
                     { name: "Maria S.", posts: 31, avatar: "MS" }
                   ].map((user, index) => (
                     <div key={index} className="flex items-center gap-3">
-                      <div className="flex items-center gap-1 text-keto-orange">
+                      <div className="flex items-center gap-1 text-keto-yellow">
                         <Star className="h-3 w-3 fill-current" />
                         <span className="text-sm font-medium">#{index + 1}</span>
                       </div>
                       <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-gradient-to-br from-keto-green to-keto-orange text-white text-xs">
+                        <AvatarFallback className="bg-gradient-to-br from-keto-green to-keto-yellow text-white text-xs">
                           {user.avatar}
                         </AvatarFallback>
                       </Avatar>
@@ -186,7 +186,7 @@ const Community = () => {
                     <div className="text-sm text-muted-foreground">Active Members</div>
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-keto-orange">2,847</div>
+                    <div className="text-2xl font-bold text-keto-yellow">2,847</div>
                     <div className="text-sm text-muted-foreground">Success Stories</div>
                   </div>
                   <div>

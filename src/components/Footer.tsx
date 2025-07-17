@@ -8,10 +8,10 @@ const Footer = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-keto-green to-keto-orange flex items-center justify-center">
+              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-keto-green to-keto-yellow flex items-center justify-center">
                 <span className="text-white font-bold text-sm">K</span>
               </div>
-              <span className="font-bold text-xl bg-gradient-to-r from-keto-green to-keto-orange bg-clip-text text-transparent">
+              <span className="font-bold text-xl bg-gradient-to-r from-keto-green to-keto-yellow bg-clip-text text-transparent">
                 Keto Compass Pro
               </span>
             </div>
@@ -19,16 +19,16 @@ const Footer = () => {
               Your complete companion for a successful keto journey. Track, learn, and thrive with our community.
             </p>
             <div className="flex gap-2">
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" onClick={() => console.log('Twitter clicked')}>
                 <Twitter className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" onClick={() => console.log('Instagram clicked')}>
                 <Instagram className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" onClick={() => console.log('Facebook clicked')}>
                 <Facebook className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" onClick={() => console.log('Email clicked')}>
                 <Mail className="h-4 w-4" />
               </Button>
             </div>
