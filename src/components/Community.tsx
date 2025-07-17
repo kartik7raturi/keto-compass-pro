@@ -93,15 +93,15 @@ const Community = () => {
                           </div>
 
                           <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                            <button className="flex items-center gap-1 hover:text-keto-green transition-colors">
+                            <button className="flex items-center gap-1 hover:text-keto-green transition-colors" onClick={() => console.log(`Like post by ${post.author}`)}>
                               <Heart className="h-4 w-4" />
                               {post.likes}
                             </button>
-                            <button className="flex items-center gap-1 hover:text-keto-green transition-colors">
+                            <button className="flex items-center gap-1 hover:text-keto-green transition-colors" onClick={() => console.log(`Comment on post by ${post.author}`)}>
                               <MessageCircle className="h-4 w-4" />
                               {post.comments}
                             </button>
-                            <button className="flex items-center gap-1 hover:text-keto-green transition-colors">
+                            <button className="flex items-center gap-1 hover:text-keto-green transition-colors" onClick={() => console.log(`Share post by ${post.author}`)}>
                               <Share2 className="h-4 w-4" />
                               Share
                             </button>
@@ -115,7 +115,7 @@ const Community = () => {
               </Card>
 
               <div className="text-center">
-                <Button variant="outline">Load More Posts</Button>
+                <Button variant="outline" onClick={() => console.log('Load More Posts clicked')}>Load More Posts</Button>
               </div>
             </div>
 
@@ -139,7 +139,7 @@ const Community = () => {
                         </div>
                         <div>{challenge.daysLeft} days left</div>
                       </div>
-                      <Button size="sm" className="w-full bg-gradient-to-r from-keto-green to-keto-orange">
+                      <Button size="sm" className="w-full bg-gradient-to-r from-keto-green to-keto-orange" onClick={() => console.log(`Join Challenge: ${challenge.name}`)}>
                         Join Challenge
                       </Button>
                     </div>

@@ -28,7 +28,7 @@ const MacroTracker = () => {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>Today's Macros</span>
-                <Button size="sm" className="bg-gradient-to-r from-keto-green to-keto-orange">
+                <Button size="sm" className="bg-gradient-to-r from-keto-green to-keto-orange" onClick={() => console.log('Add Food clicked')}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Food
                 </Button>
@@ -113,6 +113,7 @@ const MacroTracker = () => {
                     key={index} 
                     variant="outline" 
                     className="w-full justify-start h-auto p-3"
+                    onClick={() => console.log(`Quick add: ${food}`)}
                   >
                     {food}
                   </Button>

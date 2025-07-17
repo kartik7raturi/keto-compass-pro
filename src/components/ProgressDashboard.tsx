@@ -55,7 +55,7 @@ const ProgressDashboard = () => {
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span>Weight Progress</span>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => console.log('Log Weight clicked')}>
                     <Plus className="h-4 w-4 mr-2" />
                     Log Weight
                   </Button>

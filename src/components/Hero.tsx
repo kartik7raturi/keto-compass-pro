@@ -32,11 +32,11 @@ const Hero = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="bg-gradient-to-r from-keto-green to-keto-orange hover:opacity-90 transition-opacity">
+              <Button size="lg" className="bg-gradient-to-r from-keto-green to-keto-orange hover:opacity-90 transition-opacity" onClick={() => console.log('Start Free Today clicked')}>
                 Start Free Today
                 <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
-              <Button variant="outline" size="lg">
+              <Button variant="outline" size="lg" onClick={() => console.log('Watch Demo clicked')}>
                 Watch Demo
               </Button>
             </div>

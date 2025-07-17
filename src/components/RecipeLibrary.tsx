@@ -93,6 +93,7 @@ const RecipeLibrary = () => {
               variant={category === "All" ? "default" : "outline"}
               size="sm"
               className={category === "All" ? "bg-gradient-to-r from-keto-green to-keto-orange" : ""}
+              onClick={() => console.log(`Filter by: ${category}`)}
             >
               {category}
             </Button>
@@ -143,10 +144,10 @@ const RecipeLibrary = () => {
                 </div>
 
                 <div className="flex gap-2">
-                  <Button className="flex-1 bg-gradient-to-r from-keto-green to-keto-orange hover:opacity-90">
+                  <Button className="flex-1 bg-gradient-to-r from-keto-green to-keto-orange hover:opacity-90" onClick={() => console.log(`View Recipe: ${recipe.title}`)}>
                     View Recipe
                   </Button>
-                  <Button variant="outline" size="icon">
+                  <Button variant="outline" size="icon" onClick={() => console.log(`Favorite: ${recipe.title}`)}>
                     <Heart className="h-4 w-4" />
                   </Button>
                 </div>
@@ -156,7 +157,7 @@ const RecipeLibrary = () => {
         </div>
 
         <div className="text-center">
-          <Button variant="outline" size="lg">
+          <Button variant="outline" size="lg" onClick={() => console.log('Browse All Recipes clicked')}>
             Browse All Recipes
           </Button>
         </div>

@@ -6,7 +6,7 @@ const Header = () => {
     <header className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" className="md:hidden">
+          <Button variant="ghost" size="icon" className="md:hidden" onClick={() => console.log('Mobile menu clicked')}>
             <Menu className="h-5 w-5" />
           </Button>
           <div className="flex items-center gap-2">
@@ -35,10 +35,10 @@ const Header = () => {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" onClick={() => console.log('Sign In clicked')}>
             Sign In
           </Button>
-          <Button size="sm" className="bg-gradient-to-r from-keto-green to-keto-orange hover:opacity-90 transition-opacity">
+          <Button size="sm" className="bg-gradient-to-r from-keto-green to-keto-orange hover:opacity-90 transition-opacity" onClick={() => console.log('Get Started clicked')}>
             Get Started
           </Button>
         </div>
