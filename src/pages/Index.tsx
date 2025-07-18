@@ -5,6 +5,8 @@ import RecipeLibrary from "@/components/RecipeLibrary";
 import ProgressDashboard from "@/components/ProgressDashboard";
 import Community from "@/components/Community";
 import Footer from "@/components/Footer";
+import WeightLogger from "@/components/WeightLogger";
+import ChallengeJoiner from "@/components/ChallengeJoiner";
 
 const Index = () => {
   return (
@@ -13,6 +15,12 @@ const Index = () => {
       <Hero />
       <MacroTracker />
       <RecipeLibrary />
+      <div className="container py-10">
+        <div className="grid md:grid-cols-2 gap-8">
+          <WeightLogger />
+          <ChallengeJoiner />
+        </div>
+      </div>
       <ProgressDashboard />
       <Community />
       <Footer />
