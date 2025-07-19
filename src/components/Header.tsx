@@ -30,6 +30,9 @@ const Header = () => {
         </div>
         
         <nav className="hidden md:flex items-center gap-6">
+          <button onClick={() => navigate('/')} className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+            Home
+          </button>
           <a href="#tracker" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
             Tracker
           </a>
@@ -39,9 +42,9 @@ const Header = () => {
           <a href="#progress" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
             Progress
           </a>
-          <a href="#community" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+          <button onClick={() => navigate('/community')} className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
             Community
-          </a>
+          </button>
         </nav>
 
         <div className="flex items-center gap-2">
