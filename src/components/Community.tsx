@@ -163,11 +163,48 @@ const Community = () => {
     }
 
     try {
+      // First check if user has already joined this community challenge
+      const { data: existingMembership } = await supabase
+        .from('user_challenges')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('challenge_id', challengeId)
+        .single();
+
+      if (existingMembership) {
+        toast({
+          title: "Already joined",
+          description: "You've already joined this challenge!",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Find a corresponding general challenge or create a mapping
+      // For now, let's create a simple mapping approach
+      const { data: communityChallenge } = await supabase
+        .from('community_challenges')
+        .select('title')
+        .eq('id', challengeId)
+        .single();
+
+      if (!communityChallenge) throw new Error('Challenge not found');
+
+      // Try to find a matching general challenge by title
+      const { data: generalChallenge } = await supabase
+        .from('challenges')
+        .select('id')
+        .ilike('title', `%${communityChallenge.title.split(' ')[0]}%`)
+        .limit(1)
+        .single();
+
+      const targetChallengeId = generalChallenge?.id || challengeId;
+
       const { error } = await supabase
         .from('user_challenges')
         .insert([{
           user_id: user.id,
-          challenge_id: challengeId,
+          challenge_id: targetChallengeId,
           start_date: new Date().toISOString().split('T')[0]
         }]);
 
