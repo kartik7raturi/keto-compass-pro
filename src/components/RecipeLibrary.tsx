@@ -62,7 +62,7 @@ const RecipeLibrary = () => {
 
   const filteredRecipes = selectedCategory === "All" 
     ? recipes 
-    : recipes.filter(recipe => recipe.category === selectedCategory);
+    : recipes.filter(recipe => recipe.category?.toLowerCase() === selectedCategory.toLowerCase());
 
   return (
     <section id="recipes" className="py-20">
