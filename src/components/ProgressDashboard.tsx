@@ -1,22 +1,138 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { Calendar, TrendingDown, Award, Target, Plus } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Calendar, TrendingDown, Award, Target, Plus, Edit } from "lucide-react";
+import { useAuth } from "@/components/auth/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const ProgressDashboard = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [profile, setProfile] = useState<any>(null);
+  const [weightLogs, setWeightLogs] = useState<any[]>([]);
+  const [editingWeight, setEditingWeight] = useState(false);
+  const [editingGoal, setEditingGoal] = useState(false);
+  const [newCurrentWeight, setNewCurrentWeight] = useState("");
+  const [newGoalWeight, setNewGoalWeight] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      fetchUserData();
+    }
+  }, [user]);
+
+  const fetchUserData = async () => {
+    try {
+      // Fetch profile
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user?.id)
+        .single();
+
+      // Fetch weight logs
+      const { data: weightData } = await supabase
+        .from('weight_logs')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('logged_at', { ascending: false })
+        .limit(10);
+
+      setProfile(profileData);
+      setWeightLogs(weightData || []);
+      
+      if (profileData) {
+        setNewCurrentWeight(profileData.current_weight?.toString() || "");
+        setNewGoalWeight(profileData.goal_weight?.toString() || "");
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateCurrentWeight = async () => {
+    try {
+      const weight = parseFloat(newCurrentWeight);
+      if (isNaN(weight)) return;
+
+      // Update profile
+      await supabase
+        .from('profiles')
+        .update({ current_weight: weight })
+        .eq('user_id', user?.id);
+
+      // Add weight log
+      await supabase
+        .from('weight_logs')
+        .insert({
+          user_id: user?.id,
+          weight: weight,
+          unit: 'lbs'
+        });
+
+      setProfile({ ...profile, current_weight: weight });
+      setEditingWeight(false);
+      fetchUserData();
+      toast({ title: "Weight updated successfully!" });
+    } catch (error) {
+      toast({ title: "Error updating weight", variant: "destructive" });
+    }
+  };
+
+  const updateGoalWeight = async () => {
+    try {
+      const weight = parseFloat(newGoalWeight);
+      if (isNaN(weight)) return;
+
+      await supabase
+        .from('profiles')
+        .update({ goal_weight: weight })
+        .eq('user_id', user?.id);
+
+      setProfile({ ...profile, goal_weight: weight });
+      setEditingGoal(false);
+      toast({ title: "Goal weight updated successfully!" });
+    } catch (error) {
+      toast({ title: "Error updating goal weight", variant: "destructive" });
+    }
+  };
+
+  if (loading) {
+    return <div className="py-20 text-center">Loading your progress...</div>;
+  }
+
+  if (!user) {
+    return <div className="py-20 text-center">Please sign in to view your progress.</div>;
+  }
+
+  const currentWeight = profile?.current_weight || 0;
+  const goalWeight = profile?.goal_weight || 0;
+  const startingWeight = weightLogs.length > 0 ? weightLogs[weightLogs.length - 1]?.weight || currentWeight : currentWeight;
+  const weightLost = startingWeight - currentWeight;
+  const progressPercentage = goalWeight && startingWeight !== goalWeight 
+    ? Math.round(((startingWeight - currentWeight) / (startingWeight - goalWeight)) * 100)
+    : 0;
+
   const stats = [
-    { label: "Current Weight", value: "168 lbs", change: "-12 lbs", trend: "down" },
-    { label: "Goal Weight", value: "155 lbs", change: "13 lbs to go", trend: "target" },
-    { label: "Body Fat", value: "22%", change: "-3%", trend: "down" },
-    { label: "Ketosis Days", value: "28", change: "This month", trend: "up" }
+    { label: "Current Weight", value: `${currentWeight} lbs`, change: `${weightLost > 0 ? '-' : '+'}${Math.abs(weightLost).toFixed(1)} lbs`, trend: weightLost > 0 ? "down" : "up" },
+    { label: "Goal Weight", value: `${goalWeight} lbs`, change: `${Math.abs(currentWeight - goalWeight).toFixed(1)} lbs to go`, trend: "target" },
+    { label: "Progress", value: `${progressPercentage}%`, change: "Complete", trend: "up" },
+    { label: "Weight Logs", value: `${weightLogs.length}`, change: "Total entries", trend: "up" }
   ];
 
   const milestones = [
-    { title: "First Week Complete", date: "2024-01-15", achieved: true },
-    { title: "Lost 5 lbs", date: "2024-01-22", achieved: true },
-    { title: "30 Days Consistent", date: "2024-02-05", achieved: true },
-    { title: "Lost 10 lbs", date: "2024-02-12", achieved: true },
-    { title: "Goal Weight", date: "2024-03-15", achieved: false }
+    { title: "First Weight Log", date: weightLogs.length > 0 ? new Date(weightLogs[weightLogs.length - 1]?.logged_at).toLocaleDateString() : "", achieved: weightLogs.length > 0 },
+    { title: "Lost 5 lbs", date: "", achieved: weightLost >= 5 },
+    { title: "Lost 10 lbs", date: "", achieved: weightLost >= 10 },
+    { title: "Lost 15 lbs", date: "", achieved: weightLost >= 15 },
+    { title: "Goal Weight", date: "", achieved: currentWeight <= goalWeight && goalWeight > 0 }
   ];
 
   return (
@@ -55,37 +171,126 @@ const ProgressDashboard = () => {
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span>Weight Progress</span>
-                  <Button variant="outline" size="sm" onClick={() => console.log('Log Weight clicked')}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Log Weight
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Log Weight
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Log New Weight</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="text-sm font-medium">Weight (lbs)</label>
+                          <Input
+                            type="number"
+                            value={newCurrentWeight}
+                            onChange={(e) => setNewCurrentWeight(e.target.value)}
+                            placeholder="Enter your current weight"
+                          />
+                        </div>
+                        <Button onClick={updateCurrentWeight} className="w-full">
+                          Log Weight
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="mb-6">
                   <div className="flex justify-between text-sm mb-2">
                     <span>Progress to Goal</span>
-                    <span>48% Complete</span>
+                    <span>{progressPercentage}% Complete</span>
                   </div>
-                  <Progress value={48} className="h-3" />
+                  <Progress value={Math.min(progressPercentage, 100)} className="h-3" />
                 </div>
 
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Starting Weight</span>
-                    <span className="font-medium">180 lbs</span>
+                    <span className="font-medium">{startingWeight} lbs</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Current Weight</span>
-                    <span className="font-medium">168 lbs</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{currentWeight} lbs</span>
+                      <Dialog open={editingWeight} onOpenChange={setEditingWeight}>
+                        <DialogTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Update Current Weight</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div>
+                              <label className="text-sm font-medium">Weight (lbs)</label>
+                              <Input
+                                type="number"
+                                value={newCurrentWeight}
+                                onChange={(e) => setNewCurrentWeight(e.target.value)}
+                                placeholder="Enter your current weight"
+                              />
+                            </div>
+                            <div className="flex gap-2">
+                              <Button onClick={updateCurrentWeight} className="flex-1">
+                                Update
+                              </Button>
+                              <Button variant="outline" onClick={() => setEditingWeight(false)} className="flex-1">
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Goal Weight</span>
-                    <span className="font-medium">155 lbs</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{goalWeight} lbs</span>
+                      <Dialog open={editingGoal} onOpenChange={setEditingGoal}>
+                        <DialogTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Update Goal Weight</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div>
+                              <label className="text-sm font-medium">Goal Weight (lbs)</label>
+                              <Input
+                                type="number"
+                                value={newGoalWeight}
+                                onChange={(e) => setNewGoalWeight(e.target.value)}
+                                placeholder="Enter your goal weight"
+                              />
+                            </div>
+                            <div className="flex gap-2">
+                              <Button onClick={updateGoalWeight} className="flex-1">
+                                Update
+                              </Button>
+                              <Button variant="outline" onClick={() => setEditingGoal(false)} className="flex-1">
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
                   </div>
                   <div className="flex justify-between items-center pt-2 border-t">
                     <span className="text-sm font-medium">Total Lost</span>
-                    <span className="font-bold text-keto-green">12 lbs</span>
+                    <span className="font-bold text-keto-green">{weightLost.toFixed(1)} lbs</span>
                   </div>
                 </div>
               </CardContent>
