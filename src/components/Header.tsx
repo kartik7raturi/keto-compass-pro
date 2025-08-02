@@ -49,6 +49,24 @@ const Header = () => {
             Home
           </button>
           <button 
+            onClick={() => navigate('/recipes')} 
+            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+          >
+            Recipes
+          </button>
+          <button 
+            onClick={() => navigate('/tracker')} 
+            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+          >
+            Tracker
+          </button>
+          <button 
+            onClick={() => navigate('/progress')} 
+            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+          >
+            Progress
+          </button>
+          <button 
             onClick={() => navigate('/community')} 
             className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
           >
@@ -89,6 +107,24 @@ const Header = () => {
               className="block w-full text-left py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
             >
               Home
+            </button>
+            <button 
+              onClick={() => handleNavigation('/recipes')} 
+              className="block w-full text-left py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            >
+              Recipes
+            </button>
+            <button 
+              onClick={() => handleNavigation('/tracker')} 
+              className="block w-full text-left py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            >
+              Tracker
+            </button>
+            <button 
+              onClick={() => handleNavigation('/progress')} 
+              className="block w-full text-left py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            >
+              Progress
             </button>
             <button 
               onClick={() => handleNavigation('/community')} 

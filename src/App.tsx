@@ -7,6 +7,9 @@ import { AuthProvider } from "@/components/auth/AuthContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import Recipes from "./pages/Recipes";
+import Tracker from "./pages/Tracker";
+import Progress from "./pages/Progress";
 import Community from "./components/Community";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -23,6 +26,9 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/recipes" element={<Recipes />} />
+            <Route path="/tracker" element={<Tracker />} />
+            <Route path="/progress" element={<Progress />} />
             <Route path="/community" element={
               <div className="min-h-screen bg-background">
                 <Header />
