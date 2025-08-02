@@ -62,11 +62,22 @@ const ProgressDashboard = () => {
       const weight = parseFloat(newCurrentWeight);
       if (isNaN(weight)) return;
 
-      // Update profile
-      await supabase
-        .from('profiles')
-        .update({ current_weight: weight })
-        .eq('user_id', user?.id);
+      // First ensure profile exists
+      if (!profile) {
+        await supabase
+          .from('profiles')
+          .insert({
+            user_id: user?.id,
+            email: user?.email,
+            current_weight: weight
+          });
+      } else {
+        // Update existing profile
+        await supabase
+          .from('profiles')
+          .update({ current_weight: weight })
+          .eq('user_id', user?.id);
+      }
 
       // Add weight log
       await supabase
