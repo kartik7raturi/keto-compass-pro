@@ -22,7 +22,7 @@ const MealPlanner = () => {
               <CardDescription>Plan all your meals for the week ahead</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="outline" className="w-full">Start Planning</Button>
+              <Button variant="outline" className="w-full" onClick={() => window.location.href = '/weekly-plan'}>Start Planning</Button>
             </CardContent>
           </Card>
 
@@ -33,7 +33,7 @@ const MealPlanner = () => {
               <CardDescription>30-minute keto meal suggestions</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="outline" className="w-full">Browse Quick Meals</Button>
+              <Button variant="outline" className="w-full" onClick={() => window.location.href = '/quick-meals'}>Browse Quick Meals</Button>
             </CardContent>
           </Card>
 
@@ -44,7 +44,7 @@ const MealPlanner = () => {
               <CardDescription>Create personalized meal plans</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="outline" className="w-full">Create Plan</Button>
+              <Button variant="outline" className="w-full" onClick={() => window.location.href = '/custom-plan'}>Create Plan</Button>
             </CardContent>
           </Card>
         </div>

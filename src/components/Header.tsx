@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { Menu, User, LogOut, X } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Menu, User, LogOut, X, ChevronDown } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -54,12 +55,31 @@ const Header = () => {
           >
             Recipes
           </button>
-          <button 
-            onClick={() => navigate('/tracker')} 
-            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-          >
-            Tracker
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                Tracker
+                <ChevronDown className="h-3 w-3" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => navigate('/tracker')}>
+                Macro Tracker
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/planner')}>
+                Meal Planner
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/weekly-plan')}>
+                Weekly Plan
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/quick-meals')}>
+                Quick Meals
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/custom-plan')}>
+                Custom Plan
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <button 
             onClick={() => navigate('/progress')} 
             className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
@@ -118,7 +138,31 @@ const Header = () => {
               onClick={() => handleNavigation('/tracker')} 
               className="block w-full text-left py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
             >
-              Tracker
+              Macro Tracker
+            </button>
+            <button 
+              onClick={() => handleNavigation('/planner')} 
+              className="block w-full text-left py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            >
+              Meal Planner
+            </button>
+            <button 
+              onClick={() => handleNavigation('/weekly-plan')} 
+              className="block w-full text-left py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            >
+              Weekly Plan
+            </button>
+            <button 
+              onClick={() => handleNavigation('/quick-meals')} 
+              className="block w-full text-left py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            >
+              Quick Meals
+            </button>
+            <button 
+              onClick={() => handleNavigation('/custom-plan')} 
+              className="block w-full text-left py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            >
+              Custom Plan
             </button>
             <button 
               onClick={() => handleNavigation('/progress')} 
