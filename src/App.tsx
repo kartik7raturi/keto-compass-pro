@@ -10,6 +10,17 @@ import NotFound from "./pages/NotFound";
 import Recipes from "./pages/Recipes";
 import Tracker from "./pages/Tracker";
 import Progress from "./pages/Progress";
+import MealPlanner from "./pages/MealPlanner";
+import Guide from "./pages/Guide";
+import Stories from "./pages/Stories";
+import Blog from "./pages/Blog";
+import FAQ from "./pages/FAQ";
+import Support from "./pages/Support";
+import About from "./pages/About";
+import Careers from "./pages/Careers";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import Contact from "./pages/Contact";
 import Community from "./components/Community";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -29,6 +40,17 @@ const App = () => (
             <Route path="/recipes" element={<Recipes />} />
             <Route path="/tracker" element={<Tracker />} />
             <Route path="/progress" element={<Progress />} />
+            <Route path="/planner" element={<MealPlanner />} />
+            <Route path="/guide" element={<Guide />} />
+            <Route path="/stories" element={<Stories />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/support" element={<Support />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/careers" element={<Careers />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="/community" element={
               <div className="min-h-screen bg-background">
                 <Header />

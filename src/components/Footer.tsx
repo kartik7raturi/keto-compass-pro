@@ -37,33 +37,33 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">Features</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-keto-green transition-colors">Macro Tracker</a></li>
-              <li><a href="#" className="hover:text-keto-green transition-colors">Recipe Library</a></li>
-              <li><a href="#" className="hover:text-keto-green transition-colors">Progress Dashboard</a></li>
-              <li><a href="#" className="hover:text-keto-green transition-colors">Meal Planner</a></li>
-              <li><a href="#" className="hover:text-keto-green transition-colors">Community</a></li>
+              <li><a href="/tracker" className="hover:text-keto-green transition-colors">Macro Tracker</a></li>
+              <li><a href="/recipes" className="hover:text-keto-green transition-colors">Recipe Library</a></li>
+              <li><a href="/progress" className="hover:text-keto-green transition-colors">Progress Dashboard</a></li>
+              <li><a href="/planner" className="hover:text-keto-green transition-colors">Meal Planner</a></li>
+              <li><a href="/community" className="hover:text-keto-green transition-colors">Community</a></li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-semibold mb-4">Resources</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-keto-green transition-colors">Keto Guide</a></li>
-              <li><a href="#" className="hover:text-keto-green transition-colors">Success Stories</a></li>
-              <li><a href="#" className="hover:text-keto-green transition-colors">Blog</a></li>
-              <li><a href="#" className="hover:text-keto-green transition-colors">FAQ</a></li>
-              <li><a href="#" className="hover:text-keto-green transition-colors">Support</a></li>
+              <li><a href="/guide" className="hover:text-keto-green transition-colors">Keto Guide</a></li>
+              <li><a href="/stories" className="hover:text-keto-green transition-colors">Success Stories</a></li>
+              <li><a href="/blog" className="hover:text-keto-green transition-colors">Blog</a></li>
+              <li><a href="/faq" className="hover:text-keto-green transition-colors">FAQ</a></li>
+              <li><a href="/support" className="hover:text-keto-green transition-colors">Support</a></li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-semibold mb-4">Company</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-keto-green transition-colors">About Us</a></li>
-              <li><a href="#" className="hover:text-keto-green transition-colors">Careers</a></li>
-              <li><a href="#" className="hover:text-keto-green transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-keto-green transition-colors">Terms of Service</a></li>
-              <li><a href="#" className="hover:text-keto-green transition-colors">Contact</a></li>
+              <li><a href="/about" className="hover:text-keto-green transition-colors">About Us</a></li>
+              <li><a href="/careers" className="hover:text-keto-green transition-colors">Careers</a></li>
+              <li><a href="/privacy" className="hover:text-keto-green transition-colors">Privacy Policy</a></li>
+              <li><a href="/terms" className="hover:text-keto-green transition-colors">Terms of Service</a></li>
+              <li><a href="/contact" className="hover:text-keto-green transition-colors">Contact</a></li>
             </ul>
           </div>
         </div>
