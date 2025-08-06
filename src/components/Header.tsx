@@ -55,31 +55,12 @@ const Header = () => {
           >
             Recipes
           </button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-                Tracker
-                <ChevronDown className="h-3 w-3" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem onClick={() => navigate('/tracker')}>
-                Macro Tracker
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/planner')}>
-                Meal Planner
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/weekly-plan')}>
-                Weekly Plan
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/quick-meals')}>
-                Quick Meals
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/custom-plan')}>
-                Custom Plan
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <button 
+            onClick={() => navigate('/tracker')} 
+            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+          >
+            Tracker
+          </button>
           <button 
             onClick={() => navigate('/progress')} 
             className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
@@ -138,31 +119,7 @@ const Header = () => {
               onClick={() => handleNavigation('/tracker')} 
               className="block w-full text-left py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
             >
-              Macro Tracker
-            </button>
-            <button 
-              onClick={() => handleNavigation('/planner')} 
-              className="block w-full text-left py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-            >
-              Meal Planner
-            </button>
-            <button 
-              onClick={() => handleNavigation('/weekly-plan')} 
-              className="block w-full text-left py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-            >
-              Weekly Plan
-            </button>
-            <button 
-              onClick={() => handleNavigation('/quick-meals')} 
-              className="block w-full text-left py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-            >
-              Quick Meals
-            </button>
-            <button 
-              onClick={() => handleNavigation('/custom-plan')} 
-              className="block w-full text-left py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-            >
-              Custom Plan
+              Tracker
             </button>
             <button 
               onClick={() => handleNavigation('/progress')} 
