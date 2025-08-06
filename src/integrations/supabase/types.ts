@@ -332,6 +332,159 @@ export type Database = {
           },
         ]
       }
+      meal_plan_items: {
+        Row: {
+          created_at: string
+          day_of_week: number | null
+          id: string
+          meal_id: string
+          meal_plan_id: string
+          meal_type: string
+          planned_date: string | null
+          servings: number | null
+        }
+        Insert: {
+          created_at?: string
+          day_of_week?: number | null
+          id?: string
+          meal_id: string
+          meal_plan_id: string
+          meal_type: string
+          planned_date?: string | null
+          servings?: number | null
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number | null
+          id?: string
+          meal_id?: string
+          meal_plan_id?: string
+          meal_type?: string
+          planned_date?: string | null
+          servings?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meal_plan_items_meal_id_fkey"
+            columns: ["meal_id"]
+            isOneToOne: false
+            referencedRelation: "meals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meal_plan_items_meal_plan_id_fkey"
+            columns: ["meal_plan_id"]
+            isOneToOne: false
+            referencedRelation: "meal_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meal_plans: {
+        Row: {
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean | null
+          plan_type: string
+          start_date: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          plan_type: string
+          start_date: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          plan_type?: string
+          start_date?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      meals: {
+        Row: {
+          calories: number | null
+          carbs: number | null
+          cook_time: number | null
+          created_at: string
+          description: string | null
+          difficulty: string | null
+          fat: number | null
+          id: string
+          image_url: string | null
+          ingredients: string[]
+          instructions: string[]
+          is_quick_meal: boolean | null
+          meal_type: string | null
+          prep_time: number | null
+          protein: number | null
+          servings: number | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          calories?: number | null
+          carbs?: number | null
+          cook_time?: number | null
+          created_at?: string
+          description?: string | null
+          difficulty?: string | null
+          fat?: number | null
+          id?: string
+          image_url?: string | null
+          ingredients?: string[]
+          instructions?: string[]
+          is_quick_meal?: boolean | null
+          meal_type?: string | null
+          prep_time?: number | null
+          protein?: number | null
+          servings?: number | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          calories?: number | null
+          carbs?: number | null
+          cook_time?: number | null
+          created_at?: string
+          description?: string | null
+          difficulty?: string | null
+          fat?: number | null
+          id?: string
+          image_url?: string | null
+          ingredients?: string[]
+          instructions?: string[]
+          is_quick_meal?: boolean | null
+          meal_type?: string | null
+          prep_time?: number | null
+          protein?: number | null
+          servings?: number | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           activity_level: string | null

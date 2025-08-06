@@ -10,7 +10,7 @@ import NotFound from "./pages/NotFound";
 import Recipes from "./pages/Recipes";
 import Tracker from "./pages/Tracker";
 import Progress from "./pages/Progress";
-import MealPlanner from "./pages/MealPlanner";
+
 import WeeklyPlan from "./pages/WeeklyPlan";
 import QuickMeals from "./pages/QuickMeals";
 import CustomPlan from "./pages/CustomPlan";
@@ -43,10 +43,9 @@ const App = () => (
             <Route path="/recipes" element={<Recipes />} />
             <Route path="/tracker" element={<Tracker />} />
             <Route path="/progress" element={<Progress />} />
-            <Route path="/planner" element={<MealPlanner />} />
-            <Route path="/weekly-plan" element={<WeeklyPlan />} />
-            <Route path="/quick-meals" element={<QuickMeals />} />
-            <Route path="/custom-plan" element={<CustomPlan />} />
+          <Route path="/weekly-plan" element={<WeeklyPlan />} />
+          <Route path="/quick-meals" element={<QuickMeals />} />
+          <Route path="/custom-plan" element={<CustomPlan />} />
             <Route path="/guide" element={<Guide />} />
             <Route path="/stories" element={<Stories />} />
             <Route path="/blog" element={<Blog />} />

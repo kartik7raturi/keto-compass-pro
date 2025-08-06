@@ -18,12 +18,6 @@ const Tracker = () => {
       current: true
     },
     {
-      title: "Meal Planner",
-      description: "Plan your keto meals in advance",
-      icon: Calendar,
-      path: "/planner"
-    },
-    {
       title: "Weekly Plan",
       description: "Create weekly meal schedules",
       icon: Calendar,
