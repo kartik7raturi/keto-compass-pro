@@ -224,6 +224,7 @@ export type Database = {
         Row: {
           author_avatar: string | null
           author_name: string
+          chart_data: Json | null
           comments_count: number | null
           community_id: string
           content: string
@@ -234,10 +235,12 @@ export type Database = {
           tags: string[] | null
           updated_at: string
           user_id: string
+          video_url: string | null
         }
         Insert: {
           author_avatar?: string | null
           author_name: string
+          chart_data?: Json | null
           comments_count?: number | null
           community_id: string
           content: string
@@ -248,10 +251,12 @@ export type Database = {
           tags?: string[] | null
           updated_at?: string
           user_id: string
+          video_url?: string | null
         }
         Update: {
           author_avatar?: string | null
           author_name?: string
+          chart_data?: Json | null
           comments_count?: number | null
           community_id?: string
           content?: string
@@ -262,6 +267,7 @@ export type Database = {
           tags?: string[] | null
           updated_at?: string
           user_id?: string
+          video_url?: string | null
         }
         Relationships: [
           {
