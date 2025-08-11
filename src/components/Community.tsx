@@ -280,8 +280,7 @@ const Community = () => {
             title: communityChallenge.title,
             description: communityChallenge.description,
             duration_days: communityChallenge.duration_days,
-            target_unit: communityChallenge.target_unit,
-            challenge_type: 'community',
+            target_unit: communityChallenge.target_unit
           })
           .select('id')
           .single();
