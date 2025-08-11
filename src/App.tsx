@@ -11,6 +11,11 @@ import Recipes from "./pages/Recipes";
 import Tracker from "./pages/Tracker";
 import Progress from "./pages/Progress";
 
+import Keto30 from "./pages/Keto30";
+import Fasting from "./pages/Fasting";
+import Workout from "./pages/Workout";
+import Water from "./pages/Water";
+
 import WeeklyPlan from "./pages/WeeklyPlan";
 import QuickMeals from "./pages/QuickMeals";
 import CustomPlan from "./pages/CustomPlan";
@@ -42,8 +47,12 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/recipes" element={<Recipes />} />
             <Route path="/tracker" element={<Tracker />} />
+            <Route path="/tracker/30-day-keto" element={<Keto30 />} />
+            <Route path="/tracker/fasting" element={<Fasting />} />
+            <Route path="/tracker/workout" element={<Workout />} />
+            <Route path="/tracker/water" element={<Water />} />
             <Route path="/progress" element={<Progress />} />
-          <Route path="/weekly-plan" element={<WeeklyPlan />} />
+           <Route path="/weekly-plan" element={<WeeklyPlan />} />
           <Route path="/quick-meals" element={<QuickMeals />} />
           <Route path="/custom-plan" element={<CustomPlan />} />
             <Route path="/guide" element={<Guide />} />

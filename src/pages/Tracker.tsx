@@ -4,7 +4,7 @@ import EnhancedMacroTracker from "@/components/EnhancedMacroTracker";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Calendar, Clock, Utensils, Target } from "lucide-react";
+import { Calendar, Clock, Utensils, Target, Droplet, Dumbbell, Timer, CheckSquare } from "lucide-react";
 
 const Tracker = () => {
   const navigate = useNavigate();
@@ -16,6 +16,30 @@ const Tracker = () => {
       icon: Target,
       path: "/tracker",
       current: true
+    },
+    {
+      title: "30-Day Keto",
+      description: "Stay on a 30-day keto streak",
+      icon: CheckSquare,
+      path: "/tracker/30-day-keto"
+    },
+    {
+      title: "Intermittent Fasting",
+      description: "Start and monitor your fasting windows",
+      icon: Timer,
+      path: "/tracker/fasting"
+    },
+    {
+      title: "Workout Tracker",
+      description: "Log your workouts and duration",
+      icon: Dumbbell,
+      path: "/tracker/workout"
+    },
+    {
+      title: "Water Tracker",
+      description: "Track daily hydration and goals",
+      icon: Droplet,
+      path: "/tracker/water"
     },
     {
       title: "Weekly Plan",
