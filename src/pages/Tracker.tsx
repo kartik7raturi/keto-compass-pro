@@ -45,7 +45,7 @@ const Tracker = () => {
       title: "Weekly Plan",
       description: "Create weekly meal schedules",
       icon: Calendar,
-      path: "/weekly-plan"
+      path: "/tracker/weekly-plan"
     },
     {
       title: "Quick Meals",

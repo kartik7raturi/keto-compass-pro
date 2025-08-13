@@ -96,7 +96,14 @@ const Community = () => {
         ? { series: chartSeriesStr.split(',').map(v => Number(v.trim())).filter(v => !Number.isNaN(v)) }
         : null;
 
-      const authorName = (user.user_metadata as any)?.display_name || user.email || 'Anonymous';
+      // Get user's display name from profiles table
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('display_name')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      const authorName = profile?.display_name || (user.user_metadata as any)?.display_name || 'Anonymous User';
 
       const { data, error } = await supabase
         .from('community_posts')

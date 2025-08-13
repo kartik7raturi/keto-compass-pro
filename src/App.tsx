@@ -51,6 +51,7 @@ const App = () => (
             <Route path="/tracker/fasting" element={<Fasting />} />
             <Route path="/tracker/workout" element={<Workout />} />
             <Route path="/tracker/water" element={<Water />} />
+            <Route path="/tracker/weekly-plan" element={<WeeklyPlan />} />
             <Route path="/progress" element={<Progress />} />
            <Route path="/weekly-plan" element={<WeeklyPlan />} />
           <Route path="/quick-meals" element={<QuickMeals />} />

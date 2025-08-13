@@ -228,6 +228,52 @@ const WeeklyPlan = () => {
     }
   };
 
+  const generateShoppingList = () => {
+    if (weeklyPlan.length === 0) {
+      toast({
+        title: "No meals planned",
+        description: "Add meals to your weekly plan first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const allIngredients: string[] = [];
+    weeklyPlan.forEach(item => {
+      if (item.meal.ingredients) {
+        allIngredients.push(...item.meal.ingredients);
+      }
+    });
+
+    // Group and count similar ingredients
+    const ingredientMap = new Map<string, number>();
+    allIngredients.forEach(ingredient => {
+      const normalizedIngredient = ingredient.toLowerCase().trim();
+      ingredientMap.set(normalizedIngredient, (ingredientMap.get(normalizedIngredient) || 0) + 1);
+    });
+
+    // Create shopping list text
+    const shoppingList = Array.from(ingredientMap.entries())
+      .map(([ingredient, count]) => count > 1 ? `${ingredient} (x${count})` : ingredient)
+      .sort()
+      .join('\n');
+
+    // Copy to clipboard
+    navigator.clipboard.writeText(shoppingList).then(() => {
+      toast({
+        title: "Shopping list generated!",
+        description: `${ingredientMap.size} unique ingredients copied to clipboard`,
+      });
+    }).catch(() => {
+      // Fallback: show in alert
+      alert(`Shopping List:\n\n${shoppingList}`);
+      toast({
+        title: "Shopping list generated!",
+        description: "Shopping list shown in popup",
+      });
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -296,7 +342,7 @@ const WeeklyPlan = () => {
               </div>
             </DialogContent>
           </Dialog>
-          <Button variant="outline" className="flex items-center gap-2">
+          <Button variant="outline" className="flex items-center gap-2" onClick={generateShoppingList}>
             <ShoppingCart className="h-4 w-4" />
             Generate Shopping List
           </Button>

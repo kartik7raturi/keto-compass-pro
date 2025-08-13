@@ -3,12 +3,14 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Menu, User, LogOut, X, ChevronDown } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Header = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userDisplayName, setUserDisplayName] = useState<string>("");
 
   const handleSignOut = async () => {
     await signOut();
@@ -19,6 +21,26 @@ const Header = () => {
     navigate(path);
     setMobileMenuOpen(false);
   };
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('display_name')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        const displayName = profile?.display_name || 
+                          (user.user_metadata as any)?.display_name || 
+                          user.email?.split('@')[0] || 
+                          'User';
+        setUserDisplayName(displayName);
+      }
+    };
+
+    fetchUserProfile();
+  }, [user]);
 
   return (
     <header className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b">
@@ -79,7 +101,7 @@ const Header = () => {
           {user ? (
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground hidden sm:block">
-                Welcome, {user.email}
+                Welcome, {userDisplayName}
               </span>
               <Button variant="ghost" size="sm" onClick={handleSignOut}>
                 <LogOut className="h-4 w-4 mr-2" />
