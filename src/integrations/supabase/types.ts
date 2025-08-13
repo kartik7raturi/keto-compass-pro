@@ -279,6 +279,60 @@ export type Database = {
           },
         ]
       }
+      fasting_sessions: {
+        Row: {
+          completed: boolean
+          created_at: string
+          end_time: string | null
+          id: string
+          start_time: string
+          target_duration_hours: number
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          end_time?: string | null
+          id?: string
+          start_time: string
+          target_duration_hours: number
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          end_time?: string | null
+          id?: string
+          start_time?: string
+          target_duration_hours?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      keto_streaks: {
+        Row: {
+          completed: boolean
+          created_at: string
+          date: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          date?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          date?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ketodiet: {
         Row: {
           created_at: string
@@ -680,6 +734,36 @@ export type Database = {
           },
         ]
       }
+      water_logs: {
+        Row: {
+          created_at: string
+          cups_consumed: number
+          daily_goal: number
+          date: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          cups_consumed?: number
+          daily_goal?: number
+          date?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          cups_consumed?: number
+          daily_goal?: number
+          date?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       weight_logs: {
         Row: {
           id: string
@@ -714,6 +798,36 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      workout_logs: {
+        Row: {
+          created_at: string
+          date: string
+          duration_minutes: number
+          id: string
+          notes: string | null
+          user_id: string
+          workout_type: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          duration_minutes: number
+          id?: string
+          notes?: string | null
+          user_id: string
+          workout_type: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          duration_minutes?: number
+          id?: string
+          notes?: string | null
+          user_id?: string
+          workout_type?: string
+        }
+        Relationships: []
       }
     }
     Views: {
