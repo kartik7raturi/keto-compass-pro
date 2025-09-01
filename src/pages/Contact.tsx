@@ -82,7 +82,7 @@ const Contact = () => {
                   <Mail className="h-5 w-5 text-keto-green" />
                   <div>
                     <div className="font-medium">Email</div>
-                    <div className="text-sm text-muted-foreground">hello@ketocompass.com</div>
+                    <div className="text-sm text-muted-foreground">hello@ketopia.com</div>
                   </div>
                 </div>
 
@@ -90,7 +90,7 @@ const Contact = () => {
                   <Phone className="h-5 w-5 text-keto-green" />
                   <div>
                     <div className="font-medium">Phone</div>
-                    <div className="text-sm text-muted-foreground">1-800-KETO-PRO</div>
+                    <div className="text-sm text-muted-foreground">1-800-KETOPIA</div>
                   </div>
                 </div>
 

@@ -86,7 +86,7 @@ const Auth = () => {
           <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-keto-green to-keto-green-dark flex items-center justify-center mx-auto mb-4">
             <span className="text-white font-bold text-lg">K</span>
           </div>
-          <CardTitle className="text-2xl">Welcome to Keto Compass Pro</CardTitle>
+          <CardTitle className="text-2xl">Welcome to Ketopia</CardTitle>
           <CardDescription>
             Join thousands of people on their keto journey
           </CardDescription>

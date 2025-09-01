@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const SEO = () => {
   useEffect(() => {
-    const title = "Intermittent Fasting Tracker | Keto Coach";
+    const title = "Intermittent Fasting Tracker | Ketopia";
     const description = "Start and monitor your fasting window with countdown, presets, and reminders.";
     document.title = title;
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;

@@ -10,7 +10,7 @@ const About = () => {
       <Header />
       <main className="container mx-auto px-4 py-8">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">About Keto Compass Pro</h1>
+          <h1 className="text-4xl font-bold mb-4">About Ketopia</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             We're passionate about helping people achieve their health goals through the ketogenic lifestyle
           </p>
@@ -51,7 +51,7 @@ const About = () => {
           </CardHeader>
           <CardContent className="text-center">
             <p className="text-muted-foreground mb-6 max-w-3xl mx-auto">
-              Keto Compass Pro was founded in 2020 by a team of health enthusiasts who struggled to find 
+              Ketopia was founded in 2020 by a team of health enthusiasts who struggled to find 
               a comprehensive tool for tracking their ketogenic journey. After experiencing the life-changing 
               benefits of keto themselves, they wanted to create a platform that would make the diet accessible 
               and sustainable for everyone.

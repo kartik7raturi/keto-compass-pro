@@ -106,7 +106,7 @@ const Privacy = () => {
             <CardContent>
               <p className="text-muted-foreground">
                 If you have any questions about this Privacy Policy or our data practices, 
-                please contact us at privacy@ketocompass.com or use our support center.
+                please contact us at privacy@ketopia.com or use our support center.
               </p>
             </CardContent>
           </Card>

@@ -19,7 +19,7 @@ const Terms = () => {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                By accessing and using Keto Compass Pro, you accept and agree to be bound by the terms 
+                By accessing and using Ketopia, you accept and agree to be bound by the terms 
                 and provision of this agreement. If you do not agree to abide by the above, please do 
                 not use this service.
               </p>
@@ -32,7 +32,7 @@ const Terms = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">
-                Permission is granted to temporarily access and use Keto Compass Pro for personal, 
+                Permission is granted to temporarily access and use Ketopia for personal, 
                 non-commercial transitory viewing only. This is the grant of a license, not a transfer 
                 of title, and under this license you may not:
               </p>
@@ -68,7 +68,7 @@ const Terms = () => {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                Keto Compass Pro provides information and tools for tracking your ketogenic diet journey. 
+                Ketopia provides information and tools for tracking your ketogenic diet journey. 
                 This information is not intended as medical advice and should not replace consultation 
                 with qualified healthcare professionals.
               </p>
@@ -102,7 +102,7 @@ const Terms = () => {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                In no event shall Keto Compass Pro or its suppliers be liable for any damages 
+                In no event shall Ketopia or its suppliers be liable for any damages 
                 (including, without limitation, damages for loss of data or profit, or due to business 
                 interruption) arising out of the use or inability to use the service, even if we have 
                 been notified orally or in writing of the possibility of such damage.
@@ -131,7 +131,7 @@ const Terms = () => {
             <CardContent>
               <p className="text-muted-foreground">
                 If you have any questions about these Terms of Service, please contact us at 
-                legal@ketocompass.com or through our support center.
+                legal@ketopia.com or through our support center.
               </p>
             </CardContent>
           </Card>

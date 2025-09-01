@@ -12,7 +12,7 @@ const Footer = () => {
                 <span className="text-white font-bold text-sm">K</span>
               </div>
               <span className="font-bold text-xl bg-gradient-to-r from-keto-green to-keto-yellow bg-clip-text text-transparent">
-                Keto Compass Pro
+                Ketopia
               </span>
             </div>
             <p className="text-muted-foreground mb-4">
@@ -71,7 +71,7 @@ const Footer = () => {
         <div className="border-t pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-muted-foreground">
-              © 2024 Keto Compass Pro. All rights reserved.
+              © 2024 Ketopia. All rights reserved.
             </p>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <span>Made with ❤️ for the keto community</span>

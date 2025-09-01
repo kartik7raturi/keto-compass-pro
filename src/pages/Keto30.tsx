@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const SEO = () => {
   useEffect(() => {
-    const title = "30-Day Keto Tracker | Keto Coach";
+    const title = "30-Day Keto Tracker | Ketopia";
     const description = "Stay consistent with a 30-day keto streak tracker. Check off days, see progress, and keep your momentum.";
     document.title = title;
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;

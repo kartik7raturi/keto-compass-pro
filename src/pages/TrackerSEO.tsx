@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const SEO = () => {
   useEffect(() => {
-    const title = "Tracker Hub | Keto Coach";
+    const title = "Tracker Hub | Ketopia";
     const description = "Access all tracking tools: 30-day keto, fasting, workouts, water, and macros.";
     document.title = title;
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;

@@ -59,7 +59,7 @@ const Header = () => {
               <span className="text-white font-bold text-sm">K</span>
             </div>
             <span className="font-bold text-xl bg-gradient-to-r from-keto-green to-keto-green-dark bg-clip-text text-transparent">
-              Keto Compass Pro
+              Ketopia
             </span>
           </div>
         </div>

@@ -24,7 +24,7 @@ const Support = () => {
               <CardDescription>Get detailed help via email</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground mb-3">support@ketocompass.com</p>
+              <p className="text-sm text-muted-foreground mb-3">support@ketopia.com</p>
               <p className="text-xs text-muted-foreground">Response within 24 hours</p>
             </CardContent>
           </Card>
@@ -48,7 +48,7 @@ const Support = () => {
               <CardDescription>Speak directly with our team</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground mb-3">1-800-KETO-PRO</p>
+              <p className="text-sm text-muted-foreground mb-3">1-800-KETOPIA</p>
               <p className="text-xs text-muted-foreground">Mon-Fri 9 AM - 6 PM EST</p>
             </CardContent>
           </Card>

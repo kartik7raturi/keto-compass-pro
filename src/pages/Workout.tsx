@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const SEO = () => {
   useEffect(() => {
-    const title = "Workout Tracker | Keto Coach";
+    const title = "Workout Tracker | Ketopia";
     const description = "Log workouts with duration and notes. Stay active on your keto journey.";
     document.title = title;
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
