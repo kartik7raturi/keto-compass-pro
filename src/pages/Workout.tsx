@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/components/auth/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const SEO = () => {
   useEffect(() => {
@@ -23,51 +25,85 @@ const SEO = () => {
   return null;
 };
 
-type WorkoutEntry = {
-  id: string;
-  date: string;
-  type: string;
-  duration: number;
-  notes?: string;
-};
-
-const STORAGE_KEY = "workout-entries";
-
 const Workout = () => {
   const { toast } = useToast();
-  const [entries, setEntries] = useState<WorkoutEntry[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : [];
-  });
-
+  const { user } = useAuth();
+  const [entries, setEntries] = useState<any[]>([]);
   const [date, setDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
   const [type, setType] = useState("");
   const [duration, setDuration] = useState<number>(30);
   const [notes, setNotes] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-  }, [entries]);
+    if (user) {
+      fetchWorkouts();
+    }
+  }, [user]);
 
-  const addEntry = () => {
-    if (!type || duration <= 0) return;
-    const entry: WorkoutEntry = {
-      id: crypto.randomUUID(),
-      date,
-      type,
-      duration,
-      notes: notes || undefined,
-    };
-    setEntries([entry, ...entries]);
-    setType("");
-    setDuration(30);
-    setNotes("");
-    toast({ title: "Workout added", description: `${entry.type} for ${entry.duration} min` });
+  const fetchWorkouts = async () => {
+    try {
+      const { data } = await supabase
+        .from('workout_logs')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('date', { ascending: false });
+      
+      setEntries(data || []);
+    } catch (error) {
+      console.error('Error fetching workouts:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const removeEntry = (id: string) => {
-    setEntries(entries.filter(e => e.id !== id));
+  const addEntry = async () => {
+    if (!type || duration <= 0 || !user) return;
+    
+    try {
+      const { data } = await supabase
+        .from('workout_logs')
+        .insert({
+          user_id: user.id,
+          date,
+          workout_type: type,
+          duration_minutes: duration,
+          notes: notes || null
+        })
+        .select()
+        .single();
+      
+      setEntries([data, ...entries]);
+      setType("");
+      setDuration(30);
+      setNotes("");
+      toast({ title: "Workout added", description: `${type} for ${duration} min` });
+    } catch (error) {
+      toast({ title: "Error adding workout", variant: "destructive" });
+    }
   };
+
+  const removeEntry = async (id: string) => {
+    try {
+      await supabase
+        .from('workout_logs')
+        .delete()
+        .eq('id', id);
+      
+      setEntries(entries.filter(e => e.id !== id));
+      toast({ title: "Workout removed" });
+    } catch (error) {
+      toast({ title: "Error removing workout", variant: "destructive" });
+    }
+  };
+
+  if (loading) {
+    return <div className="min-h-screen bg-background flex items-center justify-center">Loading...</div>;
+  }
+
+  if (!user) {
+    return <div className="min-h-screen bg-background flex items-center justify-center">Please sign in to use the tracker.</div>;
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -114,8 +150,8 @@ const Workout = () => {
               <Card key={e.id}>
                 <CardContent className="py-4 flex items-center justify-between gap-4">
                   <div>
-                    <div className="font-semibold">{e.type}</div>
-                    <div className="text-sm text-muted-foreground">{e.date} • {e.duration} min</div>
+                    <div className="font-semibold">{e.workout_type}</div>
+                    <div className="text-sm text-muted-foreground">{e.date} • {e.duration_minutes} min</div>
                     {e.notes && <div className="text-sm mt-1">{e.notes}</div>}
                   </div>
                   <Button variant="outline" onClick={() => removeEntry(e.id)}>Remove</Button>

@@ -12,7 +12,6 @@ import KetoStreakChart from "@/components/charts/KetoStreakChart";
 import FastingChart from "@/components/charts/FastingChart";
 import WorkoutChart from "@/components/charts/WorkoutChart";
 import WaterChart from "@/components/charts/WaterChart";
-import MacroChart from "@/components/charts/MacroChart";
 
 const ProgressDashboard = () => {
   const { user } = useAuth();
@@ -348,7 +347,6 @@ const ProgressDashboard = () => {
           <div className="mt-8">
             <h3 className="text-2xl font-bold mb-6">Tracker Analytics</h3>
             <div className="grid lg:grid-cols-2 gap-6 mb-8">
-              <MacroChart />
               <KetoStreakChart />
               <FastingChart />
               <WorkoutChart />

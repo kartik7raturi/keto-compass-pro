@@ -4,6 +4,8 @@ import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/components/auth/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const SEO = () => {
   useEffect(() => {
@@ -29,20 +31,12 @@ const SEO = () => {
   return null;
 };
 
-const daysArray = (count: number) => Array.from({ length: count }, (_, i) => i + 1);
-
-const STORAGE_KEY = "keto30-tracker";
-
 const Keto30 = () => {
   const { toast } = useToast();
-  const [startDate, setStartDate] = useState<string>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}-start`);
-    return saved || "";
-  });
-  const [completed, setCompleted] = useState<boolean[]>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}-days`);
-    return saved ? JSON.parse(saved) : Array(30).fill(false);
-  });
+  const { user } = useAuth();
+  const [startDate, setStartDate] = useState<string>("");
+  const [completed, setCompleted] = useState<boolean[]>(Array(30).fill(false));
+  const [loading, setLoading] = useState(true);
 
   const started = !!startDate;
   const progress = useMemo(() => {
@@ -51,29 +45,110 @@ const Keto30 = () => {
   }, [completed]);
 
   useEffect(() => {
-    if (startDate) localStorage.setItem(`${STORAGE_KEY}-start`, startDate);
-    localStorage.setItem(`${STORAGE_KEY}-days`, JSON.stringify(completed));
-  }, [startDate, completed]);
+    if (user) {
+      fetchKetoData();
+    }
+  }, [user]);
 
-  const handleStart = () => {
-    setStartDate(new Date().toISOString().slice(0, 10));
+  const fetchKetoData = async () => {
+    try {
+      const { data: ketoData } = await supabase
+        .from('keto_streaks')
+        .select('*')
+        .eq('user_id', user?.id)
+        .gte('date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10))
+        .order('date', { ascending: true });
+
+      if (ketoData && ketoData.length > 0) {
+        setStartDate(ketoData[0].date);
+        const completedDays = Array(30).fill(false);
+        ketoData.forEach(entry => {
+          const dayIndex = Math.floor((new Date(entry.date).getTime() - new Date(ketoData[0].date).getTime()) / (1000 * 60 * 60 * 24));
+          if (dayIndex >= 0 && dayIndex < 30) {
+            completedDays[dayIndex] = entry.completed;
+          }
+        });
+        setCompleted(completedDays);
+      }
+    } catch (error) {
+      console.error('Error fetching keto data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStart = async () => {
+    if (!user) return;
+    
+    const today = new Date().toISOString().slice(0, 10);
+    setStartDate(today);
     setCompleted(Array(30).fill(false));
-    toast({ title: "Challenge started", description: "Your 30-day keto tracker is live. You got this!" });
+    
+    try {
+      await supabase
+        .from('keto_streaks')
+        .insert({
+          user_id: user.id,
+          date: today,
+          completed: false
+        });
+      
+      toast({ title: "Challenge started", description: "Your 30-day keto tracker is live. You got this!" });
+    } catch (error) {
+      toast({ title: "Error starting challenge", variant: "destructive" });
+    }
   };
 
-  const handleReset = () => {
-    setStartDate("");
-    setCompleted(Array(30).fill(false));
-    localStorage.removeItem(`${STORAGE_KEY}-start`);
-    localStorage.removeItem(`${STORAGE_KEY}-days`);
-    toast({ title: "Tracker reset", description: "Start again anytime." });
+  const handleReset = async () => {
+    if (!user) return;
+    
+    try {
+      await supabase
+        .from('keto_streaks')
+        .delete()
+        .eq('user_id', user.id);
+      
+      setStartDate("");
+      setCompleted(Array(30).fill(false));
+      toast({ title: "Tracker reset", description: "Start again anytime." });
+    } catch (error) {
+      toast({ title: "Error resetting tracker", variant: "destructive" });
+    }
   };
 
-  const toggleDay = (index: number) => {
-    const next = [...completed];
-    next[index] = !next[index];
-    setCompleted(next);
+  const toggleDay = async (index: number) => {
+    if (!user || !startDate) return;
+    
+    const targetDate = new Date(startDate);
+    targetDate.setDate(targetDate.getDate() + index);
+    const dateStr = targetDate.toISOString().slice(0, 10);
+    
+    const newCompleted = [...completed];
+    newCompleted[index] = !newCompleted[index];
+    setCompleted(newCompleted);
+    
+    try {
+      await supabase
+        .from('keto_streaks')
+        .upsert({
+          user_id: user.id,
+          date: dateStr,
+          completed: newCompleted[index]
+        });
+    } catch (error) {
+      console.error('Error updating day:', error);
+      // Revert on error
+      setCompleted(completed);
+    }
   };
+
+  if (loading) {
+    return <div className="min-h-screen bg-background flex items-center justify-center">Loading...</div>;
+  }
+
+  if (!user) {
+    return <div className="min-h-screen bg-background flex items-center justify-center">Please sign in to use the tracker.</div>;
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -116,7 +191,7 @@ const Keto30 = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-10 gap-2">
-              {daysArray(30).map((day, i) => (
+              {Array.from({ length: 30 }, (_, i) => i + 1).map((day, i) => (
                 <button
                   key={day}
                   onClick={() => toggleDay(i)}

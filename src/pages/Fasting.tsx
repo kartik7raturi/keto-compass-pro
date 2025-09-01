@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/components/auth/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const SEO = () => {
   useEffect(() => {
@@ -22,8 +24,6 @@ const SEO = () => {
   return null;
 };
 
-const STORAGE_KEY = "fasting-tracker";
-
 function formatHMS(ms: number) {
   const total = Math.max(0, Math.floor(ms / 1000));
   const h = Math.floor(total / 3600).toString().padStart(2, '0');
@@ -34,20 +34,22 @@ function formatHMS(ms: number) {
 
 const Fasting = () => {
   const { toast } = useToast();
-  const [durationHours, setDurationHours] = useState<number>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}-duration`);
-    return saved ? Number(saved) : 16;
-  });
-  const [startAt, setStartAt] = useState<number | null>(() => {
-    const saved = localStorage.getItem(`${STORAGE_KEY}-start`);
-    return saved ? Number(saved) : null;
-  });
+  const { user } = useAuth();
+  const [durationHours, setDurationHours] = useState<number>(16);
+  const [currentSession, setCurrentSession] = useState<any>(null);
   const [now, setNow] = useState<number>(Date.now());
   const timerRef = useRef<number | null>(null);
 
-  const endAt = useMemo(() => (startAt ? startAt + durationHours * 3600 * 1000 : null), [startAt, durationHours]);
-  const remaining = useMemo(() => (endAt ? endAt - now : 0), [endAt, now]);
-  const active = !!startAt && remaining > 0;
+  const active = !!currentSession && !currentSession.completed;
+  const remaining = currentSession && active 
+    ? Math.max(0, new Date(currentSession.start_time).getTime() + currentSession.target_duration_hours * 3600 * 1000 - now)
+    : 0;
+
+  useEffect(() => {
+    if (user) {
+      fetchCurrentSession();
+    }
+  }, [user]);
 
   useEffect(() => {
     if (active) {
@@ -57,26 +59,93 @@ const Fasting = () => {
   }, [active]);
 
   useEffect(() => {
-    localStorage.setItem(`${STORAGE_KEY}-duration`, String(durationHours));
-    if (startAt) localStorage.setItem(`${STORAGE_KEY}-start`, String(startAt));
-    else localStorage.removeItem(`${STORAGE_KEY}-start`);
-  }, [durationHours, startAt]);
-
-  useEffect(() => {
-    if (!active && startAt && endAt && remaining <= 0) {
-      toast({ title: "Fasting complete", description: `You completed a ${durationHours}h fast. Great job!` });
-      setStartAt(null);
+    if (active && remaining <= 0) {
+      completeSession();
     }
-  }, [active, remaining, startAt, endAt, durationHours, toast]);
+  }, [active, remaining]);
 
-  const start = () => {
-    setStartAt(Date.now());
-    toast({ title: "Fast started", description: `Countdown for ${durationHours} hours.` });
+  const fetchCurrentSession = async () => {
+    try {
+      const { data } = await supabase
+        .from('fasting_sessions')
+        .select('*')
+        .eq('user_id', user?.id)
+        .eq('completed', false)
+        .order('start_time', { ascending: false })
+        .limit(1);
+      
+      if (data && data.length > 0) {
+        setCurrentSession(data[0]);
+        setDurationHours(data[0].target_duration_hours);
+      }
+    } catch (error) {
+      console.error('Error fetching session:', error);
+    }
   };
-  const stop = () => {
-    setStartAt(null);
-    toast({ title: "Fast stopped", description: "You can start again anytime." });
+
+  const start = async () => {
+    if (!user) return;
+    
+    try {
+      const { data } = await supabase
+        .from('fasting_sessions')
+        .insert({
+          user_id: user.id,
+          start_time: new Date().toISOString(),
+          target_duration_hours: durationHours,
+          completed: false
+        })
+        .select()
+        .single();
+      
+      setCurrentSession(data);
+      toast({ title: "Fast started", description: `Countdown for ${durationHours} hours.` });
+    } catch (error) {
+      toast({ title: "Error starting fast", variant: "destructive" });
+    }
   };
+
+  const stop = async () => {
+    if (!user || !currentSession) return;
+    
+    try {
+      await supabase
+        .from('fasting_sessions')
+        .update({ 
+          completed: true,
+          end_time: new Date().toISOString()
+        })
+        .eq('id', currentSession.id);
+      
+      setCurrentSession(null);
+      toast({ title: "Fast stopped", description: "You can start again anytime." });
+    } catch (error) {
+      toast({ title: "Error stopping fast", variant: "destructive" });
+    }
+  };
+
+  const completeSession = async () => {
+    if (!currentSession) return;
+    
+    try {
+      await supabase
+        .from('fasting_sessions')
+        .update({ 
+          completed: true,
+          end_time: new Date().toISOString()
+        })
+        .eq('id', currentSession.id);
+      
+      setCurrentSession(null);
+      toast({ title: "Fasting complete", description: `You completed a ${durationHours}h fast. Great job!` });
+    } catch (error) {
+      console.error('Error completing session:', error);
+    }
+  };
+
+  if (!user) {
+    return <div className="min-h-screen bg-background flex items-center justify-center">Please sign in to use the tracker.</div>;
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -123,9 +192,9 @@ const Fasting = () => {
             <div className="text-center p-6 rounded-md border">
               <div className="text-sm text-muted-foreground mb-1">Remaining</div>
               <div className="text-4xl font-bold tracking-tight">{active ? formatHMS(remaining) : "--:--:--"}</div>
-              {startAt && endAt && (
+              {currentSession && active && (
                 <div className="text-sm text-muted-foreground mt-2">
-                  Ends at {new Date(endAt).toLocaleString()}
+                  Ends at {new Date(new Date(currentSession.start_time).getTime() + currentSession.target_duration_hours * 3600 * 1000).toLocaleString()}
                 </div>
               )}
             </div>

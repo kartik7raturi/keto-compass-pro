@@ -1,27 +1,57 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
-import { useMemo } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/components/auth/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const FastingChart = () => {
-  const data = useMemo(() => {
-    // Simulate fasting history data since it's stored locally
-    const savedDuration = localStorage.getItem("fasting-tracker-duration");
-    const duration = savedDuration ? Number(savedDuration) : 16;
-    
-    // Generate sample data for the last 7 days
-    const days = [];
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      days.push({
-        date: date.toLocaleDateString('en-US', { weekday: 'short' }),
-        duration: Math.random() > 0.3 ? duration + Math.floor(Math.random() * 4 - 2) : 0, // Some days might be skipped
-        target: duration
-      });
+  const { user } = useAuth();
+  const [data, setData] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (user) {
+      fetchFastingData();
     }
-    return days;
-  }, []);
+  }, [user]);
+
+  const fetchFastingData = async () => {
+    try {
+      const { data: fastingData } = await supabase
+        .from('fasting_sessions')
+        .select('*')
+        .eq('user_id', user?.id)
+        .gte('start_time', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+        .order('start_time', { ascending: true });
+
+      if (fastingData) {
+        // Group by days for the last 7 days
+        const days = [];
+        for (let i = 6; i >= 0; i--) {
+          const date = new Date();
+          date.setDate(date.getDate() - i);
+          const dateStr = date.toISOString().slice(0, 10);
+          
+          const daySession = fastingData.find(session => 
+            session.start_time.slice(0, 10) === dateStr
+          );
+          
+          const actualDuration = daySession?.completed && daySession?.end_time 
+            ? Math.round((new Date(daySession.end_time).getTime() - new Date(daySession.start_time).getTime()) / (1000 * 60 * 60))
+            : 0;
+          
+          days.push({
+            date: date.toLocaleDateString('en-US', { weekday: 'short' }),
+            duration: actualDuration,
+            target: daySession?.target_duration_hours || 16
+          });
+        }
+        setData(days);
+      }
+    } catch (error) {
+      console.error('Error fetching fasting data:', error);
+    }
+  };
 
   const chartConfig = {
     duration: {

@@ -1,26 +1,57 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from "recharts";
-import { useMemo } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/components/auth/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const KetoStreakChart = () => {
-  const data = useMemo(() => {
-    const saved = localStorage.getItem("keto30-tracker-days");
-    const completed = saved ? JSON.parse(saved) : Array(30).fill(false);
-    
-    // Group by weeks for better visualization
-    const weeks = [];
-    for (let i = 0; i < 30; i += 7) {
-      const weekDays = completed.slice(i, i + 7);
-      const completedDays = weekDays.filter(Boolean).length;
-      weeks.push({
-        week: `Week ${Math.floor(i / 7) + 1}`,
-        completed: completedDays,
-        total: Math.min(7, 30 - i)
-      });
+  const { user } = useAuth();
+  const [data, setData] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (user) {
+      fetchKetoData();
     }
-    return weeks;
-  }, []);
+  }, [user]);
+
+  const fetchKetoData = async () => {
+    try {
+      const { data: ketoData } = await supabase
+        .from('keto_streaks')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('date', { ascending: true });
+
+      if (ketoData) {
+        // Group by weeks for better visualization
+        const weeks = [];
+        for (let i = 0; i < 4; i++) {
+          const weekStart = new Date();
+          weekStart.setDate(weekStart.getDate() - (21 - i * 7));
+          
+          const weekEnd = new Date(weekStart);
+          weekEnd.setDate(weekEnd.getDate() + 6);
+          
+          const weekData = ketoData.filter(entry => {
+            const entryDate = new Date(entry.date);
+            return entryDate >= weekStart && entryDate <= weekEnd;
+          });
+          
+          const completedDays = weekData.filter(entry => entry.completed).length;
+          
+          weeks.push({
+            week: `Week ${i + 1}`,
+            completed: completedDays,
+            total: 7
+          });
+        }
+        setData(weeks);
+      }
+    } catch (error) {
+      console.error('Error fetching keto data:', error);
+    }
+  };
 
   const chartConfig = {
     completed: {

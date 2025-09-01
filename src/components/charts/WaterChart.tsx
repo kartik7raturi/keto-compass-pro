@@ -1,41 +1,54 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer } from "recharts";
-import { useMemo } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/components/auth/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const WaterChart = () => {
-  const data = useMemo(() => {
-    const savedGoal = localStorage.getItem("water-goal");
-    const goal = savedGoal ? Number(savedGoal) : 8;
-    
-    // Generate sample data for the last 7 days
-    const days = [];
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      const dateKey = date.toISOString().slice(0, 10);
-      
-      // Check if it's today to get real data
-      const isToday = i === 0;
-      let cups = 0;
-      
-      if (isToday) {
-        const savedCups = localStorage.getItem("water-cups");
-        cups = savedCups ? Number(savedCups) : 0;
-      } else {
-        // Generate realistic sample data for previous days
-        cups = Math.floor(Math.random() * (goal + 2)) + Math.max(0, goal - 3);
-      }
-      
-      days.push({
-        date: date.toLocaleDateString('en-US', { weekday: 'short' }),
-        cups: cups,
-        goal: goal,
-        percentage: Math.round((cups / goal) * 100)
-      });
+  const { user } = useAuth();
+  const [data, setData] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (user) {
+      fetchWaterData();
     }
-    return days;
-  }, []);
+  }, [user]);
+
+  const fetchWaterData = async () => {
+    try {
+      const { data: waterData } = await supabase
+        .from('water_logs')
+        .select('*')
+        .eq('user_id', user?.id)
+        .gte('date', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10))
+        .order('date', { ascending: true });
+
+      if (waterData) {
+        // Group by last 7 days
+        const days = [];
+        for (let i = 6; i >= 0; i--) {
+          const date = new Date();
+          date.setDate(date.getDate() - i);
+          const dateStr = date.toISOString().slice(0, 10);
+          
+          const dayLog = waterData.find(log => log.date === dateStr);
+          const cups = dayLog?.cups_consumed || 0;
+          const goal = dayLog?.daily_goal || 8;
+          
+          days.push({
+            date: date.toLocaleDateString('en-US', { weekday: 'short' }),
+            cups: cups,
+            goal: goal,
+            percentage: Math.round((cups / goal) * 100)
+          });
+        }
+        setData(days);
+      }
+    } catch (error) {
+      console.error('Error fetching water data:', error);
+    }
+  };
 
   const chartConfig = {
     cups: {

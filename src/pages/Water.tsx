@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/components/auth/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const SEO = () => {
   useEffect(() => {
@@ -23,45 +25,98 @@ const SEO = () => {
   return null;
 };
 
-const todayKey = () => new Date().toISOString().slice(0, 10);
-
 const Water = () => {
   const { toast } = useToast();
-  const [goal, setGoal] = useState<number>(() => {
-    const saved = localStorage.getItem("water-goal");
-    return saved ? Number(saved) : 8;
-  });
-  const [dateKey, setDateKey] = useState<string>(todayKey());
-  const [cups, setCups] = useState<number>(() => {
-    const saved = localStorage.getItem(`water-${todayKey()}`);
-    return saved ? Number(saved) : 0;
-  });
+  const { user } = useAuth();
+  const [goal, setGoal] = useState<number>(8);
+  const [cups, setCups] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
+
+  const pct = useMemo(() => Math.min(100, Math.round((cups / goal) * 100)), [cups, goal]);
 
   useEffect(() => {
-    const key = todayKey();
-    if (key !== dateKey) {
-      setDateKey(key);
-      const saved = localStorage.getItem(`water-${key}`);
-      setCups(saved ? Number(saved) : 0);
+    if (user) {
+      fetchTodayWaterLog();
     }
-  }, [dateKey]);
+  }, [user]);
 
-  useEffect(() => {
-    localStorage.setItem("water-goal", String(goal));
-  }, [goal]);
+  const fetchTodayWaterLog = async () => {
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const { data } = await supabase
+        .from('water_logs')
+        .select('*')
+        .eq('user_id', user?.id)
+        .eq('date', today)
+        .maybeSingle();
 
-  useEffect(() => {
-    localStorage.setItem(`water-${dateKey}`, String(cups));
-  }, [cups, dateKey]);
-
-  const pct = useMemo(() => Math.min(100, Math.round((cups / Math.max(1, goal)) * 100)), [cups, goal]);
-
-  const inc = () => {
-    const next = cups + 1;
-    setCups(next);
-    if (next === goal) toast({ title: "Goal reached", description: "Nice! You've hit your hydration goal today." });
+      if (data) {
+        setGoal(data.daily_goal);
+        setCups(data.cups_consumed);
+      } else {
+        // Create today's entry with defaults
+        await supabase
+          .from('water_logs')
+          .insert({
+            user_id: user?.id,
+            date: today,
+            cups_consumed: 0,
+            daily_goal: 8
+          });
+      }
+    } catch (error) {
+      console.error('Error fetching water log:', error);
+    } finally {
+      setLoading(false);
+    }
   };
-  const dec = () => setCups(Math.max(0, cups - 1));
+
+  const updateWaterLog = async (newCups: number, newGoal?: number) => {
+    if (!user) return;
+    
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      await supabase
+        .from('water_logs')
+        .upsert({
+          user_id: user.id,
+          date: today,
+          cups_consumed: newCups,
+          daily_goal: newGoal || goal
+        });
+    } catch (error) {
+      console.error('Error updating water log:', error);
+    }
+  };
+
+  const inc = async () => {
+    const newCups = cups + 1;
+    setCups(newCups);
+    await updateWaterLog(newCups);
+    if (newCups === goal) {
+      toast({ title: "Goal reached", description: "Nice! You've hit your hydration goal today." });
+    }
+  };
+
+  const dec = async () => {
+    const newCups = Math.max(0, cups - 1);
+    setCups(newCups);
+    await updateWaterLog(newCups);
+  };
+
+  const updateGoal = async (newGoal: number) => {
+    setGoal(newGoal);
+    await updateWaterLog(cups, newGoal);
+    toast({ title: "Goal updated", description: `Daily goal set to ${newGoal} cups` });
+  };
+
+  if (loading) {
+    return <div className="min-h-screen bg-background flex items-center justify-center">Loading...</div>;
+  }
+
+  if (!user) {
+    return <div className="min-h-screen bg-background flex items-center justify-center">Please sign in to use the tracker.</div>;
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -80,12 +135,19 @@ const Water = () => {
           <CardContent className="grid gap-4 sm:grid-cols-3 items-end">
             <div className="sm:col-span-2">
               <Label htmlFor="goal">Cups per day</Label>
-              <Input id="goal" type="number" min={1} max={30} value={goal} onChange={(e) => setGoal(Math.max(1, Number(e.target.value)))} />
+              <Input
+                id="goal"
+                type="number"
+                min={1}
+                max={20}
+                value={goal}
+                onChange={(e) => updateGoal(Math.max(1, Number(e.target.value)))}
+              />
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setGoal(6)}>6</Button>
-              <Button variant="outline" onClick={() => setGoal(8)}>8</Button>
-              <Button variant="outline" onClick={() => setGoal(10)}>10</Button>
+              <Button variant="outline" onClick={() => updateGoal(6)}>6</Button>
+              <Button variant="outline" onClick={() => updateGoal(8)}>8</Button>
+              <Button variant="outline" onClick={() => updateGoal(10)}>10</Button>
             </div>
           </CardContent>
         </Card>
