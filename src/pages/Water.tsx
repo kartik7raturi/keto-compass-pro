@@ -9,6 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { usePointsSystem, POINT_VALUES } from "@/hooks/usePointsSystem";
 
 const SEO = () => {
   useEffect(() => {
@@ -28,6 +29,7 @@ const SEO = () => {
 const Water = () => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { awardPoints } = usePointsSystem();
   const [goal, setGoal] = useState<number>(8);
   const [cups, setCups] = useState<number>(0);
   const [loading, setLoading] = useState(true);
@@ -94,6 +96,7 @@ const Water = () => {
     setCups(newCups);
     await updateWaterLog(newCups);
     if (newCups === goal) {
+      awardPoints(POINT_VALUES.COMPLETE_WATER_GOAL, "completing your daily water goal!");
       toast({ title: "Goal reached", description: "Nice! You've hit your hydration goal today." });
     }
   };

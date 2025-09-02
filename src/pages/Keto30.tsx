@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { usePointsSystem, POINT_VALUES } from "@/hooks/usePointsSystem";
 
 const SEO = () => {
   useEffect(() => {
@@ -34,6 +35,7 @@ const SEO = () => {
 const Keto30 = () => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { awardPoints } = usePointsSystem();
   const [startDate, setStartDate] = useState<string>("");
   const [completed, setCompleted] = useState<boolean[]>(Array(30).fill(false));
   const [loading, setLoading] = useState(true);
@@ -135,6 +137,11 @@ const Keto30 = () => {
           date: dateStr,
           completed: newCompleted[index]
         });
+        
+      // Award points for completing a keto day
+      if (newCompleted[index]) {
+        awardPoints(POINT_VALUES.COMPLETE_KETO_DAY, "staying keto!");
+      }
     } catch (error) {
       console.error('Error updating day:', error);
       // Revert on error

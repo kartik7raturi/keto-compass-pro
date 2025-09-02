@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { usePointsSystem, POINT_VALUES } from "@/hooks/usePointsSystem";
 
 const SEO = () => {
   useEffect(() => {
@@ -28,6 +29,7 @@ const SEO = () => {
 const Workout = () => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { awardPoints } = usePointsSystem();
   const [entries, setEntries] = useState<any[]>([]);
   const [date, setDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
   const [type, setType] = useState("");
@@ -77,6 +79,7 @@ const Workout = () => {
       setType("");
       setDuration(30);
       setNotes("");
+      awardPoints(POINT_VALUES.LOG_WORKOUT, "logging a workout!");
       toast({ title: "Workout added", description: `${type} for ${duration} min` });
     } catch (error) {
       toast({ title: "Error adding workout", variant: "destructive" });

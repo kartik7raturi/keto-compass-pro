@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Menu, User, LogOut, X, ChevronDown } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import UserProgressWidget from "@/components/UserProgressWidget";
 
 const Header = () => {
   const { user, signOut } = useAuth();
@@ -33,6 +34,8 @@ const Header = () => {
         
         const displayName = profile?.display_name || 
                           (user.user_metadata as any)?.display_name || 
+                          (user.user_metadata as any)?.full_name ||
+                          (user.user_metadata as any)?.name ||
                           user.email?.split('@')[0] || 
                           'User';
         setUserDisplayName(displayName);
@@ -103,10 +106,38 @@ const Header = () => {
               <span className="text-sm text-muted-foreground hidden sm:block">
                 Welcome, {userDisplayName}
               </span>
-              <Button variant="ghost" size="sm" onClick={handleSignOut}>
-                <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    <ChevronDown className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-80">
+                  <DropdownMenuLabel>
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      My Account
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <div className="p-2">
+                    <UserProgressWidget />
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/progress')}>
+                    Progress Dashboard
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/tracker')}>
+                    Tracker
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Sign Out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           ) : (
             <>

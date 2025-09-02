@@ -734,6 +734,33 @@ export type Database = {
           },
         ]
       }
+      user_progress: {
+        Row: {
+          created_at: string
+          current_level: number
+          id: string
+          total_points: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_level?: number
+          id?: string
+          total_points?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_level?: number
+          id?: string
+          total_points?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       water_logs: {
         Row: {
           created_at: string
@@ -834,7 +861,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      award_points: {
+        Args: { points_to_add: number }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

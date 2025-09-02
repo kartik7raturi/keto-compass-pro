@@ -12,10 +12,13 @@ import KetoStreakChart from "@/components/charts/KetoStreakChart";
 import FastingChart from "@/components/charts/FastingChart";
 import WorkoutChart from "@/components/charts/WorkoutChart";
 import WaterChart from "@/components/charts/WaterChart";
+import UserProgressWidget from "@/components/UserProgressWidget";
+import { usePointsSystem, POINT_VALUES } from "@/hooks/usePointsSystem";
 
 const ProgressDashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { awardPoints } = usePointsSystem();
   const [profile, setProfile] = useState<any>(null);
   const [weightLogs, setWeightLogs] = useState<any[]>([]);
   const [editingWeight, setEditingWeight] = useState(false);
@@ -95,6 +98,7 @@ const ProgressDashboard = () => {
       setProfile({ ...profile, current_weight: weight });
       setEditingWeight(false);
       fetchUserData();
+      awardPoints(POINT_VALUES.LOG_WEIGHT, "logging your weight!");
       toast({ title: "Weight updated successfully!" });
     } catch (error) {
       toast({ title: "Error updating weight", variant: "destructive" });
@@ -164,6 +168,11 @@ const ProgressDashboard = () => {
         </div>
 
         <div className="max-w-6xl mx-auto">
+          {/* User Progress Widget */}
+          <div className="mb-8">
+            <UserProgressWidget />
+          </div>
+
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {stats.map((stat, index) => (
               <Card key={index}>

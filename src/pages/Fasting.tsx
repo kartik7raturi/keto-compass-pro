@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { usePointsSystem, POINT_VALUES } from "@/hooks/usePointsSystem";
 
 const SEO = () => {
   useEffect(() => {
@@ -35,6 +36,7 @@ function formatHMS(ms: number) {
 const Fasting = () => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { awardPoints } = usePointsSystem();
   const [durationHours, setDurationHours] = useState<number>(16);
   const [currentSession, setCurrentSession] = useState<any>(null);
   const [now, setNow] = useState<number>(Date.now());
@@ -137,6 +139,7 @@ const Fasting = () => {
         .eq('id', currentSession.id);
       
       setCurrentSession(null);
+      awardPoints(POINT_VALUES.COMPLETE_FAST, `completing a ${durationHours}h fast!`);
       toast({ title: "Fasting complete", description: `You completed a ${durationHours}h fast. Great job!` });
     } catch (error) {
       console.error('Error completing session:', error);

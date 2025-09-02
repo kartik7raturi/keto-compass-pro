@@ -11,6 +11,7 @@ import { useAuth } from "@/components/auth/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { ChartContainer } from "@/components/ui/chart";
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip } from "recharts";
+import { usePointsSystem, POINT_VALUES } from "@/hooks/usePointsSystem";
 
 interface Community {
   id: string;
@@ -50,6 +51,7 @@ const Community = () => {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { awardPoints } = usePointsSystem();
 
   // Post composer state
   const [newPostContent, setNewPostContent] = useState("");
@@ -103,7 +105,12 @@ const Community = () => {
         .eq('user_id', user.id)
         .maybeSingle();
       
-      const authorName = profile?.display_name || (user.user_metadata as any)?.display_name || 'Anonymous User';
+      const authorName = profile?.display_name || 
+                        (user.user_metadata as any)?.display_name || 
+                        (user.user_metadata as any)?.full_name ||
+                        (user.user_metadata as any)?.name ||
+                        user.email?.split('@')[0] || 
+                        'Anonymous User';
 
       const { data, error } = await supabase
         .from('community_posts')
@@ -128,6 +135,7 @@ const Community = () => {
       setImageFile(null);
       setVideoFile(null);
       setChartSeriesStr("");
+      awardPoints(POINT_VALUES.CREATE_POST, "creating a post!");
       toast({ title: 'Posted!' });
     } catch (err: any) {
       console.error('Create post error', err);
@@ -238,6 +246,8 @@ const Community = () => {
             ? { ...post, likes_count: post.likes_count + 1 }
             : post
         ));
+        
+        awardPoints(POINT_VALUES.LIKE_POST, "liking a post!");
       }
     } catch (error) {
       console.error('Error handling like:', error);
