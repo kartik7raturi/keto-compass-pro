@@ -6,6 +6,15 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import RecipeDetail from "@/components/RecipeDetail";
 import { useAuth } from "@/components/auth/AuthContext";
+import SocialShareButtons from "@/components/SocialShareButtons";
+
+// Import recipe images
+import ketoBreakfastBowl from "@/assets/recipes/keto-breakfast-bowl.jpg";
+import ketoSalmonDinner from "@/assets/recipes/keto-salmon-dinner.jpg";
+import ketoChocolateMousse from "@/assets/recipes/keto-chocolate-mousse.jpg";
+import ketoChickenWrap from "@/assets/recipes/keto-chicken-wrap.jpg";
+import ketoCauliflowerPizza from "@/assets/recipes/keto-cauliflower-pizza.jpg";
+import ketoFatBombs from "@/assets/recipes/keto-fat-bombs.jpg";
 
 interface Recipe {
   id: string;
@@ -22,6 +31,7 @@ interface Recipe {
   protein: number;
   fat: number;
   calories: number;
+  image_url?: string;
 }
 
 const RecipeLibrary = () => {
@@ -55,6 +65,29 @@ const RecipeLibrary = () => {
   const handleViewRecipe = (recipe: Recipe) => {
     setSelectedRecipe(recipe);
     setIsDetailOpen(true);
+  };
+
+  const getRecipeImage = (recipe: Recipe) => {
+    if (recipe.image_url) return recipe.image_url;
+    
+    // Default images based on category or title
+    const title = recipe.title.toLowerCase();
+    if (title.includes('breakfast') || title.includes('bowl')) return ketoBreakfastBowl;
+    if (title.includes('salmon') || title.includes('fish')) return ketoSalmonDinner;
+    if (title.includes('chocolate') || title.includes('mousse')) return ketoChocolateMousse;
+    if (title.includes('chicken') || title.includes('wrap')) return ketoChickenWrap;
+    if (title.includes('pizza') || title.includes('cauliflower')) return ketoCauliflowerPizza;
+    if (title.includes('bomb') || title.includes('snack')) return ketoFatBombs;
+    
+    // Default by category
+    switch (recipe.category?.toLowerCase()) {
+      case 'breakfast': return ketoBreakfastBowl;
+      case 'lunch': return ketoChickenWrap;
+      case 'dinner': return ketoSalmonDinner;
+      case 'dessert': return ketoChocolateMousse;
+      case 'snacks': return ketoFatBombs;
+      default: return ketoCauliflowerPizza;
+    }
   };
 
 
@@ -101,9 +134,21 @@ const RecipeLibrary = () => {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             {filteredRecipes.map((recipe) => (
-              <Card key={recipe.id} className="group hover:shadow-lg transition-all duration-300 cursor-pointer">
+              <Card key={recipe.id} className="group hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden">
+                <div className="relative">
+                  <img 
+                    src={getRecipeImage(recipe)}
+                    alt={recipe.title}
+                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute top-2 right-2">
+                    <Badge variant="secondary" className="bg-keto-green-light text-keto-green">
+                      {recipe.carbs}g carbs
+                    </Badge>
+                  </div>
+                </div>
+                
                 <CardHeader className="pb-4">
-                  <div className="text-6xl text-center mb-4">🍽️</div>
                   <CardTitle className="text-lg group-hover:text-keto-green transition-colors">
                     {recipe.title}
                   </CardTitle>
@@ -126,9 +171,6 @@ const RecipeLibrary = () => {
                 
                 <CardContent>
                   <div className="flex items-center justify-between mb-4">
-                    <Badge variant="secondary" className="bg-keto-green-light text-keto-green">
-                      {recipe.carbs}g carbs
-                    </Badge>
                     <Badge 
                       variant="outline"
                       className={
@@ -139,19 +181,30 @@ const RecipeLibrary = () => {
                     >
                       {recipe.difficulty}
                     </Badge>
+                    <div className="text-sm text-muted-foreground">
+                      {recipe.calories} cal
+                    </div>
                   </div>
                   
                   <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
                     {recipe.description}
                   </p>
 
-                  <div className="flex gap-2">
+                  <div className="space-y-3">
                     <Button 
-                      className="flex-1 bg-gradient-to-r from-keto-green to-keto-green-dark hover:opacity-90" 
+                      className="w-full bg-gradient-to-r from-keto-green to-keto-green-dark hover:opacity-90" 
                       onClick={() => handleViewRecipe(recipe)}
                     >
                       View Recipe
                     </Button>
+                    
+                    <SocialShareButtons 
+                      title={recipe.title}
+                      description={recipe.description}
+                      url={`${window.location.origin}/recipes/${recipe.id}`}
+                      image={getRecipeImage(recipe)}
+                      className="justify-center"
+                    />
                   </div>
                 </CardContent>
               </Card>

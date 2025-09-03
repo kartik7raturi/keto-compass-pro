@@ -7,6 +7,15 @@ import { Clock, Users, ChefHat, Heart, HeartOff } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import SocialShareButtons from '@/components/SocialShareButtons';
+
+// Import recipe images
+import ketoBreakfastBowl from "@/assets/recipes/keto-breakfast-bowl.jpg";
+import ketoSalmonDinner from "@/assets/recipes/keto-salmon-dinner.jpg";
+import ketoChocolateMousse from "@/assets/recipes/keto-chocolate-mousse.jpg";
+import ketoChickenWrap from "@/assets/recipes/keto-chicken-wrap.jpg";
+import ketoCauliflowerPizza from "@/assets/recipes/keto-cauliflower-pizza.jpg";
+import ketoFatBombs from "@/assets/recipes/keto-fat-bombs.jpg";
 
 interface Recipe {
   id: string;
@@ -23,6 +32,7 @@ interface Recipe {
   protein: number;
   fat: number;
   calories: number;
+  image_url?: string;
 }
 
 interface RecipeDetailProps {
@@ -107,6 +117,29 @@ const RecipeDetail = ({ recipe, isOpen, onClose }: RecipeDetailProps) => {
 
   if (!recipe) return null;
 
+  const getRecipeImage = (recipe: Recipe) => {
+    if (recipe.image_url) return recipe.image_url;
+    
+    // Default images based on category or title
+    const title = recipe.title.toLowerCase();
+    if (title.includes('breakfast') || title.includes('bowl')) return ketoBreakfastBowl;
+    if (title.includes('salmon') || title.includes('fish')) return ketoSalmonDinner;
+    if (title.includes('chocolate') || title.includes('mousse')) return ketoChocolateMousse;
+    if (title.includes('chicken') || title.includes('wrap')) return ketoChickenWrap;
+    if (title.includes('pizza') || title.includes('cauliflower')) return ketoCauliflowerPizza;
+    if (title.includes('bomb') || title.includes('snack')) return ketoFatBombs;
+    
+    // Default by category
+    switch (recipe.category?.toLowerCase()) {
+      case 'breakfast': return ketoBreakfastBowl;
+      case 'lunch': return ketoChickenWrap;
+      case 'dinner': return ketoSalmonDinner;
+      case 'dessert': return ketoChocolateMousse;
+      case 'snacks': return ketoFatBombs;
+      default: return ketoCauliflowerPizza;
+    }
+  };
+
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'easy': return 'bg-green-100 text-green-800';
@@ -135,23 +168,42 @@ const RecipeDetail = ({ recipe, isOpen, onClose }: RecipeDetailProps) => {
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* Recipe Image */}
+          <div className="relative rounded-lg overflow-hidden">
+            <img 
+              src={getRecipeImage(recipe)}
+              alt={recipe.title}
+              className="w-full h-64 object-cover"
+            />
+          </div>
+
           <p className="text-muted-foreground">{recipe.description}</p>
 
-          <div className="flex flex-wrap gap-4">
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              <span className="text-sm">{recipe.prep_time + recipe.cook_time} min total</span>
+          <div className="flex flex-wrap gap-4 justify-between items-center">
+            <div className="flex flex-wrap gap-4">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                <span className="text-sm">{recipe.prep_time + recipe.cook_time} min total</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                <span className="text-sm">{recipe.servings} servings</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <ChefHat className="h-4 w-4" />
+                <Badge className={getDifficultyColor(recipe.difficulty)}>
+                  {recipe.difficulty}
+                </Badge>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              <span className="text-sm">{recipe.servings} servings</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <ChefHat className="h-4 w-4" />
-              <Badge className={getDifficultyColor(recipe.difficulty)}>
-                {recipe.difficulty}
-              </Badge>
-            </div>
+            
+            {/* Social Share Buttons */}
+            <SocialShareButtons 
+              title={recipe.title}
+              description={recipe.description}
+              url={`${window.location.origin}/recipes/${recipe.id}`}
+              image={getRecipeImage(recipe)}
+            />
           </div>
 
           <Card>

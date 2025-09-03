@@ -7,6 +7,7 @@ import { AuthProvider } from "@/components/auth/AuthContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
+import ArticleManager from "./pages/ArticleManager";
 import NotFound from "./pages/NotFound";
 import Recipes from "./pages/Recipes";
 import Tracker from "./pages/Tracker";
@@ -47,6 +48,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/articles" element={<ArticleManager />} />
             <Route path="/recipes" element={<Recipes />} />
             <Route path="/tracker" element={<Tracker />} />
             <Route path="/tracker/30-day-keto" element={<Keto30 />} />

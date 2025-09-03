@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      articles: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          excerpt: string | null
+          featured_image_url: string | null
+          id: string
+          is_published: boolean | null
+          slug: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+          user_id: string
+          view_count: number | null
+        }
+        Insert: {
+          category?: string
+          content: string
+          created_at?: string
+          excerpt?: string | null
+          featured_image_url?: string | null
+          id?: string
+          is_published?: boolean | null
+          slug: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          user_id: string
+          view_count?: number | null
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          excerpt?: string | null
+          featured_image_url?: string | null
+          id?: string
+          is_published?: boolean | null
+          slug?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          view_count?: number | null
+        }
+        Relationships: []
+      }
       challenges: {
         Row: {
           challenge_type: string | null
@@ -497,6 +545,7 @@ export type Database = {
           prep_time: number | null
           protein: number | null
           servings: number | null
+          social_shares: number | null
           tags: string[] | null
           title: string
           updated_at: string
@@ -518,6 +567,7 @@ export type Database = {
           prep_time?: number | null
           protein?: number | null
           servings?: number | null
+          social_shares?: number | null
           tags?: string[] | null
           title: string
           updated_at?: string
@@ -539,6 +589,7 @@ export type Database = {
           prep_time?: number | null
           protein?: number | null
           servings?: number | null
+          social_shares?: number | null
           tags?: string[] | null
           title?: string
           updated_at?: string
@@ -644,6 +695,7 @@ export type Database = {
           prep_time: number | null
           protein: number | null
           servings: number | null
+          social_shares: number | null
           title: string
         }
         Insert: {
@@ -663,6 +715,7 @@ export type Database = {
           prep_time?: number | null
           protein?: number | null
           servings?: number | null
+          social_shares?: number | null
           title: string
         }
         Update: {
@@ -682,6 +735,7 @@ export type Database = {
           prep_time?: number | null
           protein?: number | null
           servings?: number | null
+          social_shares?: number | null
           title?: string
         }
         Relationships: []
