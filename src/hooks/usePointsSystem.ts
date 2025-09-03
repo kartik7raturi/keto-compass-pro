@@ -1,9 +1,48 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/components/auth/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
+interface UserProgress {
+  user_id: string;
+  total_points: number;
+  current_level: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export const usePointsSystem = () => {
+  const { user } = useAuth();
   const { toast } = useToast();
+  const [userProgress, setUserProgress] = useState<UserProgress | null>(null);
+
+  // Fetch user progress on mount
+  useEffect(() => {
+    if (user?.id) {
+      fetchUserProgress();
+    }
+  }, [user?.id]);
+
+  const fetchUserProgress = async () => {
+    if (!user?.id) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('user_progress')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching user progress:', error);
+        return;
+      }
+      
+      setUserProgress(data);
+    } catch (error) {
+      console.error('Error fetching user progress:', error);
+    }
+  };
 
   const awardPoints = useCallback(async (points: number, action: string) => {
     try {
@@ -16,6 +55,9 @@ export const usePointsSystem = () => {
         return;
       }
 
+      // Refresh user progress after awarding points
+      await fetchUserProgress();
+
       toast({
         title: `+${points} points earned!`,
         description: `Great job ${action}`,
@@ -26,7 +68,7 @@ export const usePointsSystem = () => {
     }
   }, [toast]);
 
-  return { awardPoints };
+  return { awardPoints, userProgress };
 };
 
 // Point values for different actions

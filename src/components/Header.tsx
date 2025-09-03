@@ -125,6 +125,9 @@ const Header = () => {
                     <UserProgressWidget />
                   </div>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/profile')}>
+                    Profile Settings
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/progress')}>
                     Progress Dashboard
                   </DropdownMenuItem>
@@ -167,6 +170,12 @@ const Header = () => {
               className="block w-full text-left py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
             >
               Recipes
+            </button>
+            <button 
+              onClick={() => handleNavigation('/profile')} 
+              className="block w-full text-left py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            >
+              Profile
             </button>
             <button 
               onClick={() => handleNavigation('/tracker')} 

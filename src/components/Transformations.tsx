@@ -1,39 +1,39 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingDown, Calendar, Target } from "lucide-react";
+import transformation1 from "@/assets/transformation-1.jpg";
+import transformation2 from "@/assets/transformation-2.jpg";
+import transformation3 from "@/assets/transformation-3.jpg";
 
 const Transformations = () => {
   const transformations = [
     {
-      name: "Lisa Chen",
-      beforeImage: "https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      afterImage: "https://images.unsplash.com/photo-1581090464777-f3220bbe1b8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      weightLoss: "42 lbs",
-      timeframe: "8 months",
-      startWeight: "185 lbs",
-      currentWeight: "143 lbs",
-      story: "Lost 42 pounds and gained confidence. Keto changed my relationship with food completely.",
+      name: "Sarah Kim",
+      beforeImage: transformation1,
+      weightLoss: "42.4 lbs",
+      timeframe: "3 months",
+      startWeight: "179.4 lbs",
+      currentWeight: "137.0 lbs",
+      story: "Lost over 42 pounds and gained incredible confidence. Keto transformed my entire relationship with food.",
       achievements: ["Improved energy", "Better sleep", "Reduced inflammation"]
     },
     {
-      name: "David Park",
-      beforeImage: "https://images.unsplash.com/photo-1517022812141-2362092800607?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      afterImage: "https://images.unsplash.com/photo-1581090464777-f3220bbe1b8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      weightLoss: "38 lbs", 
-      timeframe: "6 months",
-      startWeight: "220 lbs",
-      currentWeight: "182 lbs",
-      story: "From struggling with weight to feeling the strongest I've ever been. This app made it possible.",
+      name: "Mike Johnson",
+      beforeImage: transformation2,
+      weightLoss: "65 lbs", 
+      timeframe: "8 months",
+      startWeight: "285 lbs",
+      currentWeight: "220 lbs",
+      story: "From struggling with weight to feeling the strongest I've ever been. This app made it all possible.",
       achievements: ["Lower cholesterol", "Increased muscle", "Mental clarity"]
     },
     {
       name: "Jennifer Walsh",
-      beforeImage: "https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      afterImage: "https://images.unsplash.com/photo-1581090464777-f3220bbe1b8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      weightLoss: "29 lbs",
-      timeframe: "5 months", 
-      startWeight: "165 lbs",
-      currentWeight: "136 lbs",
+      beforeImage: transformation3,
+      weightLoss: "35 lbs",
+      timeframe: "6 months", 
+      startWeight: "175 lbs",
+      currentWeight: "140 lbs",
       story: "The tracking features kept me accountable every day. I finally found a sustainable lifestyle.",
       achievements: ["Stable blood sugar", "Mood improvement", "Consistent energy"]
     }
@@ -55,30 +55,16 @@ const Transformations = () => {
           {transformations.map((transformation, index) => (
             <Card key={index} className="overflow-hidden group hover:shadow-xl transition-all duration-300">
               <div className="relative">
-                <div className="grid grid-cols-2 gap-0">
-                  <div className="relative">
-                    <img 
-                      src={transformation.beforeImage}
-                      alt={`${transformation.name} before`}
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="absolute top-2 left-2">
-                      <Badge variant="secondary" className="bg-muted text-muted-foreground">
-                        Before
-                      </Badge>
-                    </div>
-                  </div>
-                  <div className="relative">
-                    <img 
-                      src={transformation.afterImage}
-                      alt={`${transformation.name} after`}
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="absolute top-2 right-2">
-                      <Badge className="bg-keto-green text-white">
-                        After
-                      </Badge>
-                    </div>
+                <div className="relative">
+                  <img 
+                    src={transformation.beforeImage}
+                    alt={`${transformation.name} transformation`}
+                    className="w-full h-64 object-cover"
+                  />
+                  <div className="absolute top-2 left-2">
+                    <Badge className="bg-primary text-primary-foreground">
+                      Amazing Transformation
+                    </Badge>
                   </div>
                 </div>
               </div>
