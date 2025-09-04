@@ -50,7 +50,7 @@ const Footer = () => {
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><a href="/guide" className="hover:text-keto-green transition-colors">Keto Guide</a></li>
               <li><a href="/stories" className="hover:text-keto-green transition-colors">Success Stories</a></li>
-              <li><a href="/blog" className="hover:text-keto-green transition-colors">Blog</a></li>
+              <li><a href="/blog" className="hover:text-keto-green transition-colors">Keto Articles</a></li>
               <li><a href="/faq" className="hover:text-keto-green transition-colors">FAQ</a></li>
               <li><a href="/support" className="hover:text-keto-green transition-colors">Support</a></li>
             </ul>

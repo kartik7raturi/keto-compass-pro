@@ -180,13 +180,7 @@ const Header = () => {
             >
               Profile
             </button>
-            <button 
-              onClick={() => handleNavigation('/articles')} 
-              className="block w-full text-left py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-            >
-              Articles
-            </button>
-            <button 
+            <button
               onClick={() => handleNavigation('/tracker')} 
               className="block w-full text-left py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
             >
