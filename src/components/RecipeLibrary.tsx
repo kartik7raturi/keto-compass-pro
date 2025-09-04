@@ -8,14 +8,6 @@ import RecipeDetail from "@/components/RecipeDetail";
 import { useAuth } from "@/components/auth/AuthContext";
 import SocialShareButtons from "@/components/SocialShareButtons";
 
-// Import recipe images
-import ketoBreakfastBowl from "@/assets/recipes/keto-breakfast-bowl.jpg";
-import ketoSalmonDinner from "@/assets/recipes/keto-salmon-dinner.jpg";
-import ketoChocolateMousse from "@/assets/recipes/keto-chocolate-mousse.jpg";
-import ketoChickenWrap from "@/assets/recipes/keto-chicken-wrap.jpg";
-import ketoCauliflowerPizza from "@/assets/recipes/keto-cauliflower-pizza.jpg";
-import ketoFatBombs from "@/assets/recipes/keto-fat-bombs.jpg";
-
 interface Recipe {
   id: string;
   title: string;
@@ -70,23 +62,35 @@ const RecipeLibrary = () => {
   const getRecipeImage = (recipe: Recipe) => {
     if (recipe.image_url) return recipe.image_url;
     
-    // Default images based on category or title
+    // Default placeholder images from Unsplash
     const title = recipe.title.toLowerCase();
-    if (title.includes('breakfast') || title.includes('bowl')) return ketoBreakfastBowl;
-    if (title.includes('salmon') || title.includes('fish')) return ketoSalmonDinner;
-    if (title.includes('chocolate') || title.includes('mousse')) return ketoChocolateMousse;
-    if (title.includes('chicken') || title.includes('wrap')) return ketoChickenWrap;
-    if (title.includes('pizza') || title.includes('cauliflower')) return ketoCauliflowerPizza;
-    if (title.includes('bomb') || title.includes('snack')) return ketoFatBombs;
+    if (title.includes('breakfast') || title.includes('bowl')) 
+      return "https://images.unsplash.com/photo-1543362906-acfc16c67564?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80";
+    if (title.includes('salmon') || title.includes('fish')) 
+      return "https://images.unsplash.com/photo-1467003909585-2f8a72700288?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80";
+    if (title.includes('chocolate') || title.includes('mousse')) 
+      return "https://images.unsplash.com/photo-1578985545062-69928b1d9587?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80";
+    if (title.includes('chicken') || title.includes('wrap')) 
+      return "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80";
+    if (title.includes('pizza') || title.includes('cauliflower')) 
+      return "https://images.unsplash.com/photo-1513104890138-7c749659a591?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80";
+    if (title.includes('bomb') || title.includes('snack')) 
+      return "https://images.unsplash.com/photo-1551024601-bec78aea704b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80";
     
     // Default by category
     switch (recipe.category?.toLowerCase()) {
-      case 'breakfast': return ketoBreakfastBowl;
-      case 'lunch': return ketoChickenWrap;
-      case 'dinner': return ketoSalmonDinner;
-      case 'dessert': return ketoChocolateMousse;
-      case 'snacks': return ketoFatBombs;
-      default: return ketoCauliflowerPizza;
+      case 'breakfast': 
+        return "https://images.unsplash.com/photo-1543362906-acfc16c67564?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80";
+      case 'lunch': 
+        return "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80";
+      case 'dinner': 
+        return "https://images.unsplash.com/photo-1467003909585-2f8a72700288?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80";
+      case 'dessert': 
+        return "https://images.unsplash.com/photo-1578985545062-69928b1d9587?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80";
+      case 'snacks': 
+        return "https://images.unsplash.com/photo-1551024601-bec78aea704b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80";
+      default: 
+        return "https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80";
     }
   };
 
