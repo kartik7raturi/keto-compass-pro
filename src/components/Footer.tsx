@@ -46,11 +46,26 @@ const Footer = () => {
           </div>
 
           <div>
+            <h4 className="font-semibold mb-4">Blog Articles</h4>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li><a href="/blog/keto-beginners-guide" className="hover:text-keto-green transition-colors">Keto Beginner's Guide</a></li>
+              <li><a href="/blog/intermittent-fasting-keto" className="hover:text-keto-green transition-colors">Intermittent Fasting & Keto</a></li>
+              <li><a href="/blog/keto-meal-prep-tips" className="hover:text-keto-green transition-colors">Keto Meal Prep Tips</a></li>
+              <li><a href="/blog/ketosis-signs-symptoms" className="hover:text-keto-green transition-colors">Signs You're in Ketosis</a></li>
+              <li><a href="/blog/keto-flu-remedies" className="hover:text-keto-green transition-colors">Keto Flu Remedies</a></li>
+              <li><a href="/blog/best-keto-snacks" className="hover:text-keto-green transition-colors">Best Keto Snacks</a></li>
+              <li><a href="/blog/keto-macros-calculator" className="hover:text-keto-green transition-colors">Keto Macros Calculator</a></li>
+              <li><a href="/blog/eating-out-on-keto" className="hover:text-keto-green transition-colors">Eating Out on Keto</a></li>
+              <li><a href="/blog/keto-supplements-guide" className="hover:text-keto-green transition-colors">Keto Supplements Guide</a></li>
+              <li><a href="/blog/long-term-keto-success" className="hover:text-keto-green transition-colors">Long-term Keto Success</a></li>
+            </ul>
+          </div>
+
+          <div>
             <h4 className="font-semibold mb-4">Resources</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><a href="/guide" className="hover:text-keto-green transition-colors">Keto Guide</a></li>
               <li><a href="/stories" className="hover:text-keto-green transition-colors">Success Stories</a></li>
-              <li><a href="/blog" className="hover:text-keto-green transition-colors">Keto Articles</a></li>
               <li><a href="/faq" className="hover:text-keto-green transition-colors">FAQ</a></li>
               <li><a href="/support" className="hover:text-keto-green transition-colors">Support</a></li>
             </ul>

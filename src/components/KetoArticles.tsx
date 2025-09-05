@@ -32,7 +32,7 @@ const KetoArticles = () => {
         .select('id, title, excerpt, category, featured_image_url, slug, created_at')
         .eq('is_published', true)
         .order('created_at', { ascending: false })
-        .limit(6);
+        .limit(3);
 
       if (error) throw error;
       setArticles(data || []);
@@ -85,7 +85,7 @@ const KetoArticles = () => {
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1,2,3,4,5,6].map((i) => (
+            {[1,2,3].map((i) => (
               <div key={i} className="animate-pulse">
                 <div className="bg-gray-300 h-48 rounded-t-lg mb-4"></div>
                 <div className="h-4 bg-gray-300 rounded mb-2"></div>
