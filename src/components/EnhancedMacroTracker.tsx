@@ -50,8 +50,7 @@ const EnhancedMacroTracker = () => {
     try {
       const { data, error } = await supabase
         .from('recipes')
-        .select('id, title, carbs, protein, fat, calories, servings')
-        .limit(20);
+        .select('id, title, carbs, protein, fat, calories, servings');
       
       if (error) throw error;
       setRecipes(data || []);

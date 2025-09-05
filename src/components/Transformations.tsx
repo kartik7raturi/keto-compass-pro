@@ -1,15 +1,16 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingDown, Calendar, Target } from "lucide-react";
-import realTransformation1 from "@/assets/real-transformation-1.jpg";
-import realTransformation2 from "@/assets/real-transformation-2.jpg";
-import realTransformation3 from "@/assets/real-transformation-3.jpg";
+// Using uploaded transformation images
+const sarahTransformation = "/lovable-uploads/2243bacf-bb2c-4dbf-a783-04e0bcc23493.png";
+const mikeTransformation = "/lovable-uploads/1229cd6c-93e6-460e-90ac-c0b09cabec3c.png";
+const jenniferTransformation = "/lovable-uploads/dc216a6c-e2aa-4f21-aea2-95bf0fc22104.png";
 
 const Transformations = () => {
   const transformations = [
     {
       name: "Sarah Kim",
-      beforeImage: realTransformation1,
+      beforeImage: sarahTransformation,
       weightLoss: "42.4 lbs",
       timeframe: "3 months",
       startWeight: "179.4 lbs",
@@ -19,7 +20,7 @@ const Transformations = () => {
     },
     {
       name: "Mike Johnson",
-      beforeImage: realTransformation2,
+      beforeImage: mikeTransformation,
       weightLoss: "65 lbs", 
       timeframe: "8 months",
       startWeight: "285 lbs",
@@ -29,7 +30,7 @@ const Transformations = () => {
     },
     {
       name: "Jennifer Walsh",
-      beforeImage: realTransformation3,
+      beforeImage: jenniferTransformation,
       weightLoss: "35 lbs",
       timeframe: "6 months", 
       startWeight: "175 lbs",
