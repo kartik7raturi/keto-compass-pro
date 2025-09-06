@@ -58,10 +58,10 @@ const Header = () => {
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-keto-green to-keto-green-dark flex items-center justify-center">
-              <span className="text-white font-bold text-sm">K</span>
+            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-sm">K</span>
             </div>
-            <span className="font-bold text-xl bg-gradient-to-r from-keto-green to-keto-green-dark bg-clip-text text-transparent">
+            <span className="font-bold text-xl text-foreground">
               Ketopia
             </span>
           </div>

@@ -59,40 +59,6 @@ const RecipeLibrary = () => {
     setIsDetailOpen(true);
   };
 
-  const getRecipeImage = (recipe: Recipe) => {
-    if (recipe.image_url) return recipe.image_url;
-    
-    // Default placeholder images from Unsplash
-    const title = recipe.title.toLowerCase();
-    if (title.includes('breakfast') || title.includes('bowl')) 
-      return "https://images.unsplash.com/photo-1543362906-acfc16c67564?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80";
-    if (title.includes('salmon') || title.includes('fish')) 
-      return "https://images.unsplash.com/photo-1467003909585-2f8a72700288?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80";
-    if (title.includes('chocolate') || title.includes('mousse')) 
-      return "https://images.unsplash.com/photo-1578985545062-69928b1d9587?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80";
-    if (title.includes('chicken') || title.includes('wrap')) 
-      return "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80";
-    if (title.includes('pizza') || title.includes('cauliflower')) 
-      return "https://images.unsplash.com/photo-1513104890138-7c749659a591?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80";
-    if (title.includes('bomb') || title.includes('snack')) 
-      return "https://images.unsplash.com/photo-1551024601-bec78aea704b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80";
-    
-    // Default by category
-    switch (recipe.category?.toLowerCase()) {
-      case 'breakfast': 
-        return "https://images.unsplash.com/photo-1543362906-acfc16c67564?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80";
-      case 'lunch': 
-        return "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80";
-      case 'dinner': 
-        return "https://images.unsplash.com/photo-1467003909585-2f8a72700288?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80";
-      case 'dessert': 
-        return "https://images.unsplash.com/photo-1578985545062-69928b1d9587?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80";
-      case 'snacks': 
-        return "https://images.unsplash.com/photo-1551024601-bec78aea704b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80";
-      default: 
-        return "https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80";
-    }
-  };
 
 
   const categories = ["All", "Breakfast", "Lunch", "Dinner", "Dessert", "Snacks", "Drinks"];
@@ -139,18 +105,20 @@ const RecipeLibrary = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             {filteredRecipes.map((recipe) => (
               <Card key={recipe.id} className="group hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden">
-                <div className="relative">
-                  <img 
-                    src={getRecipeImage(recipe)}
-                    alt={recipe.title}
-                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute top-2 right-2">
-                    <Badge variant="secondary" className="bg-keto-green-light text-keto-green">
-                      {recipe.carbs}g carbs
-                    </Badge>
+                {recipe.image_url && (
+                  <div className="relative">
+                    <img 
+                      src={recipe.image_url}
+                      alt={recipe.title}
+                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute top-2 right-2">
+                      <Badge variant="secondary" className="bg-keto-green-light text-keto-green">
+                        {recipe.carbs}g carbs
+                      </Badge>
+                    </div>
                   </div>
-                </div>
+                )}
                 
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg group-hover:text-keto-green transition-colors">
@@ -206,7 +174,7 @@ const RecipeLibrary = () => {
                       title={recipe.title}
                       description={recipe.description}
                       url={`${window.location.origin}/recipes/${recipe.id}`}
-                      image={getRecipeImage(recipe)}
+                      image={recipe.image_url || ''}
                       className="justify-center"
                     />
                   </div>
