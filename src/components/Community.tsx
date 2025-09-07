@@ -98,10 +98,10 @@ const Community = () => {
         ? { series: chartSeriesStr.split(',').map(v => Number(v.trim())).filter(v => !Number.isNaN(v)) }
         : null;
 
-      // Get user's display name from profiles table
+      // Get user's display name and avatar from profiles table
       const { data: profile } = await supabase
         .from('profiles')
-        .select('display_name')
+        .select('display_name, avatar_url')
         .eq('user_id', user.id)
         .maybeSingle();
       
@@ -112,13 +112,15 @@ const Community = () => {
                         user.email?.split('@')[0] || 
                         'Anonymous User';
 
+      const authorAvatar = profile?.avatar_url || null;
+
       const { data, error } = await supabase
         .from('community_posts')
         .insert({
           community_id: selectedCommunity.id,
           user_id: user.id,
           author_name: authorName,
-          author_avatar: null,
+          author_avatar: authorAvatar,
           content: newPostContent || '',
           image_url: imageUrl,
           video_url: videoUrl,
