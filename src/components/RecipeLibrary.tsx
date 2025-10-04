@@ -1,12 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Users, Star, Heart, ChefHat } from "lucide-react";
+import { Clock, Users, ChefHat, ThumbsUp, Trophy } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import RecipeDetail from "@/components/RecipeDetail";
 import { useAuth } from "@/components/auth/AuthContext";
 import SocialShareButtons from "@/components/SocialShareButtons";
+import { DietTypeSwitch } from "./DietTypeSwitch";
+import { UserRecipeSubmission } from "./UserRecipeSubmission";
 
 interface Recipe {
   id: string;
@@ -24,27 +26,59 @@ interface Recipe {
   fat: number;
   calories: number;
   image_url?: string;
+  upvotes?: number;
 }
 
 const RecipeLibrary = () => {
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const { user } = useAuth();
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [userRecipes, setUserRecipes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const { user } = useAuth();
+  const [dietType, setDietType] = useState<'keto' | 'pcos'>('keto');
+  const [topContributors, setTopContributors] = useState<any[]>([]);
 
   useEffect(() => {
+    if (user) {
+      fetchDietType();
+    }
     fetchRecipes();
-  }, []);
+    fetchUserRecipes();
+    fetchTopContributors();
+  }, [selectedCategory, dietType, user]);
+
+  const fetchDietType = async () => {
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('diet_type')
+        .eq('user_id', user?.id)
+        .single();
+
+      if (data?.diet_type && (data.diet_type === 'keto' || data.diet_type === 'pcos')) {
+        setDietType(data.diet_type);
+      }
+    } catch (error) {
+      console.error('Error fetching diet type:', error);
+    }
+  };
 
   const fetchRecipes = async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('recipes')
         .select('*')
+        .eq('diet_type', dietType)
         .order('created_at', { ascending: false });
 
+      if (selectedCategory !== "all" && selectedCategory !== "people") {
+        query = query.eq('category', selectedCategory);
+      }
+
+      const { data, error } = await query;
+      
       if (error) throw error;
       setRecipes(data || []);
     } catch (error) {
@@ -54,18 +88,94 @@ const RecipeLibrary = () => {
     }
   };
 
+  const fetchUserRecipes = async () => {
+    try {
+      let query = supabase
+        .from('user_recipes')
+        .select('*, profiles!user_recipes_user_id_fkey(display_name)')
+        .eq('is_approved', true)
+        .eq('diet_type', dietType)
+        .order('upvotes', { ascending: false });
+
+      if (selectedCategory !== "all" && selectedCategory !== "people") {
+        query = query.eq('category', selectedCategory);
+      }
+
+      const { data } = await query;
+      setUserRecipes(data || []);
+    } catch (error) {
+      console.error('Error fetching user recipes:', error);
+    }
+  };
+
+  const fetchTopContributors = async () => {
+    try {
+      const { data } = await supabase
+        .from('user_recipes')
+        .select('user_id, profiles!user_recipes_user_id_fkey(display_name)')
+        .eq('is_approved', true);
+
+      if (data) {
+        const contributors = data.reduce((acc: any, recipe: any) => {
+          const userId = recipe.user_id;
+          if (!acc[userId]) {
+            acc[userId] = {
+              name: recipe.profiles?.display_name || 'Anonymous',
+              count: 0
+            };
+          }
+          acc[userId].count++;
+          return acc;
+        }, {});
+
+        const sorted = Object.values(contributors)
+          .sort((a: any, b: any) => b.count - a.count)
+          .slice(0, 5);
+        
+        setTopContributors(sorted);
+      }
+    } catch (error) {
+      console.error('Error fetching top contributors:', error);
+    }
+  };
+
+  const handleVote = async (recipeId: string) => {
+    if (!user) {
+      return;
+    }
+
+    try {
+      const { data: existingVote } = await supabase
+        .from('recipe_votes')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('recipe_id', recipeId)
+        .single();
+
+      if (existingVote) {
+        await supabase
+          .from('recipe_votes')
+          .delete()
+          .eq('id', existingVote.id);
+      } else {
+        await supabase
+          .from('recipe_votes')
+          .insert({ user_id: user.id, recipe_id: recipeId });
+      }
+
+      fetchUserRecipes();
+    } catch (error) {
+      console.error('Error voting:', error);
+    }
+  };
+
   const handleViewRecipe = (recipe: Recipe) => {
     setSelectedRecipe(recipe);
     setIsDetailOpen(true);
   };
 
-
-
-  const categories = ["All", "Breakfast", "Lunch", "Dinner", "Dessert", "Snacks", "Drinks"];
-
-  const filteredRecipes = selectedCategory === "All" 
-    ? recipes 
-    : recipes.filter(recipe => recipe.category?.toLowerCase() === selectedCategory.toLowerCase());
+  const categories = ["all", "people", "breakfast", "lunch", "dinner", "snacks", "drinks"];
+  const displayRecipes = selectedCategory === "people" ? userRecipes : recipes;
 
   return (
     <section id="recipes" className="py-20">
@@ -74,14 +184,41 @@ const RecipeLibrary = () => {
           <div className="flex items-center justify-center gap-2 mb-4">
             <ChefHat className="h-8 w-8 text-keto-green" />
             <h2 className="text-3xl lg:text-4xl font-bold">
-              Delicious Keto Recipes
+              Delicious {dietType.toUpperCase()} Recipes
             </h2>
           </div>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Discover 1000+ mouth-watering keto recipes with detailed macros, 
-            step-by-step instructions, and video tutorials.
+            Discover mouth-watering recipes that keep you healthy while satisfying your cravings.
           </p>
         </div>
+
+        {/* Diet Type Switch */}
+        {user && (
+          <div className="flex justify-center mb-6">
+            <DietTypeSwitch />
+          </div>
+        )}
+
+        {/* Top Contributors */}
+        {topContributors.length > 0 && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Trophy className="h-5 w-5 text-yellow-500" />
+                Top Contributors
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-3">
+                {topContributors.map((contributor: any, index: number) => (
+                  <Badge key={index} variant="secondary" className="text-sm">
+                    {contributor.name} • {contributor.count} recipes
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="flex flex-wrap gap-2 justify-center mb-8">
           {categories.map((category) => (
@@ -89,7 +226,7 @@ const RecipeLibrary = () => {
               key={category} 
               variant={category === selectedCategory ? "default" : "outline"}
               size="sm"
-              className={category === selectedCategory ? "bg-gradient-to-r from-keto-green to-keto-green-dark" : ""}
+              className={category === selectedCategory ? "bg-gradient-to-r from-keto-green to-keto-green-dark capitalize" : "capitalize"}
               onClick={() => setSelectedCategory(category)}
             >
               {category}
@@ -97,29 +234,29 @@ const RecipeLibrary = () => {
           ))}
         </div>
 
+        {/* User Recipe Submission */}
+        {user && selectedCategory === "people" && (
+          <div className="max-w-md mx-auto mb-8">
+            <UserRecipeSubmission />
+          </div>
+        )}
+
         {loading ? (
           <div className="text-center py-12">
             <div className="text-muted-foreground">Loading recipes...</div>
           </div>
+        ) : displayRecipes.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">
+              {selectedCategory === "people" 
+                ? "No community recipes yet. Be the first to contribute!" 
+                : "No recipes found in this category."}
+            </p>
+          </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            {filteredRecipes.map((recipe) => (
+            {displayRecipes.map((recipe: any) => (
               <Card key={recipe.id} className="group hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden">
-                {recipe.image_url && (
-                  <div className="relative">
-                    <img 
-                      src={recipe.image_url}
-                      alt={recipe.title}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute top-2 right-2">
-                      <Badge variant="secondary" className="bg-keto-green-light text-keto-green">
-                        {recipe.carbs}g carbs
-                      </Badge>
-                    </div>
-                  </div>
-                )}
-                
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg group-hover:text-keto-green transition-colors">
                     {recipe.title}
@@ -134,15 +271,11 @@ const RecipeLibrary = () => {
                       <Users className="h-4 w-4" />
                       {recipe.servings}
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      4.5
-                    </div>
                   </div>
                 </CardHeader>
                 
                 <CardContent>
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2 mb-4">
                     <Badge 
                       variant="outline"
                       className={
@@ -151,11 +284,18 @@ const RecipeLibrary = () => {
                         "border-red-500 text-red-500"
                       }
                     >
+                      <ChefHat className="h-3 w-3 mr-1" />
                       {recipe.difficulty}
                     </Badge>
-                    <div className="text-sm text-muted-foreground">
+                    <Badge variant="secondary">
                       {recipe.calories} cal
-                    </div>
+                    </Badge>
+                    {selectedCategory === "people" && recipe.upvotes !== undefined && (
+                      <Badge variant="secondary" className="flex items-center gap-1">
+                        <ThumbsUp className="h-3 w-3" />
+                        {recipe.upvotes}
+                      </Badge>
+                    )}
                   </div>
                   
                   <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
@@ -169,6 +309,17 @@ const RecipeLibrary = () => {
                     >
                       View Recipe
                     </Button>
+                    
+                    {selectedCategory === "people" && user && (
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => handleVote(recipe.id)}
+                      >
+                        <ThumbsUp className="h-4 w-4 mr-2" />
+                        Upvote
+                      </Button>
+                    )}
                     
                     <SocialShareButtons 
                       title={recipe.title}

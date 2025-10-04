@@ -79,6 +79,7 @@ const Profile = () => {
 
   const handleNameUpdate = async () => {
     try {
+      // Update profile table
       await supabase
         .from('profiles')
         .upsert({
@@ -87,10 +88,18 @@ const Profile = () => {
           email: user?.email
         });
 
+      // Update auth metadata
+      await supabase.auth.updateUser({
+        data: { display_name: displayName }
+      });
+
       toast({
         title: "Name updated!",
         description: "Your display name has been updated successfully.",
       });
+
+      // Reload to reflect changes
+      window.location.reload();
     } catch (error: any) {
       toast({
         variant: "destructive",

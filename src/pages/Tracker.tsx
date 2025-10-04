@@ -4,7 +4,7 @@ import EnhancedMacroTracker from "@/components/EnhancedMacroTracker";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Calendar, Clock, Utensils, Target, Droplet, Dumbbell, Timer, CheckSquare } from "lucide-react";
+import { Calendar, Clock, Utensils, Target, Droplet, Dumbbell, Timer, CheckSquare, Heart } from "lucide-react";
 
 const Tracker = () => {
   const navigate = useNavigate();
@@ -58,6 +58,12 @@ const Tracker = () => {
       description: "Create personalized meal plans",
       icon: Utensils,
       path: "/custom-plan"
+    },
+    {
+      title: "Period Tracker",
+      description: "Track your menstrual cycle",
+      icon: Heart,
+      path: "/tracker/period"
     }
   ];
 

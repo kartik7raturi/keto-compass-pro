@@ -17,6 +17,7 @@ import Keto30 from "./pages/Keto30";
 import Fasting from "./pages/Fasting";
 import Workout from "./pages/Workout";
 import Water from "./pages/Water";
+import PeriodTracker from "./pages/PeriodTracker";
 
 import WeeklyPlan from "./pages/WeeklyPlan";
 import QuickMeals from "./pages/QuickMeals";
@@ -55,6 +56,7 @@ const App = () => (
             <Route path="/tracker/fasting" element={<Fasting />} />
             <Route path="/tracker/workout" element={<Workout />} />
             <Route path="/tracker/water" element={<Water />} />
+            <Route path="/tracker/period" element={<PeriodTracker />} />
             <Route path="/tracker/weekly-plan" element={<WeeklyPlan />} />
             <Route path="/progress" element={<Progress />} />
            <Route path="/weekly-plan" element={<WeeklyPlan />} />

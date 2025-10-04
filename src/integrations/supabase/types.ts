@@ -596,6 +596,42 @@ export type Database = {
         }
         Relationships: []
       }
+      period_logs: {
+        Row: {
+          created_at: string | null
+          end_date: string | null
+          flow_intensity: string | null
+          id: string
+          notes: string | null
+          start_date: string
+          symptoms: string[] | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          end_date?: string | null
+          flow_intensity?: string | null
+          id?: string
+          notes?: string | null
+          start_date: string
+          symptoms?: string[] | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          end_date?: string | null
+          flow_intensity?: string | null
+          id?: string
+          notes?: string | null
+          start_date?: string
+          symptoms?: string[] | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           activity_level: string | null
@@ -603,6 +639,7 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           current_weight: number | null
+          diet_type: string | null
           display_name: string | null
           email: string | null
           goal_weight: number | null
@@ -617,6 +654,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           current_weight?: number | null
+          diet_type?: string | null
           display_name?: string | null
           email?: string | null
           goal_weight?: number | null
@@ -631,6 +669,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           current_weight?: number | null
+          diet_type?: string | null
           display_name?: string | null
           email?: string | null
           goal_weight?: number | null
@@ -677,6 +716,35 @@ export type Database = {
           },
         ]
       }
+      recipe_votes: {
+        Row: {
+          created_at: string | null
+          id: string
+          recipe_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          recipe_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          recipe_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipe_votes_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "user_recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recipes: {
         Row: {
           calories: number | null
@@ -685,10 +753,10 @@ export type Database = {
           cook_time: number | null
           created_at: string
           description: string | null
+          diet_type: string | null
           difficulty: string | null
           fat: number | null
           id: string
-          image_url: string | null
           ingredients: string[]
           instructions: string[]
           is_keto_friendly: boolean | null
@@ -705,10 +773,10 @@ export type Database = {
           cook_time?: number | null
           created_at?: string
           description?: string | null
+          diet_type?: string | null
           difficulty?: string | null
           fat?: number | null
           id?: string
-          image_url?: string | null
           ingredients: string[]
           instructions: string[]
           is_keto_friendly?: boolean | null
@@ -725,10 +793,10 @@ export type Database = {
           cook_time?: number | null
           created_at?: string
           description?: string | null
+          diet_type?: string | null
           difficulty?: string | null
           fat?: number | null
           id?: string
-          image_url?: string | null
           ingredients?: string[]
           instructions?: string[]
           is_keto_friendly?: boolean | null
@@ -811,6 +879,78 @@ export type Database = {
           id?: string
           total_points?: number
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_recipes: {
+        Row: {
+          calories: number | null
+          carbs: number | null
+          category: string | null
+          cook_time: number | null
+          created_at: string | null
+          description: string | null
+          diet_type: string | null
+          difficulty: string | null
+          fat: number | null
+          id: string
+          image_url: string | null
+          ingredients: string[]
+          instructions: string[]
+          is_approved: boolean | null
+          prep_time: number | null
+          protein: number | null
+          servings: number | null
+          title: string
+          updated_at: string | null
+          upvotes: number | null
+          user_id: string
+        }
+        Insert: {
+          calories?: number | null
+          carbs?: number | null
+          category?: string | null
+          cook_time?: number | null
+          created_at?: string | null
+          description?: string | null
+          diet_type?: string | null
+          difficulty?: string | null
+          fat?: number | null
+          id?: string
+          image_url?: string | null
+          ingredients: string[]
+          instructions: string[]
+          is_approved?: boolean | null
+          prep_time?: number | null
+          protein?: number | null
+          servings?: number | null
+          title: string
+          updated_at?: string | null
+          upvotes?: number | null
+          user_id: string
+        }
+        Update: {
+          calories?: number | null
+          carbs?: number | null
+          category?: string | null
+          cook_time?: number | null
+          created_at?: string | null
+          description?: string | null
+          diet_type?: string | null
+          difficulty?: string | null
+          fat?: number | null
+          id?: string
+          image_url?: string | null
+          ingredients?: string[]
+          instructions?: string[]
+          is_approved?: boolean | null
+          prep_time?: number | null
+          protein?: number | null
+          servings?: number | null
+          title?: string
+          updated_at?: string | null
+          upvotes?: number | null
           user_id?: string
         }
         Relationships: []
