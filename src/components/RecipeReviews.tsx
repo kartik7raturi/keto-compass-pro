@@ -40,11 +40,14 @@ export const RecipeReviews = ({ recipeId }: RecipeReviewsProps) => {
   const fetchReviews = async () => {
     const { data } = await supabase
       .from('recipe_reviews')
-      .select('*, profiles!recipe_reviews_user_id_fkey(display_name, avatar_url)')
+      .select(`
+        *,
+        profiles!inner(display_name, avatar_url)
+      `)
       .eq('recipe_id', recipeId)
       .order('created_at', { ascending: false });
 
-    setReviews(data || []);
+    setReviews(data as any || []);
   };
 
   const handleSubmit = async () => {
