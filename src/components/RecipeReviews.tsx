@@ -38,16 +38,30 @@ export const RecipeReviews = ({ recipeId }: RecipeReviewsProps) => {
   }, [recipeId]);
 
   const fetchReviews = async () => {
-    const { data } = await supabase
+    const { data: reviewsData } = await supabase
       .from('recipe_reviews')
-      .select(`
-        *,
-        profiles!inner(display_name, avatar_url)
-      `)
+      .select('*')
       .eq('recipe_id', recipeId)
       .order('created_at', { ascending: false });
 
-    setReviews(data as any || []);
+    if (reviewsData && reviewsData.length > 0) {
+      // Fetch profiles for all unique user IDs
+      const userIds = [...new Set(reviewsData.map(r => r.user_id))];
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('user_id, display_name, avatar_url')
+        .in('user_id', userIds);
+
+      // Merge profile data with reviews
+      const reviewsWithProfiles = reviewsData.map(review => ({
+        ...review,
+        profiles: profilesData?.find(p => p.user_id === review.user_id) || null
+      }));
+
+      setReviews(reviewsWithProfiles as any);
+    } else {
+      setReviews([]);
+    }
   };
 
   const handleSubmit = async () => {
