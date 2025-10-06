@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/components/auth/AuthContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -22,6 +22,30 @@ const Profile = () => {
   const [uploading, setUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string>("");
   const [displayName, setDisplayName] = useState(user?.user_metadata?.display_name || "");
+
+  // Fetch profile data on mount
+  useEffect(() => {
+    if (user) {
+      fetchProfile();
+    }
+  }, [user]);
+
+  const fetchProfile = async () => {
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('avatar_url, display_name')
+        .eq('user_id', user?.id)
+        .maybeSingle();
+
+      if (data) {
+        setAvatarUrl(data.avatar_url || "");
+        setDisplayName(data.display_name || user?.email?.split('@')[0] || "");
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+  };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];

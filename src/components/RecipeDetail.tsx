@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import SocialShareButtons from '@/components/SocialShareButtons';
+import { RecipeReviews } from '@/components/RecipeReviews';
 
 interface Recipe {
   id: string;
@@ -220,6 +221,9 @@ const RecipeDetail = ({ recipe, isOpen, onClose }: RecipeDetailProps) => {
               </CardContent>
             </Card>
           </div>
+
+          {/* Recipe Reviews Section */}
+          <RecipeReviews recipeId={recipe.id} />
         </div>
       </DialogContent>
     </Dialog>

@@ -716,6 +716,36 @@ export type Database = {
           },
         ]
       }
+      recipe_reviews: {
+        Row: {
+          comment: string
+          created_at: string
+          id: string
+          image_url: string | null
+          recipe_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          recipe_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          recipe_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       recipe_votes: {
         Row: {
           created_at: string | null

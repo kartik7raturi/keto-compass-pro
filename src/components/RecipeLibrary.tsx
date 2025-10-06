@@ -47,6 +47,13 @@ const RecipeLibrary = () => {
     fetchRecipes();
     fetchUserRecipes();
     fetchTopContributors();
+
+    // Listen for diet type changes
+    const handleDietChange = (event: any) => {
+      setDietType(event.detail);
+    };
+    window.addEventListener('dietTypeChanged', handleDietChange);
+    return () => window.removeEventListener('dietTypeChanged', handleDietChange);
   }, [selectedCategory, dietType, user]);
 
   const fetchDietType = async () => {
@@ -113,7 +120,8 @@ const RecipeLibrary = () => {
       const { data } = await supabase
         .from('user_recipes')
         .select('user_id, profiles!user_recipes_user_id_fkey(display_name)')
-        .eq('is_approved', true);
+        .eq('is_approved', true)
+        .eq('diet_type', dietType);
 
       if (data) {
         const contributors = data.reduce((acc: any, recipe: any) => {
@@ -130,7 +138,7 @@ const RecipeLibrary = () => {
 
         const sorted = Object.values(contributors)
           .sort((a: any, b: any) => b.count - a.count)
-          .slice(0, 5);
+          .slice(0, 3);
         
         setTopContributors(sorted);
       }

@@ -54,8 +54,8 @@ export const DietTypeSwitch = () => {
         description: `Switched to ${newDietType.toUpperCase()} diet`,
       });
 
-      // Reload the page to update recipes
-      window.location.reload();
+      // Trigger a custom event to notify other components
+      window.dispatchEvent(new CustomEvent('dietTypeChanged', { detail: newDietType }));
     } catch (error) {
       toast({
         variant: "destructive",
