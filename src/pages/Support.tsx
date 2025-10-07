@@ -24,7 +24,7 @@ const Support = () => {
               <CardDescription>Get detailed help via email</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground mb-3">support@ketopia.com</p>
+              <p className="text-sm text-muted-foreground mb-3">sankhobusiness@gmail.com</p>
               <p className="text-xs text-muted-foreground">Response within 24 hours</p>
             </CardContent>
           </Card>
