@@ -82,7 +82,7 @@ const Contact = () => {
                   <Mail className="h-5 w-5 text-keto-green" />
                   <div>
                     <div className="font-medium">Email</div>
-                    <div className="text-sm text-muted-foreground">hello@ketopia.com</div>
+                    <div className="text-sm text-muted-foreground">sankhobusiness@gmail.com</div>
                   </div>
                 </div>
 
