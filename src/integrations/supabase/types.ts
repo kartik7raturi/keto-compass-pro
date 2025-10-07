@@ -1082,20 +1082,7 @@ export type Database = {
       }
     }
     Views: {
-      recipe_reviews_with_profiles: {
-        Row: {
-          avatar_url: string | null
-          comment: string | null
-          created_at: string | null
-          display_name: string | null
-          id: string | null
-          image_url: string | null
-          recipe_id: string | null
-          updated_at: string | null
-          user_id: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       award_points: {
