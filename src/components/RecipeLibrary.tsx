@@ -100,7 +100,6 @@ const RecipeLibrary = () => {
       let query = supabase
         .from('user_recipes')
         .select('*, profiles!user_recipes_user_id_fkey(display_name, avatar_url)')
-        .eq('is_approved', true)
         .eq('diet_type', dietType)
         .order('upvotes', { ascending: false });
 
@@ -120,7 +119,6 @@ const RecipeLibrary = () => {
       const { data } = await supabase
         .from('user_recipes')
         .select('user_id, profiles!user_recipes_user_id_fkey(display_name, avatar_url)')
-        .eq('is_approved', true)
         .eq('diet_type', dietType);
 
       if (data) {
@@ -280,7 +278,23 @@ const RecipeLibrary = () => {
                     {recipe.title}
                   </CardTitle>
                   
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  {/* Show user info for community recipes */}
+                  {selectedCategory === "people" && recipe.profiles && (
+                    <div className="flex items-center gap-2 mt-2">
+                      {recipe.profiles.avatar_url && (
+                        <img 
+                          src={recipe.profiles.avatar_url} 
+                          alt={recipe.profiles.display_name || 'User'}
+                          className="w-6 h-6 rounded-full object-cover"
+                        />
+                      )}
+                      <span className="text-sm text-muted-foreground">
+                        by {recipe.profiles.display_name || 'Anonymous'}
+                      </span>
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
                     <div className="flex items-center gap-1">
                       <Clock className="h-4 w-4" />
                       {recipe.prep_time + recipe.cook_time} min
