@@ -99,7 +99,7 @@ const RecipeLibrary = () => {
     try {
       let query = supabase
         .from('user_recipes')
-        .select('*, profiles!user_recipes_user_id_fkey(display_name)')
+        .select('*, profiles!user_recipes_user_id_fkey(display_name, avatar_url)')
         .eq('is_approved', true)
         .eq('diet_type', dietType)
         .order('upvotes', { ascending: false });
@@ -119,7 +119,7 @@ const RecipeLibrary = () => {
     try {
       const { data } = await supabase
         .from('user_recipes')
-        .select('user_id, profiles!user_recipes_user_id_fkey(display_name)')
+        .select('user_id, profiles!user_recipes_user_id_fkey(display_name, avatar_url)')
         .eq('is_approved', true)
         .eq('diet_type', dietType);
 
@@ -129,6 +129,7 @@ const RecipeLibrary = () => {
           if (!acc[userId]) {
             acc[userId] = {
               name: recipe.profiles?.display_name || 'Anonymous',
+              avatar: recipe.profiles?.avatar_url || null,
               count: 0
             };
           }
@@ -219,9 +220,18 @@ const RecipeLibrary = () => {
             <CardContent>
               <div className="flex flex-wrap gap-3">
                 {topContributors.map((contributor: any, index: number) => (
-                  <Badge key={index} variant="secondary" className="text-sm">
-                    {contributor.name} • {contributor.count} recipes
-                  </Badge>
+                  <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+                    {contributor.avatar && (
+                      <img 
+                        src={contributor.avatar} 
+                        alt={contributor.name}
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                    )}
+                    <Badge variant="secondary" className="text-sm">
+                      {contributor.name} • {contributor.count} recipes
+                    </Badge>
+                  </div>
                 ))}
               </div>
             </CardContent>

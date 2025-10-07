@@ -77,13 +77,18 @@ const Profile = () => {
       setAvatarUrl(publicUrl);
 
       // Update user profile
-      await supabase
+      const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
           user_id: user?.id,
           avatar_url: publicUrl,
-          display_name: displayName || user?.email?.split('@')[0]
+          display_name: displayName || user?.email?.split('@')[0],
+          email: user?.email
+        }, {
+          onConflict: 'user_id'
         });
+
+      if (profileError) throw profileError;
 
       toast({
         title: "Profile updated!",
@@ -102,29 +107,45 @@ const Profile = () => {
   };
 
   const handleNameUpdate = async () => {
+    if (!displayName.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Invalid name",
+        description: "Display name cannot be empty",
+      });
+      return;
+    }
+
     try {
-      // Update profile table
-      await supabase
+      // Update profile table with email to ensure row exists
+      const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
           user_id: user?.id,
-          display_name: displayName,
+          display_name: displayName.trim(),
           email: user?.email
+        }, {
+          onConflict: 'user_id'
         });
 
+      if (profileError) throw profileError;
+
       // Update auth metadata
-      await supabase.auth.updateUser({
-        data: { display_name: displayName }
+      const { error: authError } = await supabase.auth.updateUser({
+        data: { display_name: displayName.trim() }
       });
+
+      if (authError) throw authError;
 
       toast({
         title: "Name updated!",
         description: "Your display name has been updated successfully.",
       });
 
-      // Reload to reflect changes
-      window.location.reload();
+      // Refresh profile data
+      await fetchProfile();
     } catch (error: any) {
+      console.error('Profile update error:', error);
       toast({
         variant: "destructive",
         title: "Update failed",
