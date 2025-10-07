@@ -44,17 +44,27 @@ const RecipeLibrary = () => {
     if (user) {
       fetchDietType();
     }
+  }, [user]);
+
+  useEffect(() => {
+    // Clear recipes before fetching to avoid showing wrong diet type
+    setRecipes([]);
+    setUserRecipes([]);
+    setLoading(true);
+    
     fetchRecipes();
     fetchUserRecipes();
     fetchTopContributors();
+  }, [selectedCategory, dietType]);
 
+  useEffect(() => {
     // Listen for diet type changes
     const handleDietChange = (event: any) => {
       setDietType(event.detail);
     };
     window.addEventListener('dietTypeChanged', handleDietChange);
     return () => window.removeEventListener('dietTypeChanged', handleDietChange);
-  }, [selectedCategory, dietType, user]);
+  }, []);
 
   const fetchDietType = async () => {
     try {
