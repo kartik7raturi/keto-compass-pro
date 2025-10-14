@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/components/auth/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,30 @@ export const UserRecipeSubmission = () => {
   const [fat, setFat] = useState("");
   const [ingredients, setIngredients] = useState<string[]>([""]);
   const [instructions, setInstructions] = useState<string[]>([""]);
+
+  // Sync diet type with profile and page switch
+  useEffect(() => {
+    const loadDiet = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from('profiles')
+        .select('diet_type')
+        .eq('user_id', user.id)
+        .single();
+      if (data?.diet_type) setDietType(data.diet_type);
+    };
+    loadDiet();
+  }, [user]);
+
+  useEffect(() => {
+    const handleDietChange = (event: any) => {
+      if (event.detail === 'keto' || event.detail === 'pcos') {
+        setDietType(event.detail);
+      }
+    };
+    window.addEventListener('dietTypeChanged', handleDietChange);
+    return () => window.removeEventListener('dietTypeChanged', handleDietChange);
+  }, []);
 
   const addIngredient = () => setIngredients([...ingredients, ""]);
   const removeIngredient = (index: number) => 
@@ -92,8 +116,10 @@ export const UserRecipeSubmission = () => {
 
       toast({ 
         title: "Recipe submitted!",
-        description: "Your recipe will be visible after getting 10+ upvotes"
+        description: "Your recipe has been added to People."
       });
+      // Notify page to refresh community list
+      window.dispatchEvent(new CustomEvent('userRecipeSubmitted'));
       setDialogOpen(false);
       resetForm();
     } catch (error) {

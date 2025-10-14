@@ -66,6 +66,16 @@ const RecipeLibrary = () => {
     return () => window.removeEventListener('dietTypeChanged', handleDietChange);
   }, []);
 
+  useEffect(() => {
+    // Refresh community recipes after a new submission
+    const handleSubmitted = () => {
+      fetchUserRecipes();
+      fetchTopContributors();
+    };
+    window.addEventListener('userRecipeSubmitted', handleSubmitted);
+    return () => window.removeEventListener('userRecipeSubmitted', handleSubmitted);
+  }, [dietType, selectedCategory]);
+
   const fetchDietType = async () => {
     try {
       const { data } = await supabase
@@ -109,10 +119,9 @@ const RecipeLibrary = () => {
     try {
       let query = supabase
         .from('user_recipes')
-        .select('*, profiles!user_recipes_user_id_fkey(display_name, avatar_url)')
+        .select('*')
         .eq('diet_type', dietType)
         .order('upvotes', { ascending: false });
-
       if (selectedCategory !== "all" && selectedCategory !== "people") {
         query = query.eq('category', selectedCategory);
       }
@@ -128,9 +137,8 @@ const RecipeLibrary = () => {
     try {
       const { data } = await supabase
         .from('user_recipes')
-        .select('user_id, profiles!user_recipes_user_id_fkey(display_name, avatar_url)')
+        .select('user_id')
         .eq('diet_type', dietType);
-
       if (data) {
         const contributors = data.reduce((acc: any, recipe: any) => {
           const userId = recipe.user_id;
