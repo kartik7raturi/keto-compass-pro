@@ -1089,6 +1089,14 @@ export type Database = {
         Args: { points_to_add: number }
         Returns: undefined
       }
+      decrement_recipe_upvotes: {
+        Args: { recipe_id: string }
+        Returns: undefined
+      }
+      increment_recipe_upvotes: {
+        Args: { recipe_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

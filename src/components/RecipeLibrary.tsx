@@ -203,7 +203,7 @@ const RecipeLibrary = () => {
           .eq('id', existingVote.id);
         
         // Decrement upvotes count
-        await supabase.rpc('decrement_recipe_upvotes', { recipe_id: recipeId });
+        await (supabase.rpc as any)('decrement_recipe_upvotes', { recipe_id: recipeId });
       } else {
         // Add vote
         await supabase
@@ -211,7 +211,7 @@ const RecipeLibrary = () => {
           .insert({ user_id: user.id, recipe_id: recipeId });
         
         // Increment upvotes count
-        await supabase.rpc('increment_recipe_upvotes', { recipe_id: recipeId });
+        await (supabase.rpc as any)('increment_recipe_upvotes', { recipe_id: recipeId });
       }
 
       fetchUserRecipes();
