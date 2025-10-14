@@ -9,6 +9,7 @@ import { useAuth } from "@/components/auth/AuthContext";
 import SocialShareButtons from "@/components/SocialShareButtons";
 import { DietTypeSwitch } from "./DietTypeSwitch";
 import { UserRecipeSubmission } from "./UserRecipeSubmission";
+import { useToast } from "@/hooks/use-toast";
 
 interface Recipe {
   id: string;
@@ -31,6 +32,7 @@ interface Recipe {
 
 const RecipeLibrary = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [userRecipes, setUserRecipes] = useState<any[]>([]);
@@ -119,7 +121,13 @@ const RecipeLibrary = () => {
     try {
       let query = supabase
         .from('user_recipes')
-        .select('*')
+        .select(`
+          *,
+          profiles:user_id (
+            display_name,
+            avatar_url
+          )
+        `)
         .eq('diet_type', dietType)
         .order('upvotes', { ascending: false });
       if (selectedCategory !== "all" && selectedCategory !== "people") {
@@ -137,7 +145,13 @@ const RecipeLibrary = () => {
     try {
       const { data } = await supabase
         .from('user_recipes')
-        .select('user_id')
+        .select(`
+          user_id,
+          profiles:user_id (
+            display_name,
+            avatar_url
+          )
+        `)
         .eq('diet_type', dietType);
       if (data) {
         const contributors = data.reduce((acc: any, recipe: any) => {
@@ -166,6 +180,10 @@ const RecipeLibrary = () => {
 
   const handleVote = async (recipeId: string) => {
     if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to upvote recipes"
+      });
       return;
     }
 
@@ -175,22 +193,35 @@ const RecipeLibrary = () => {
         .select('id')
         .eq('user_id', user.id)
         .eq('recipe_id', recipeId)
-        .single();
+        .maybeSingle();
 
       if (existingVote) {
+        // Remove vote
         await supabase
           .from('recipe_votes')
           .delete()
           .eq('id', existingVote.id);
+        
+        // Decrement upvotes count
+        await supabase.rpc('decrement_recipe_upvotes', { recipe_id: recipeId });
       } else {
+        // Add vote
         await supabase
           .from('recipe_votes')
           .insert({ user_id: user.id, recipe_id: recipeId });
+        
+        // Increment upvotes count
+        await supabase.rpc('increment_recipe_upvotes', { recipe_id: recipeId });
       }
 
       fetchUserRecipes();
+      fetchTopContributors();
     } catch (error) {
       console.error('Error voting:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update vote"
+      });
     }
   };
 
@@ -260,7 +291,9 @@ const RecipeLibrary = () => {
               key={category} 
               variant={category === selectedCategory ? "default" : "outline"}
               size="sm"
-              className={category === selectedCategory ? "bg-gradient-to-r from-keto-green to-keto-green-dark capitalize" : "capitalize"}
+              className={category === selectedCategory ? 
+                (dietType === 'pcos' ? "bg-gradient-to-r from-pink-500 to-pink-600 capitalize" : "bg-gradient-to-r from-keto-green to-keto-green-dark capitalize") 
+                : "capitalize"}
               onClick={() => setSelectedCategory(category)}
             >
               {category}
@@ -297,17 +330,17 @@ const RecipeLibrary = () => {
                   </CardTitle>
                   
                   {/* Show user info for community recipes */}
-                  {selectedCategory === "people" && recipe.profiles && (
+                  {selectedCategory === "people" && (
                     <div className="flex items-center gap-2 mt-2">
-                      {recipe.profiles.avatar_url && (
+                      {recipe.profiles?.avatar_url && (
                         <img 
                           src={recipe.profiles.avatar_url} 
-                          alt={recipe.profiles.display_name || 'User'}
+                          alt={recipe.profiles?.display_name || 'User'}
                           className="w-6 h-6 rounded-full object-cover"
                         />
                       )}
                       <span className="text-sm text-muted-foreground">
-                        by {recipe.profiles.display_name || 'Anonymous'}
+                        by {recipe.profiles?.display_name || 'Anonymous'}
                       </span>
                     </div>
                   )}
@@ -354,17 +387,28 @@ const RecipeLibrary = () => {
 
                   <div className="space-y-3">
                     <Button 
-                      className="w-full bg-gradient-to-r from-keto-green to-keto-green-dark hover:opacity-90" 
+                      className={`w-full hover:opacity-90 ${
+                        dietType === 'pcos' 
+                          ? 'bg-gradient-to-r from-pink-500 to-pink-600' 
+                          : 'bg-gradient-to-r from-keto-green to-keto-green-dark'
+                      }`}
                       onClick={() => handleViewRecipe(recipe)}
                     >
                       View Recipe
                     </Button>
                     
-                    {selectedCategory === "people" && user && (
+                    {selectedCategory === "people" && (
                       <Button
                         variant="outline"
-                        className="w-full"
-                        onClick={() => handleVote(recipe.id)}
+                        className={`w-full ${
+                          dietType === 'pcos' 
+                            ? 'hover:bg-pink-50 hover:text-pink-600 hover:border-pink-300' 
+                            : 'hover:bg-green-50'
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleVote(recipe.id);
+                        }}
                       >
                         <ThumbsUp className="h-4 w-4 mr-2" />
                         Upvote
@@ -393,7 +437,9 @@ const RecipeLibrary = () => {
             </p>
             <Button 
               size="lg" 
-              className="bg-gradient-to-r from-keto-green to-keto-green-dark"
+              className={dietType === 'pcos' 
+                ? "bg-gradient-to-r from-pink-500 to-pink-600" 
+                : "bg-gradient-to-r from-keto-green to-keto-green-dark"}
               onClick={() => user ? fetchRecipes() : console.log('Sign up to access more recipes')}
             >
               {user ? 'Refresh Recipes' : 'Sign Up for More Recipes'}
