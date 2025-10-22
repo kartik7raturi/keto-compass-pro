@@ -102,7 +102,7 @@ const RecipeLibrary = () => {
         .eq('diet_type', dietType)
         .order('created_at', { ascending: false });
 
-      if (selectedCategory !== "all" && selectedCategory !== "people") {
+      if (selectedCategory !== "all" && selectedCategory !== "people recipes") {
         query = query.eq('category', selectedCategory);
       }
 
@@ -130,7 +130,7 @@ const RecipeLibrary = () => {
         `)
         .eq('diet_type', dietType)
         .order('upvotes', { ascending: false });
-      if (selectedCategory !== "all" && selectedCategory !== "people") {
+      if (selectedCategory !== "all" && selectedCategory !== "people recipes") {
         query = query.eq('category', selectedCategory);
       }
 
@@ -230,8 +230,8 @@ const RecipeLibrary = () => {
     setIsDetailOpen(true);
   };
 
-  const categories = ["all", "people", "breakfast", "lunch", "dinner", "snacks", "drinks"];
-  const displayRecipes = selectedCategory === "people" ? userRecipes : recipes;
+  const categories = ["all", "people recipes", "breakfast", "lunch", "dinner", "snacks", "drinks"];
+  const displayRecipes = selectedCategory === "people recipes" ? userRecipes : recipes;
 
   return (
     <section id="recipes" className="py-20">
@@ -302,7 +302,7 @@ const RecipeLibrary = () => {
         </div>
 
         {/* User Recipe Submission */}
-        {user && selectedCategory === "people" && (
+        {user && selectedCategory === "people recipes" && (
           <div className="max-w-md mx-auto mb-8">
             <UserRecipeSubmission />
           </div>
@@ -315,7 +315,7 @@ const RecipeLibrary = () => {
         ) : displayRecipes.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-muted-foreground">
-              {selectedCategory === "people" 
+              {selectedCategory === "people recipes" 
                 ? "No community recipes yet. Be the first to contribute!" 
                 : "No recipes found in this category."}
             </p>
@@ -330,7 +330,7 @@ const RecipeLibrary = () => {
                   </CardTitle>
                   
                   {/* Show user info for community recipes */}
-                  {selectedCategory === "people" && (
+                  {selectedCategory === "people recipes" && (
                     <div className="flex items-center gap-2 mt-2">
                       {recipe.profiles?.avatar_url && (
                         <img 
@@ -373,7 +373,7 @@ const RecipeLibrary = () => {
                     <Badge variant="secondary">
                       {recipe.calories} cal
                     </Badge>
-                    {selectedCategory === "people" && recipe.upvotes !== undefined && (
+                    {selectedCategory === "people recipes" && recipe.upvotes !== undefined && (
                       <Badge variant="secondary" className="flex items-center gap-1">
                         <ThumbsUp className="h-3 w-3" />
                         {recipe.upvotes}
@@ -397,7 +397,7 @@ const RecipeLibrary = () => {
                       View Recipe
                     </Button>
                     
-                    {selectedCategory === "people" && (
+                    {selectedCategory === "people recipes" && (
                       <Button
                         variant="outline"
                         className={`w-full ${
