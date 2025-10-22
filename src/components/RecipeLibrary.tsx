@@ -121,21 +121,39 @@ const RecipeLibrary = () => {
     try {
       let query = supabase
         .from('user_recipes')
-        .select(`
-          *,
-          profiles:user_id (
-            display_name,
-            avatar_url
-          )
-        `)
+        .select('*')
         .eq('diet_type', dietType)
         .order('upvotes', { ascending: false });
+      
       if (selectedCategory !== "all" && selectedCategory !== "people recipes") {
         query = query.eq('category', selectedCategory);
       }
 
-      const { data } = await query;
-      setUserRecipes(data || []);
+      const { data, error } = await query;
+      
+      if (error) {
+        console.error('Error fetching user recipes:', error);
+        return;
+      }
+      
+      // Fetch profile data for each recipe
+      if (data && data.length > 0) {
+        const userIds = [...new Set(data.map(r => r.user_id))];
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('user_id, display_name, avatar_url')
+          .in('user_id', userIds);
+        
+        // Merge profile data with recipes
+        const recipesWithProfiles = data.map(recipe => ({
+          ...recipe,
+          profiles: profiles?.find(p => p.user_id === recipe.user_id) || null
+        }));
+        
+        setUserRecipes(recipesWithProfiles);
+      } else {
+        setUserRecipes([]);
+      }
     } catch (error) {
       console.error('Error fetching user recipes:', error);
     }
@@ -143,23 +161,26 @@ const RecipeLibrary = () => {
 
   const fetchTopContributors = async () => {
     try {
-      const { data } = await supabase
+      const { data: recipes } = await supabase
         .from('user_recipes')
-        .select(`
-          user_id,
-          profiles:user_id (
-            display_name,
-            avatar_url
-          )
-        `)
+        .select('user_id')
         .eq('diet_type', dietType);
-      if (data) {
-        const contributors = data.reduce((acc: any, recipe: any) => {
+      
+      if (recipes && recipes.length > 0) {
+        const userIds = [...new Set(recipes.map(r => r.user_id))];
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('user_id, display_name, avatar_url')
+          .in('user_id', userIds);
+        
+        const contributors = recipes.reduce((acc: any, recipe: any) => {
           const userId = recipe.user_id;
+          const profile = profiles?.find(p => p.user_id === userId);
+          
           if (!acc[userId]) {
             acc[userId] = {
-              name: recipe.profiles?.display_name || 'Anonymous',
-              avatar: recipe.profiles?.avatar_url || null,
+              name: profile?.display_name || 'Anonymous',
+              avatar: profile?.avatar_url || null,
               count: 0
             };
           }
