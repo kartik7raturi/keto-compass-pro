@@ -362,12 +362,244 @@ const RecipeLibrary = () => {
                 : "No recipes found in this category."}
             </p>
           </div>
+        ) : selectedCategory === "people recipes" ? (
+          <>
+            {/* Weekly Top 10 Section */}
+            {userRecipes.slice(0, 10).length > 0 && (
+              <div className="mb-12">
+                <h3 className={`text-2xl font-bold mb-6 text-center ${
+                  dietType === 'pcos' ? 'text-[hsl(var(--pcos-pink))]' : 'text-keto-green'
+                }`}>
+                  Weekly Top 10 Recipes with Highest Upvotes
+                </h3>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {userRecipes.slice(0, 10).map((recipe: any) => (
+                    <Card key={recipe.id} className="group hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden">
+                      <CardHeader className="pb-4">
+                        <CardTitle className={`text-lg transition-colors ${
+                          dietType === 'pcos' 
+                            ? 'group-hover:text-[hsl(var(--pcos-pink))]' 
+                            : 'group-hover:text-keto-green'
+                        }`}>
+                          {recipe.title}
+                        </CardTitle>
+                        
+                        <div className="flex items-center gap-2 mt-2">
+                          {recipe.profiles?.avatar_url && (
+                            <img 
+                              src={recipe.profiles.avatar_url} 
+                              alt={recipe.profiles?.display_name || 'User'}
+                              className="w-6 h-6 rounded-full object-cover"
+                            />
+                          )}
+                          <span className="text-sm text-muted-foreground">
+                            by {recipe.profiles?.display_name || 'Anonymous'}
+                          </span>
+                        </div>
+                        
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-4 w-4" />
+                            {recipe.prep_time + recipe.cook_time} min
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Users className="h-4 w-4" />
+                            {recipe.servings}
+                          </div>
+                        </div>
+                      </CardHeader>
+                      
+                      <CardContent>
+                        <div className="flex items-center gap-2 mb-4">
+                          <Badge 
+                            variant="outline"
+                            className={
+                              recipe.difficulty === "easy" ? "border-green-500 text-green-500" :
+                              recipe.difficulty === "medium" ? "border-yellow-500 text-yellow-500" :
+                              "border-red-500 text-red-500"
+                            }
+                          >
+                            <ChefHat className="h-3 w-3 mr-1" />
+                            {recipe.difficulty}
+                          </Badge>
+                          <Badge variant="secondary">
+                            {recipe.calories} cal
+                          </Badge>
+                          <Badge variant="secondary" className="flex items-center gap-1">
+                            <ThumbsUp className="h-3 w-3" />
+                            {recipe.upvotes}
+                          </Badge>
+                        </div>
+                        
+                        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                          {recipe.description}
+                        </p>
+
+                        <div className="space-y-3">
+                          <Button 
+                            className={`w-full hover:opacity-90 ${
+                              dietType === 'pcos' 
+                                ? 'bg-[hsl(var(--pcos-pink))] hover:bg-[hsl(var(--pcos-pink-dark))]' 
+                                : 'bg-gradient-to-r from-keto-green to-keto-green-dark'
+                            }`}
+                            onClick={() => handleViewRecipe(recipe)}
+                          >
+                            View Recipe
+                          </Button>
+                          
+                          <Button
+                            variant="outline"
+                            className={`w-full ${
+                              dietType === 'pcos' 
+                                ? 'hover:bg-[hsl(var(--pcos-pink-light))] hover:text-[hsl(var(--pcos-pink-dark))] hover:border-[hsl(var(--pcos-pink))]' 
+                                : 'hover:bg-green-50'
+                            }`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleVote(recipe.id);
+                            }}
+                          >
+                            <ThumbsUp className="h-4 w-4 mr-2" />
+                            Upvote
+                          </Button>
+                          
+                          <SocialShareButtons 
+                            title={recipe.title}
+                            description={recipe.description}
+                            url={`${window.location.origin}/recipes/${recipe.id}`}
+                            image={recipe.image_url || ''}
+                            className="justify-center"
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* All Submitted Recipes Section */}
+            <div className="mb-12">
+              <h3 className={`text-2xl font-bold mb-6 text-center ${
+                dietType === 'pcos' ? 'text-[hsl(var(--pcos-pink))]' : 'text-keto-green'
+              }`}>
+                All Submitted Recipes
+              </h3>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {userRecipes.map((recipe: any) => (
+                  <Card key={recipe.id} className="group hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden">
+                    <CardHeader className="pb-4">
+                      <CardTitle className={`text-lg transition-colors ${
+                        dietType === 'pcos' 
+                          ? 'group-hover:text-[hsl(var(--pcos-pink))]' 
+                          : 'group-hover:text-keto-green'
+                      }`}>
+                        {recipe.title}
+                      </CardTitle>
+                      
+                      <div className="flex items-center gap-2 mt-2">
+                        {recipe.profiles?.avatar_url && (
+                          <img 
+                            src={recipe.profiles.avatar_url} 
+                            alt={recipe.profiles?.display_name || 'User'}
+                            className="w-6 h-6 rounded-full object-cover"
+                          />
+                        )}
+                        <span className="text-sm text-muted-foreground">
+                          by {recipe.profiles?.display_name || 'Anonymous'}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-4 w-4" />
+                          {recipe.prep_time + recipe.cook_time} min
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Users className="h-4 w-4" />
+                          {recipe.servings}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    
+                    <CardContent>
+                      <div className="flex items-center gap-2 mb-4">
+                        <Badge 
+                          variant="outline"
+                          className={
+                            recipe.difficulty === "easy" ? "border-green-500 text-green-500" :
+                            recipe.difficulty === "medium" ? "border-yellow-500 text-yellow-500" :
+                            "border-red-500 text-red-500"
+                          }
+                        >
+                          <ChefHat className="h-3 w-3 mr-1" />
+                          {recipe.difficulty}
+                        </Badge>
+                        <Badge variant="secondary">
+                          {recipe.calories} cal
+                        </Badge>
+                        <Badge variant="secondary" className="flex items-center gap-1">
+                          <ThumbsUp className="h-3 w-3" />
+                          {recipe.upvotes}
+                        </Badge>
+                      </div>
+                      
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                        {recipe.description}
+                      </p>
+
+                      <div className="space-y-3">
+                        <Button 
+                          className={`w-full hover:opacity-90 ${
+                            dietType === 'pcos' 
+                              ? 'bg-[hsl(var(--pcos-pink))] hover:bg-[hsl(var(--pcos-pink-dark))]' 
+                              : 'bg-gradient-to-r from-keto-green to-keto-green-dark'
+                          }`}
+                          onClick={() => handleViewRecipe(recipe)}
+                        >
+                          View Recipe
+                        </Button>
+                        
+                        <Button
+                          variant="outline"
+                          className={`w-full ${
+                            dietType === 'pcos' 
+                              ? 'hover:bg-[hsl(var(--pcos-pink-light))] hover:text-[hsl(var(--pcos-pink-dark))] hover:border-[hsl(var(--pcos-pink))]' 
+                              : 'hover:bg-green-50'
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleVote(recipe.id);
+                          }}
+                        >
+                          <ThumbsUp className="h-4 w-4 mr-2" />
+                          Upvote
+                        </Button>
+                        
+                        <SocialShareButtons 
+                          title={recipe.title}
+                          description={recipe.description}
+                          url={`${window.location.origin}/recipes/${recipe.id}`}
+                          image={recipe.image_url || ''}
+                          className="justify-center"
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             {displayRecipes.map((recipe: any) => (
               <Card key={recipe.id} className="group hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden">
                 <CardHeader className="pb-4">
-                  <CardTitle className="text-lg group-hover:text-keto-green transition-colors">
+                  <CardTitle className={`text-lg transition-colors ${
+                    dietType === 'pcos' 
+                      ? 'group-hover:text-[hsl(var(--pcos-pink))]' 
+                      : 'group-hover:text-keto-green'
+                  }`}>
                     {recipe.title}
                   </CardTitle>
                   
