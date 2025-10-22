@@ -109,7 +109,23 @@ const RecipeLibrary = () => {
       const { data, error } = await query;
       
       if (error) throw error;
-      setRecipes(data || []);
+      
+      // Also fetch approved user recipes for this category
+      let userRecipeQuery = supabase
+        .from('user_recipes')
+        .select('*')
+        .eq('diet_type', dietType)
+        .eq('is_approved', true);
+      
+      if (selectedCategory !== "all" && selectedCategory !== "people recipes") {
+        userRecipeQuery = userRecipeQuery.eq('category', selectedCategory);
+      }
+      
+      const { data: approvedUserRecipes } = await userRecipeQuery;
+      
+      // Combine recipes and approved user recipes
+      const allRecipes = [...(data || []), ...(approvedUserRecipes || [])];
+      setRecipes(allRecipes);
     } catch (error) {
       console.error('Error fetching recipes:', error);
     } finally {
@@ -119,10 +135,15 @@ const RecipeLibrary = () => {
 
   const fetchUserRecipes = async () => {
     try {
+      // Calculate date 7 days ago for weekly filter
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      
       let query = supabase
         .from('user_recipes')
         .select('*')
         .eq('diet_type', dietType)
+        .gte('created_at', oneWeekAgo.toISOString())
         .order('upvotes', { ascending: false });
       
       if (selectedCategory !== "all" && selectedCategory !== "people recipes") {
@@ -259,7 +280,7 @@ const RecipeLibrary = () => {
       <div className="container">
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <ChefHat className="h-8 w-8 text-keto-green" />
+            <ChefHat className={`h-8 w-8 ${dietType === 'pcos' ? 'text-[hsl(var(--pcos-pink))]' : 'text-keto-green'}`} />
             <h2 className="text-3xl lg:text-4xl font-bold">
               Delicious {dietType.toUpperCase()} Recipes
             </h2>
@@ -313,7 +334,7 @@ const RecipeLibrary = () => {
               variant={category === selectedCategory ? "default" : "outline"}
               size="sm"
               className={category === selectedCategory ? 
-                (dietType === 'pcos' ? "bg-gradient-to-r from-pink-500 to-pink-600 capitalize" : "bg-gradient-to-r from-keto-green to-keto-green-dark capitalize") 
+                (dietType === 'pcos' ? "bg-[hsl(var(--pcos-pink))] hover:bg-[hsl(var(--pcos-pink-dark))] capitalize" : "bg-gradient-to-r from-keto-green to-keto-green-dark capitalize") 
                 : "capitalize"}
               onClick={() => setSelectedCategory(category)}
             >
@@ -410,7 +431,7 @@ const RecipeLibrary = () => {
                     <Button 
                       className={`w-full hover:opacity-90 ${
                         dietType === 'pcos' 
-                          ? 'bg-gradient-to-r from-pink-500 to-pink-600' 
+                          ? 'bg-[hsl(var(--pcos-pink))] hover:bg-[hsl(var(--pcos-pink-dark))]' 
                           : 'bg-gradient-to-r from-keto-green to-keto-green-dark'
                       }`}
                       onClick={() => handleViewRecipe(recipe)}
@@ -423,7 +444,7 @@ const RecipeLibrary = () => {
                         variant="outline"
                         className={`w-full ${
                           dietType === 'pcos' 
-                            ? 'hover:bg-pink-50 hover:text-pink-600 hover:border-pink-300' 
+                            ? 'hover:bg-[hsl(var(--pcos-pink-light))] hover:text-[hsl(var(--pcos-pink-dark))] hover:border-[hsl(var(--pcos-pink))]' 
                             : 'hover:bg-green-50'
                         }`}
                         onClick={(e) => {
@@ -459,7 +480,7 @@ const RecipeLibrary = () => {
             <Button 
               size="lg" 
               className={dietType === 'pcos' 
-                ? "bg-gradient-to-r from-pink-500 to-pink-600" 
+                ? "bg-[hsl(var(--pcos-pink))] hover:bg-[hsl(var(--pcos-pink-dark))]" 
                 : "bg-gradient-to-r from-keto-green to-keto-green-dark"}
               onClick={() => user ? fetchRecipes() : console.log('Sign up to access more recipes')}
             >

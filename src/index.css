@@ -34,10 +34,20 @@ All colors MUST be HSL.
     --keto-green-dark: 120 70% 30%;
     --keto-green-darker: 120 80% 20%;
     
+    --pcos-pink: 340 82% 72%;
+    --pcos-pink-light: 340 55% 92%;
+    --pcos-pink-dark: 340 85% 55%;
+    --pcos-pink-darker: 340 90% 40%;
+    
     --gradient-hero: linear-gradient(135deg, hsl(120 60% 40%), hsl(120 70% 50%));
     --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(120 30% 98%));
     --gradient-accent: linear-gradient(90deg, hsl(120 60% 40%), hsl(120 70% 45%));
     --gradient-primary: linear-gradient(135deg, hsl(120 60% 40%), hsl(120 70% 50%));
+    
+    --gradient-hero-pcos: linear-gradient(135deg, hsl(340 82% 72%), hsl(340 85% 65%));
+    --gradient-card-pcos: linear-gradient(145deg, hsl(0 0% 100%), hsl(340 30% 98%));
+    --gradient-accent-pcos: linear-gradient(90deg, hsl(340 82% 72%), hsl(340 85% 65%));
+    --gradient-primary-pcos: linear-gradient(135deg, hsl(340 82% 72%), hsl(340 85% 65%));
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
