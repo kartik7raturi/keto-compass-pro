@@ -36,12 +36,12 @@ const RecipeLibrary = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [userRecipes, setUserRecipes] = useState<any[]>([]);
+  const [weeklyTopRecipes, setWeeklyTopRecipes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [dietType, setDietType] = useState<'keto' | 'pcos'>('keto');
   const [topContributors, setTopContributors] = useState<any[]>([]);
-
   useEffect(() => {
     if (user) {
       fetchDietType();
@@ -135,46 +135,64 @@ const RecipeLibrary = () => {
 
   const fetchUserRecipes = async () => {
     try {
-      // Calculate date 7 days ago for weekly filter
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
       
-      let query = supabase
-        .from('user_recipes')
-        .select('*')
-        .eq('diet_type', dietType)
-        .gte('created_at', oneWeekAgo.toISOString())
-        .order('upvotes', { ascending: false });
-      
-      if (selectedCategory !== "all" && selectedCategory !== "people recipes") {
-        query = query.eq('category', selectedCategory);
-      }
+      const applyBaseFilters = (q: any) => {
+        q = q.eq('diet_type', dietType);
+        if (selectedCategory !== "all" && selectedCategory !== "people recipes") {
+          q = q.eq('category', selectedCategory);
+        }
+        return q;
+      };
 
-      const { data, error } = await query;
-      
-      if (error) {
-        console.error('Error fetching user recipes:', error);
-        return;
-      }
-      
-      // Fetch profile data for each recipe
-      if (data && data.length > 0) {
-        const userIds = [...new Set(data.map(r => r.user_id))];
+      // Weekly top (last 7 days, highest upvotes)
+      let weeklyQuery = applyBaseFilters(
+        supabase
+          .from('user_recipes')
+          .select('*')
+          .gte('created_at', oneWeekAgo.toISOString())
+          .order('upvotes', { ascending: false })
+      );
+
+      // All submitted (no time filter), newest first
+      let allQuery = applyBaseFilters(
+        supabase
+          .from('user_recipes')
+          .select('*')
+          .order('created_at', { ascending: false })
+      );
+
+      const [weeklyRes, allRes] = await Promise.all([weeklyQuery, allQuery]);
+
+      const weekly = weeklyRes.data || [];
+      const all = allRes.data || [];
+
+      // Fetch profiles for both sets in one call
+      const userIds = Array.from(new Set([...weekly, ...all].map((r: any) => r.user_id)));
+      let profilesMap: Record<string, any> = {};
+      if (userIds.length > 0) {
         const { data: profiles } = await supabase
           .from('profiles')
           .select('user_id, display_name, avatar_url')
           .in('user_id', userIds);
-        
-        // Merge profile data with recipes
-        const recipesWithProfiles = data.map(recipe => ({
-          ...recipe,
-          profiles: profiles?.find(p => p.user_id === recipe.user_id) || null
-        }));
-        
-        setUserRecipes(recipesWithProfiles);
-      } else {
-        setUserRecipes([]);
+        profilesMap = (profiles || []).reduce((acc: any, p: any) => {
+          acc[p.user_id] = p;
+          return acc;
+        }, {} as Record<string, any>);
       }
+
+      const weeklyWithProfiles = weekly.map((recipe: any) => ({
+        ...recipe,
+        profiles: profilesMap[recipe.user_id] || null,
+      }));
+      const allWithProfiles = all.map((recipe: any) => ({
+        ...recipe,
+        profiles: profilesMap[recipe.user_id] || null,
+      }));
+
+      setWeeklyTopRecipes(weeklyWithProfiles);
+      setUserRecipes(allWithProfiles);
     } catch (error) {
       console.error('Error fetching user recipes:', error);
     }
@@ -365,7 +383,7 @@ const RecipeLibrary = () => {
         ) : selectedCategory === "people recipes" ? (
           <>
             {/* Weekly Top 10 Section */}
-            {userRecipes.slice(0, 10).length > 0 && (
+            {weeklyTopRecipes.slice(0, 10).length > 0 && (
               <div className="mb-12">
                 <h3 className={`text-2xl font-bold mb-6 text-center ${
                   dietType === 'pcos' ? 'text-[hsl(var(--pcos-pink))]' : 'text-keto-green'
@@ -373,7 +391,7 @@ const RecipeLibrary = () => {
                   Weekly Top 10 Recipes with Highest Upvotes
                 </h3>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {userRecipes.slice(0, 10).map((recipe: any) => (
+                  {weeklyTopRecipes.slice(0, 10).map((recipe: any) => (
                     <Card key={recipe.id} className="group hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden">
                       <CardHeader className="pb-4">
                         <CardTitle className={`text-lg transition-colors ${
