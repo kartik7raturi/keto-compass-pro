@@ -12,6 +12,7 @@ const Header = () => {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDisplayName, setUserDisplayName] = useState<string>("");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -39,6 +40,16 @@ const Header = () => {
                           user.email?.split('@')[0] || 
                           'User';
         setUserDisplayName(displayName);
+
+        // Check admin status
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('role', 'admin')
+          .maybeSingle();
+        
+        setIsAdmin(!!roleData);
       }
     };
 
@@ -131,6 +142,11 @@ const Header = () => {
                   <DropdownMenuItem onClick={() => navigate('/articles')}>
                     Manage Articles
                   </DropdownMenuItem>
+                  {isAdmin && (
+                    <DropdownMenuItem onClick={() => navigate('/admin')}>
+                      Admin Dashboard
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onClick={() => navigate('/progress')}>
                     Progress Dashboard
                   </DropdownMenuItem>

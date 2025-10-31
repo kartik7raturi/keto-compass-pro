@@ -838,6 +838,51 @@ export type Database = {
         }
         Relationships: []
       }
+      success_stories: {
+        Row: {
+          after_image_url: string | null
+          before_image_url: string | null
+          created_at: string
+          duration_months: number | null
+          id: string
+          is_approved: boolean | null
+          is_featured: boolean | null
+          story: string
+          title: string
+          updated_at: string
+          user_id: string
+          weight_lost: number | null
+        }
+        Insert: {
+          after_image_url?: string | null
+          before_image_url?: string | null
+          created_at?: string
+          duration_months?: number | null
+          id?: string
+          is_approved?: boolean | null
+          is_featured?: boolean | null
+          story: string
+          title: string
+          updated_at?: string
+          user_id: string
+          weight_lost?: number | null
+        }
+        Update: {
+          after_image_url?: string | null
+          before_image_url?: string | null
+          created_at?: string
+          duration_months?: number | null
+          id?: string
+          is_approved?: boolean | null
+          is_featured?: boolean | null
+          story?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          weight_lost?: number | null
+        }
+        Relationships: []
+      }
       user_challenges: {
         Row: {
           challenge_id: string
@@ -985,6 +1030,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       water_logs: {
         Row: {
           created_at: string
@@ -1085,21 +1151,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      award_points: {
-        Args: { points_to_add: number }
-        Returns: undefined
-      }
+      award_points: { Args: { points_to_add: number }; Returns: undefined }
       decrement_recipe_upvotes: {
         Args: { recipe_id: string }
         Returns: undefined
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
       }
       increment_recipe_upvotes: {
         Args: { recipe_id: string }
         Returns: undefined
       }
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1226,6 +1297,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+    },
   },
 } as const
