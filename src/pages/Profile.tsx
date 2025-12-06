@@ -13,6 +13,7 @@ import { Camera, Upload, User, Edit, Trophy, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { usePointsSystem } from "@/hooks/usePointsSystem";
+import { DietModeSelector } from "@/components/DietModeSelector";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -235,6 +236,11 @@ const Profile = () => {
 
                   <Separator />
 
+                  {/* Diet Mode Selection */}
+                  <DietModeSelector />
+
+                  <Separator />
+
                   {/* Transformation Photos */}
                   <div className="space-y-3">
                     <Label>Progress Photos</Label>
@@ -242,7 +248,7 @@ const Profile = () => {
                       <Camera className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                       <h4 className="font-semibold mb-2">Upload Your Transformation Photos</h4>
                       <p className="text-muted-foreground text-sm mb-4">
-                        Share your progress with the community and inspire others on their keto journey
+                        Share your progress with the community and inspire others on their diet journey
                       </p>
                       <Button variant="outline">
                         <Upload className="h-4 w-4 mr-2" />

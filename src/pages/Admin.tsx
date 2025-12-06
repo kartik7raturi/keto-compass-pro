@@ -6,10 +6,13 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Loader2 } from "lucide-react";
+import { Shield, Loader2, ChefHat, FileText, BookOpen, Image, Trophy, Star } from "lucide-react";
 import { AdminRecipes } from "@/components/admin/AdminRecipes";
 import { AdminArticles } from "@/components/admin/AdminArticles";
 import { AdminStories } from "@/components/admin/AdminStories";
+import { AdminAdvertisements } from "@/components/admin/AdminAdvertisements";
+import { AdminTopContributors } from "@/components/admin/AdminTopContributors";
+import { AdminTopPointers } from "@/components/admin/AdminTopPointers";
 
 const Admin = () => {
   const { user } = useAuth();
@@ -76,16 +79,37 @@ const Admin = () => {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
-              Manage submitted recipes, blog articles, and success stories.
+              Manage recipes, blog articles, success stories, advertisements, and view top contributors.
             </p>
           </CardContent>
         </Card>
 
         <Tabs defaultValue="recipes" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="recipes">Submitted Recipes</TabsTrigger>
-            <TabsTrigger value="articles">Blog Articles</TabsTrigger>
-            <TabsTrigger value="stories">Success Stories</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-6 h-auto gap-1">
+            <TabsTrigger value="recipes" className="flex items-center gap-1 text-xs md:text-sm">
+              <ChefHat className="h-4 w-4" />
+              <span className="hidden sm:inline">Recipes</span>
+            </TabsTrigger>
+            <TabsTrigger value="articles" className="flex items-center gap-1 text-xs md:text-sm">
+              <FileText className="h-4 w-4" />
+              <span className="hidden sm:inline">Articles</span>
+            </TabsTrigger>
+            <TabsTrigger value="stories" className="flex items-center gap-1 text-xs md:text-sm">
+              <BookOpen className="h-4 w-4" />
+              <span className="hidden sm:inline">Stories</span>
+            </TabsTrigger>
+            <TabsTrigger value="ads" className="flex items-center gap-1 text-xs md:text-sm">
+              <Image className="h-4 w-4" />
+              <span className="hidden sm:inline">Ads</span>
+            </TabsTrigger>
+            <TabsTrigger value="contributors" className="flex items-center gap-1 text-xs md:text-sm">
+              <Trophy className="h-4 w-4" />
+              <span className="hidden sm:inline">Top Contributors</span>
+            </TabsTrigger>
+            <TabsTrigger value="pointers" className="flex items-center gap-1 text-xs md:text-sm">
+              <Star className="h-4 w-4" />
+              <span className="hidden sm:inline">Top Pointers</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="recipes">
@@ -98,6 +122,18 @@ const Admin = () => {
 
           <TabsContent value="stories">
             <AdminStories />
+          </TabsContent>
+
+          <TabsContent value="ads">
+            <AdminAdvertisements />
+          </TabsContent>
+
+          <TabsContent value="contributors">
+            <AdminTopContributors />
+          </TabsContent>
+
+          <TabsContent value="pointers">
+            <AdminTopPointers />
           </TabsContent>
         </Tabs>
       </main>
