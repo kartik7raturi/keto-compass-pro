@@ -65,8 +65,14 @@ export default {
 				keto: {
 					green: 'hsl(var(--keto-green))',
 					'green-light': 'hsl(var(--keto-green-light))',
+					'green-dark': 'hsl(var(--keto-green-dark))',
 					yellow: 'hsl(var(--keto-yellow))',
 					'yellow-light': 'hsl(var(--keto-yellow-light))'
+				},
+				pcos: {
+					pink: 'hsl(var(--pcos-pink))',
+					'pink-light': 'hsl(var(--pcos-pink-light))',
+					'pink-dark': 'hsl(var(--pcos-pink-dark))'
 				}
 			},
 			borderRadius: {
