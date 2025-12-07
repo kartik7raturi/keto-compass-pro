@@ -7,15 +7,20 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Settings, Target, Users, Clock } from "lucide-react";
+import { useDietMode } from "@/components/DietModeProvider";
 
 const CustomPlan = () => {
+  const { dietMode } = useDietMode();
+  
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-4">Create Custom Meal Plan</h1>
-          <p className="text-xl text-muted-foreground">Personalized keto meal plans tailored to your needs</p>
+          <p className="text-xl text-muted-foreground">
+            Personalized {dietMode === 'pcos' ? 'PCOS-friendly' : 'keto'} meal plans tailored to your needs
+          </p>
         </div>
 
         <div className="max-w-4xl mx-auto">

@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar, Plus, ShoppingCart, Utensils, Clock, ChefHat } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useDietMode } from "@/components/DietModeProvider";
 
 interface Meal {
   id: string;
@@ -41,6 +42,7 @@ const WeeklyPlan = () => {
   const [selectedMealType, setSelectedMealType] = useState<string>("");
   const [isAddingMeal, setIsAddingMeal] = useState(false);
   const { toast } = useToast();
+  const { dietMode } = useDietMode();
 
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const mealTypes = ['breakfast', 'lunch', 'dinner'];
@@ -48,9 +50,38 @@ const WeeklyPlan = () => {
   useEffect(() => {
     fetchMeals();
     fetchWeeklyPlan();
-  }, []);
+  }, [dietMode]);
 
   const fetchMeals = async () => {
+    // First try recipes table with diet_type filter
+    const { data: recipesData, error: recipesError } = await supabase
+      .from('recipes')
+      .select('*')
+      .eq('diet_type', dietMode)
+      .order('title');
+
+    if (!recipesError && recipesData && recipesData.length > 0) {
+      const transformedMeals = recipesData.map(recipe => ({
+        id: recipe.id,
+        title: recipe.title,
+        description: recipe.description || '',
+        prep_time: recipe.prep_time || 0,
+        cook_time: recipe.cook_time || 0,
+        servings: recipe.servings || 1,
+        calories: recipe.calories || 0,
+        carbs: recipe.carbs || 0,
+        protein: recipe.protein || 0,
+        fat: recipe.fat || 0,
+        difficulty: recipe.difficulty || 'easy',
+        meal_type: recipe.category || 'meal',
+        ingredients: recipe.ingredients || [],
+        instructions: recipe.instructions || []
+      }));
+      setMeals(transformedMeals);
+      return;
+    }
+
+    // Fallback to meals table
     const { data, error } = await supabase
       .from('meals')
       .select('*')
@@ -280,7 +311,9 @@ const WeeklyPlan = () => {
       <main className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-4">Weekly Meal Plan</h1>
-          <p className="text-xl text-muted-foreground">Plan your keto meals for the entire week</p>
+          <p className="text-xl text-muted-foreground">
+            Plan your {dietMode === 'pcos' ? 'PCOS-friendly' : 'keto'} meals for the entire week
+          </p>
         </div>
 
         <div className="mb-6 flex gap-4">

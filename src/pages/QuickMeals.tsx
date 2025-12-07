@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Clock, Utensils, ChefHat, Filter } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useDietMode } from "@/components/DietModeProvider";
 
 interface Meal {
   id: string;
@@ -34,16 +35,47 @@ const QuickMeals = () => {
   const [filterTime, setFilterTime] = useState<string>("all");
   const [filterType, setFilterType] = useState<string>("all");
   const { toast } = useToast();
+  const { dietMode } = useDietMode();
 
   useEffect(() => {
     fetchQuickMeals();
-  }, []);
+  }, [dietMode]);
 
   useEffect(() => {
     applyFilters();
   }, [meals, filterTime, filterType]);
 
   const fetchQuickMeals = async () => {
+    // First try to get from recipes table which has diet_type
+    const { data: recipesData, error: recipesError } = await supabase
+      .from('recipes')
+      .select('*')
+      .eq('diet_type', dietMode)
+      .order('prep_time');
+
+    if (!recipesError && recipesData && recipesData.length > 0) {
+      // Transform recipes to match meal structure
+      const transformedMeals = recipesData.map(recipe => ({
+        id: recipe.id,
+        title: recipe.title,
+        description: recipe.description || '',
+        prep_time: recipe.prep_time || 0,
+        cook_time: recipe.cook_time || 0,
+        servings: recipe.servings || 1,
+        calories: recipe.calories || 0,
+        carbs: recipe.carbs || 0,
+        protein: recipe.protein || 0,
+        fat: recipe.fat || 0,
+        difficulty: recipe.difficulty || 'easy',
+        meal_type: recipe.category || 'meal',
+        ingredients: recipe.ingredients || [],
+        instructions: recipe.instructions || []
+      }));
+      setMeals(transformedMeals);
+      return;
+    }
+
+    // Fallback to meals table
     const { data, error } = await supabase
       .from('meals')
       .select('*')
@@ -83,8 +115,12 @@ const QuickMeals = () => {
       <Header />
       <main className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">Quick Keto Meals</h1>
-          <p className="text-xl text-muted-foreground">Fast and delicious keto recipes ready in 30 minutes or less</p>
+          <h1 className="text-4xl font-bold mb-4">
+            Quick {dietMode === 'pcos' ? 'PCOS-Friendly' : 'Keto'} Meals
+          </h1>
+          <p className="text-xl text-muted-foreground">
+            Fast and delicious {dietMode === 'pcos' ? 'PCOS-friendly' : 'keto'} recipes ready in 30 minutes or less
+          </p>
         </div>
 
         {/* Filters */}
