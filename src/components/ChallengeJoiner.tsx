@@ -46,14 +46,55 @@ const ChallengeJoiner = () => {
       return;
     }
 
-    const { error } = await supabase.from('user_challenges').insert({
-      user_id: user.id,
-      challenge_id: challengeId,
-    });
+    try {
+      // Get challenge details to find related community
+      const { data: challenge } = await supabase
+        .from('challenges')
+        .select('title, challenge_type')
+        .eq('id', challengeId)
+        .single();
 
-    if (!error) {
+      // Insert user challenge
+      const { error } = await supabase.from('user_challenges').insert({
+        user_id: user.id,
+        challenge_id: challengeId,
+      });
+
+      if (error) throw error;
+
+      // Try to find and auto-join a related community based on challenge type or title
+      if (challenge) {
+        const { data: communities } = await supabase
+          .from('communities')
+          .select('id, name')
+          .or(`name.ilike.%${challenge.challenge_type || 'keto'}%,name.ilike.%challenge%`);
+
+        if (communities && communities.length > 0) {
+          // Check if not already a member
+          const { data: existingMember } = await supabase
+            .from('community_members')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('community_id', communities[0].id)
+            .maybeSingle();
+
+          if (!existingMember) {
+            await supabase.from('community_members').insert({
+              user_id: user.id,
+              community_id: communities[0].id,
+            });
+          }
+        }
+      }
+
       setJoinedChallenges([...joinedChallenges, challengeId]);
-      toast({ title: "Challenge joined successfully!" });
+      toast({ 
+        title: "Challenge joined successfully!", 
+        description: "You've been added to the challenge community." 
+      });
+    } catch (error) {
+      console.error('Error joining challenge:', error);
+      toast({ title: "Error joining challenge", variant: "destructive" });
     }
   };
 

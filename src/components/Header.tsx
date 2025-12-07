@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import UserProgressWidget from "@/components/UserProgressWidget";
+import ActiveChallengesWidget from "@/components/ActiveChallengesWidget";
 
 const Header = () => {
   const { user, signOut } = useAuth();
@@ -132,8 +133,9 @@ const Header = () => {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <div className="p-2">
+                  <div className="p-2 space-y-3 max-h-96 overflow-y-auto">
                     <UserProgressWidget />
+                    <ActiveChallengesWidget />
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate('/profile')}>
