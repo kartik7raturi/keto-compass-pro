@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Loader2, Image, ExternalLink } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Image, ExternalLink, Upload } from "lucide-react";
 
 interface Advertisement {
   id: string;
@@ -24,6 +24,8 @@ export const AdminAdvertisements = () => {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAd, setEditingAd] = useState<Partial<Advertisement> | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchAds();
@@ -61,6 +63,48 @@ export const AdminAdvertisements = () => {
   const handleEdit = (ad: Advertisement) => {
     setEditingAd(ad);
     setIsDialogOpen(true);
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({ title: "Error", description: "Please upload an image file", variant: "destructive" });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "Error", description: "Image must be less than 5MB", variant: "destructive" });
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `ads/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('advertisements')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from('advertisements')
+        .getPublicUrl(filePath);
+
+      setEditingAd({ ...editingAd, image_url: urlData.publicUrl });
+      toast({ title: "Success", description: "Image uploaded successfully" });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast({ title: "Error", description: "Failed to upload image", variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSave = async () => {
@@ -230,12 +274,48 @@ export const AdminAdvertisements = () => {
               />
             </div>
             <div>
-              <Label>Image URL *</Label>
-              <Input
-                value={editingAd?.image_url || ''}
-                onChange={(e) => setEditingAd({ ...editingAd, image_url: e.target.value })}
-                placeholder="https://example.com/image.jpg"
-              />
+              <Label>Image *</Label>
+              <div className="space-y-2">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageUpload}
+                  accept="image/*"
+                  className="hidden"
+                />
+                <div className="flex gap-2">
+                  <Input
+                    value={editingAd?.image_url || ''}
+                    onChange={(e) => setEditingAd({ ...editingAd, image_url: e.target.value })}
+                    placeholder="Image URL or upload below"
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                  >
+                    {uploading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+                {editingAd?.image_url && (
+                  <div className="w-full h-32 rounded overflow-hidden bg-muted">
+                    <img
+                      src={editingAd.image_url}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/placeholder.svg';
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
             <div>
               <Label>Redirect URL *</Label>
