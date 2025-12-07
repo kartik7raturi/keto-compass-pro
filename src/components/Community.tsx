@@ -270,7 +270,7 @@ const Community = () => {
       // Load the community challenge to map by title
       const { data: communityChallenge, error: ccError } = await supabase
         .from('community_challenges')
-        .select('title, description, duration_days, target_unit')
+        .select('title, description, duration_days, target_unit, community_id')
         .eq('id', communityChallengeId)
         .maybeSingle();
 
@@ -330,7 +330,38 @@ const Community = () => {
 
       if (joinError) throw joinError;
 
-      toast({ title: "Challenge joined!", description: "You've successfully joined the challenge. Good luck!" });
+      // Auto-join the community when joining a challenge
+      if (communityChallenge.community_id) {
+        const { data: existingMember } = await supabase
+          .from('community_members')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('community_id', communityChallenge.community_id)
+          .maybeSingle();
+
+        if (!existingMember) {
+          await supabase.from('community_members').insert({
+            user_id: user.id,
+            community_id: communityChallenge.community_id,
+          });
+          
+          // Update member count
+          const { data: community } = await supabase
+            .from('communities')
+            .select('member_count')
+            .eq('id', communityChallenge.community_id)
+            .single();
+          
+          if (community) {
+            await supabase
+              .from('communities')
+              .update({ member_count: (community.member_count || 0) + 1 })
+              .eq('id', communityChallenge.community_id);
+          }
+        }
+      }
+
+      toast({ title: "Challenge joined!", description: "You've been added to the challenge and its community. Good luck!" });
     } catch (error) {
       console.error('Error joining challenge:', error);
       toast({ title: "Error", description: "Failed to join challenge. Please try again.", variant: "destructive" });
