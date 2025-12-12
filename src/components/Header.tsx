@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Menu, User, LogOut, X, ChevronDown } from "lucide-react";
+import { Menu, User, LogOut, X, ChevronDown, Trophy } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import UserProgressWidget from "@/components/UserProgressWidget";
 import ActiveChallengesWidget from "@/components/ActiveChallengesWidget";
+import NotificationBell from "@/components/NotificationBell";
 
 const Header = () => {
   const { user, signOut } = useAuth();
@@ -99,6 +100,12 @@ const Header = () => {
             Tracker
           </button>
           <button 
+            onClick={() => navigate('/challenges')} 
+            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+          >
+            Challenges
+          </button>
+          <button 
             onClick={() => navigate('/progress')} 
             className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
           >
@@ -115,6 +122,7 @@ const Header = () => {
         <div className="flex items-center gap-2">
           {user ? (
             <div className="flex items-center gap-2">
+              <NotificationBell />
               <span className="text-sm text-muted-foreground hidden sm:block">
                 Welcome, {userDisplayName}
               </span>
@@ -205,6 +213,13 @@ const Header = () => {
               Tracker
             </button>
             <button 
+              onClick={() => handleNavigation('/challenges')} 
+              className="block w-full text-left py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
+            >
+              <Trophy className="h-4 w-4" />
+              Challenges
+            </button>
+            <button 
               onClick={() => handleNavigation('/progress')} 
               className="block w-full text-left py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
             >
@@ -216,6 +231,13 @@ const Header = () => {
             >
               Community
             </button>
+            
+            {/* Mobile Active Challenges */}
+            {user && (
+              <div className="pt-4 border-t mt-4">
+                <ActiveChallengesWidget />
+              </div>
+            )}
             {!user && (
               <>
                 <button 

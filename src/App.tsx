@@ -15,6 +15,7 @@ import NotFound from "./pages/NotFound";
 import Recipes from "./pages/Recipes";
 import Tracker from "./pages/Tracker";
 import Progress from "./pages/Progress";
+import Challenges from "./pages/Challenges";
 
 import Keto30 from "./pages/Keto30";
 import Fasting from "./pages/Fasting";
@@ -65,6 +66,7 @@ const App = () => (
               <Route path="/tracker/period" element={<PeriodTracker />} />
               <Route path="/tracker/weekly-plan" element={<WeeklyPlan />} />
               <Route path="/progress" element={<Progress />} />
+              <Route path="/challenges" element={<Challenges />} />
               <Route path="/weekly-plan" element={<WeeklyPlan />} />
               <Route path="/quick-meals" element={<QuickMeals />} />
               <Route path="/custom-plan" element={<CustomPlan />} />

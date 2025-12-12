@@ -13,6 +13,7 @@ import FastingChart from "@/components/charts/FastingChart";
 import WorkoutChart from "@/components/charts/WorkoutChart";
 import WaterChart from "@/components/charts/WaterChart";
 import UserProgressWidget from "@/components/UserProgressWidget";
+import ActiveChallengesWidget from "@/components/ActiveChallengesWidget";
 import { usePointsSystem, POINT_VALUES } from "@/hooks/usePointsSystem";
 
 const ProgressDashboard = () => {
@@ -168,9 +169,10 @@ const ProgressDashboard = () => {
         </div>
 
         <div className="max-w-6xl mx-auto">
-          {/* User Progress Widget */}
-          <div className="mb-8">
+          {/* User Progress Widget and Active Challenges */}
+          <div className="mb-8 grid md:grid-cols-2 gap-6">
             <UserProgressWidget />
+            <ActiveChallengesWidget />
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

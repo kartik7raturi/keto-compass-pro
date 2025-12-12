@@ -95,6 +95,39 @@ export type Database = {
         }
         Relationships: []
       }
+      badges: {
+        Row: {
+          badge_type: string
+          created_at: string
+          description: string | null
+          icon: string
+          id: string
+          name: string
+          requirement_type: string | null
+          requirement_value: number | null
+        }
+        Insert: {
+          badge_type?: string
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          name: string
+          requirement_type?: string | null
+          requirement_value?: number | null
+        }
+        Update: {
+          badge_type?: string
+          created_at?: string
+          description?: string | null
+          icon?: string
+          id?: string
+          name?: string
+          requirement_type?: string | null
+          requirement_value?: number | null
+        }
+        Relationships: []
+      }
       challenges: {
         Row: {
           challenge_type: string | null
@@ -629,6 +662,39 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          link: string | null
+          message: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          message: string
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          message?: string
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       period_logs: {
         Row: {
           created_at: string | null
@@ -915,6 +981,35 @@ export type Database = {
           weight_lost?: number | null
         }
         Relationships: []
+      }
+      user_badges: {
+        Row: {
+          badge_id: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_challenges: {
         Row: {

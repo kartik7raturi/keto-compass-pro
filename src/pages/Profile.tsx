@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { usePointsSystem } from "@/hooks/usePointsSystem";
 import { DietModeSelector } from "@/components/DietModeSelector";
+import ProfileBadges from "@/components/ProfileBadges";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -298,30 +299,7 @@ const Profile = () => {
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Star className="h-5 w-5 text-primary" />
-                    Achievements
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="text-center p-3 bg-muted/50 rounded-lg">
-                      <div className="text-2xl mb-1">🏆</div>
-                      <div className="text-xs font-medium">First Week</div>
-                    </div>
-                    <div className="text-center p-3 bg-muted/50 rounded-lg">
-                      <div className="text-2xl mb-1">💪</div>
-                      <div className="text-xs font-medium">10 Workouts</div>
-                    </div>
-                    <div className="text-center p-3 bg-muted/50 rounded-lg">
-                      <div className="text-2xl mb-1">🥑</div>
-                      <div className="text-xs font-medium">Keto Master</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <ProfileBadges />
             </div>
           </div>
         </div>
