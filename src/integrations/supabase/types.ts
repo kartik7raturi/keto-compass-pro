@@ -128,6 +128,44 @@ export type Database = {
         }
         Relationships: []
       }
+      challenge_daily_logs: {
+        Row: {
+          completed: boolean
+          created_at: string
+          id: string
+          log_date: string
+          notes: string | null
+          user_challenge_id: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          id?: string
+          log_date?: string
+          notes?: string | null
+          user_challenge_id: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          id?: string
+          log_date?: string
+          notes?: string | null
+          user_challenge_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_daily_logs_user_challenge_id_fkey"
+            columns: ["user_challenge_id"]
+            isOneToOne: false
+            referencedRelation: "user_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       challenges: {
         Row: {
           challenge_type: string | null
@@ -135,6 +173,8 @@ export type Database = {
           description: string | null
           duration_days: number
           id: string
+          reward_badge_id: string | null
+          reward_points: number | null
           target_unit: string | null
           target_value: number | null
           title: string
@@ -145,6 +185,8 @@ export type Database = {
           description?: string | null
           duration_days: number
           id?: string
+          reward_badge_id?: string | null
+          reward_points?: number | null
           target_unit?: string | null
           target_value?: number | null
           title: string
@@ -155,11 +197,21 @@ export type Database = {
           description?: string | null
           duration_days?: number
           id?: string
+          reward_badge_id?: string | null
+          reward_points?: number | null
           target_unit?: string | null
           target_value?: number | null
           title?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "challenges_reward_badge_id_fkey"
+            columns: ["reward_badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       communities: {
         Row: {
@@ -1058,6 +1110,42 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      user_messages: {
+        Row: {
+          admin_response: string | null
+          category: string
+          created_at: string
+          id: string
+          message: string
+          status: string
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_response?: string | null
+          category?: string
+          created_at?: string
+          id?: string
+          message: string
+          status?: string
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_response?: string | null
+          category?: string
+          created_at?: string
+          id?: string
+          message?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_progress: {
         Row: {
