@@ -6,7 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Loader2, ChefHat, FileText, BookOpen, Image, Trophy, Star, Target, MessageSquare } from "lucide-react";
+import { Shield, Loader2, ChefHat, FileText, BookOpen, Image, Trophy, Star, Target, MessageSquare, Award } from "lucide-react";
 import { AdminRecipes } from "@/components/admin/AdminRecipes";
 import { AdminArticles } from "@/components/admin/AdminArticles";
 import { AdminStories } from "@/components/admin/AdminStories";
@@ -15,6 +15,7 @@ import { AdminTopContributors } from "@/components/admin/AdminTopContributors";
 import { AdminTopPointers } from "@/components/admin/AdminTopPointers";
 import { AdminChallenges } from "@/components/admin/AdminChallenges";
 import { AdminMessages } from "@/components/admin/AdminMessages";
+import { AdminBadges } from "@/components/admin/AdminBadges";
 
 const Admin = () => {
   const { user } = useAuth();
@@ -74,20 +75,20 @@ const Admin = () => {
       <main className="container mx-auto px-4 py-8">
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-3xl">
-              <Shield className="h-8 w-8 text-primary" />
+            <CardTitle className="flex items-center gap-2 text-2xl md:text-3xl">
+              <Shield className="h-6 w-6 md:h-8 md:w-8 text-primary" />
               Admin Dashboard
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground">
-              Manage recipes, blog articles, success stories, advertisements, and view top contributors.
+            <p className="text-muted-foreground text-sm md:text-base">
+              Manage recipes, blog articles, success stories, badges, challenges, and more.
             </p>
           </CardContent>
         </Card>
 
         <Tabs defaultValue="recipes" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-8 h-auto gap-1">
+          <TabsList className="flex flex-wrap h-auto gap-1 p-1">
             <TabsTrigger value="recipes" className="flex items-center gap-1 text-xs md:text-sm">
               <ChefHat className="h-4 w-4" />
               <span className="hidden sm:inline">Recipes</span>
@@ -103,6 +104,10 @@ const Admin = () => {
             <TabsTrigger value="ads" className="flex items-center gap-1 text-xs md:text-sm">
               <Image className="h-4 w-4" />
               <span className="hidden sm:inline">Ads</span>
+            </TabsTrigger>
+            <TabsTrigger value="badges" className="flex items-center gap-1 text-xs md:text-sm">
+              <Award className="h-4 w-4" />
+              <span className="hidden sm:inline">Badges</span>
             </TabsTrigger>
             <TabsTrigger value="challenges" className="flex items-center gap-1 text-xs md:text-sm">
               <Target className="h-4 w-4" />
@@ -136,6 +141,10 @@ const Admin = () => {
 
           <TabsContent value="ads">
             <AdminAdvertisements />
+          </TabsContent>
+
+          <TabsContent value="badges">
+            <AdminBadges />
           </TabsContent>
 
           <TabsContent value="challenges">

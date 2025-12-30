@@ -70,7 +70,27 @@ export const AdminMessages = () => {
 
       if (error) throw error;
 
-      // Create notification for user
+      // Get user email for notification
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('email, display_name')
+        .eq('user_id', selectedMessage.user_id)
+        .maybeSingle();
+
+      // Send email notification via edge function
+      if (profile?.email) {
+        await supabase.functions.invoke('send-notification-email', {
+          body: {
+            to: profile.email,
+            subject: `Response to: ${selectedMessage.subject}`,
+            userName: profile.display_name || 'User',
+            messageSubject: selectedMessage.subject,
+            adminResponse: response,
+          }
+        });
+      }
+
+      // Create in-app notification
       await supabase.from('notifications').insert({
         user_id: selectedMessage.user_id,
         title: 'Response to Your Message',
