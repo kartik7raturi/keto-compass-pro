@@ -5,7 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Heart, MessageCircle, Share2, Users, Trophy } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Heart, MessageCircle, Share2, Users, Trophy, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -19,14 +21,6 @@ interface Community {
   description: string;
   image_url: string;
   member_count: number;
-}
-
-interface CommunityChallenge {
-  id: string;
-  title: string;
-  description: string;
-  participants_count: number;
-  duration_days: number;
 }
 
 interface CommunityPost {
@@ -46,106 +40,15 @@ interface CommunityPost {
 const Community = () => {
   const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(null);
   const [communities, setCommunities] = useState<Community[]>([]);
-  const [challenges, setChallenges] = useState<CommunityChallenge[]>([]);
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
   const { awardPoints } = usePointsSystem();
 
-  // Post composer state
   const [newPostContent, setNewPostContent] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [chartSeriesStr, setChartSeriesStr] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  const uploadToStorage = async (file: File): Promise<string | null> => {
-    if (!user) return null;
-    const ext = file.name.split('.').pop();
-    const path = `${user.id}/${Date.now()}.${ext}`;
-    const { error: upErr } = await supabase.storage.from('community-media').upload(path, file, {
-      cacheControl: '3600',
-      upsert: false,
-    });
-    if (upErr) {
-      toast({ title: 'Upload failed', description: upErr.message, variant: 'destructive' });
-      return null;
-    }
-    const { data } = supabase.storage.from('community-media').getPublicUrl(path);
-    return data.publicUrl;
-  };
-
-  const createPost = async () => {
-    if (!user || !selectedCommunity) {
-      toast({ title: 'Select a community', description: 'Please sign in and select a community.', variant: 'destructive' });
-      return;
-    }
-    if (!newPostContent && !imageFile && !videoFile && !chartSeriesStr) {
-      toast({ title: 'Nothing to post', description: 'Add text, media or chart data.' });
-      return;
-    }
-
-    try {
-      setSubmitting(true);
-      let imageUrl: string | null = null;
-      let videoUrl: string | null = null;
-
-      if (imageFile) imageUrl = await uploadToStorage(imageFile);
-      if (videoFile) videoUrl = await uploadToStorage(videoFile);
-
-      const chartData = chartSeriesStr
-        ? { series: chartSeriesStr.split(',').map(v => Number(v.trim())).filter(v => !Number.isNaN(v)) }
-        : null;
-
-      // Get user's display name and avatar from profiles table
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('display_name, avatar_url')
-        .eq('user_id', user.id)
-        .maybeSingle();
-      
-      const authorName = profile?.display_name || 
-                        (user.user_metadata as any)?.display_name || 
-                        (user.user_metadata as any)?.full_name ||
-                        (user.user_metadata as any)?.name ||
-                        user.email?.split('@')[0] || 
-                        'Anonymous User';
-
-      const authorAvatar = profile?.avatar_url || null;
-
-      const { data, error } = await supabase
-        .from('community_posts')
-        .insert({
-          community_id: selectedCommunity.id,
-          user_id: user.id,
-          author_name: authorName,
-          author_avatar: authorAvatar,
-          content: newPostContent || '',
-          image_url: imageUrl,
-          video_url: videoUrl,
-          tags: [],
-          chart_data: chartData,
-        })
-        .select('*')
-        .single();
-
-      if (error) throw error;
-
-      setPosts(prev => [data as unknown as CommunityPost, ...prev]);
-      setNewPostContent("");
-      setImageFile(null);
-      setVideoFile(null);
-      setChartSeriesStr("");
-      awardPoints(POINT_VALUES.CREATE_POST, "creating a post!");
-      toast({ title: 'Posted!' });
-    } catch (err: any) {
-      console.error('Create post error', err);
-      toast({ title: 'Error', description: err.message || 'Failed to create post', variant: 'destructive' });
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   useEffect(() => {
     fetchCommunities();
@@ -153,18 +56,16 @@ const Community = () => {
 
   useEffect(() => {
     if (selectedCommunity) {
-      fetchCommunityData(selectedCommunity.id);
+      fetchPosts(selectedCommunity.id);
     }
   }, [selectedCommunity]);
 
   const fetchCommunities = async () => {
     try {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('communities')
         .select('*')
         .order('member_count', { ascending: false });
-
-      if (error) throw error;
       setCommunities(data || []);
       if (data && data.length > 0) {
         setSelectedCommunity(data[0]);
@@ -174,47 +75,90 @@ const Community = () => {
     }
   };
 
-  const fetchCommunityData = async (communityId: string) => {
+  const fetchPosts = async (communityId: string) => {
     setLoading(true);
     try {
-      // Fetch challenges
-      const { data: challengesData, error: challengesError } = await supabase
-        .from('community_challenges')
-        .select('*')
-        .eq('community_id', communityId)
-        .order('participants_count', { ascending: false });
-
-      if (challengesError) throw challengesError;
-      setChallenges(challengesData || []);
-
-      // Fetch posts
-      const { data: postsData, error: postsError } = await supabase
+      const { data } = await supabase
         .from('community_posts')
         .select('*')
         .eq('community_id', communityId)
         .order('created_at', { ascending: false });
-
-      if (postsError) throw postsError;
-      setPosts(postsData || []);
+      setPosts(data || []);
     } catch (error) {
-      console.error('Error fetching community data:', error);
+      console.error('Error fetching posts:', error);
     } finally {
       setLoading(false);
     }
   };
 
+  const uploadToStorage = async (file: File): Promise<string | null> => {
+    if (!user) return null;
+    const ext = file.name.split('.').pop();
+    const path = `${user.id}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from('community-media').upload(path, file);
+    if (error) {
+      toast({ title: 'Upload failed', description: error.message, variant: 'destructive' });
+      return null;
+    }
+    const { data } = supabase.storage.from('community-media').getPublicUrl(path);
+    return data.publicUrl;
+  };
+
+  const createPost = async () => {
+    if (!user || !selectedCommunity) {
+      toast({ title: 'Please sign in', variant: 'destructive' });
+      return;
+    }
+    if (!newPostContent && !imageFile) {
+      toast({ title: 'Add some content' });
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      let imageUrl: string | null = null;
+      if (imageFile) imageUrl = await uploadToStorage(imageFile);
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('display_name, avatar_url')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      const { data, error } = await supabase
+        .from('community_posts')
+        .insert({
+          community_id: selectedCommunity.id,
+          user_id: user.id,
+          author_name: profile?.display_name || user.email?.split('@')[0] || 'User',
+          author_avatar: profile?.avatar_url,
+          content: newPostContent,
+          image_url: imageUrl,
+          tags: [],
+        })
+        .select('*')
+        .single();
+
+      if (error) throw error;
+      setPosts(prev => [data as CommunityPost, ...prev]);
+      setNewPostContent("");
+      setImageFile(null);
+      awardPoints(POINT_VALUES.CREATE_POST, "creating a post!");
+      toast({ title: 'Posted!' });
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleLikePost = async (postId: string) => {
     if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to like posts",
-        variant: "destructive"
-      });
+      toast({ title: "Please sign in", variant: "destructive" });
       return;
     }
 
     try {
-      // Check if already liked
       const { data: existingLike } = await supabase
         .from('community_likes')
         .select('id')
@@ -223,32 +167,15 @@ const Community = () => {
         .single();
 
       if (existingLike) {
-        // Unlike
-        await supabase
-          .from('community_likes')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('post_id', postId);
-        
-        // Update post likes count manually for now
+        await supabase.from('community_likes').delete().eq('id', existingLike.id);
         setPosts(prev => prev.map(post => 
-          post.id === postId 
-            ? { ...post, likes_count: Math.max(0, post.likes_count - 1) }
-            : post
+          post.id === postId ? { ...post, likes_count: Math.max(0, post.likes_count - 1) } : post
         ));
       } else {
-        // Like
-        await supabase
-          .from('community_likes')
-          .insert([{ user_id: user.id, post_id: postId }]);
-        
-        // Update post likes count manually for now
+        await supabase.from('community_likes').insert({ user_id: user.id, post_id: postId });
         setPosts(prev => prev.map(post => 
-          post.id === postId 
-            ? { ...post, likes_count: post.likes_count + 1 }
-            : post
+          post.id === postId ? { ...post, likes_count: post.likes_count + 1 } : post
         ));
-        
         awardPoints(POINT_VALUES.LIKE_POST, "liking a post!");
       }
     } catch (error) {
@@ -256,126 +183,13 @@ const Community = () => {
     }
   };
 
-  const joinChallenge = async (communityChallengeId: string) => {
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to join challenges",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      // Load the community challenge to map by title
-      const { data: communityChallenge, error: ccError } = await supabase
-        .from('community_challenges')
-        .select('title, description, duration_days, target_unit, community_id')
-        .eq('id', communityChallengeId)
-        .maybeSingle();
-
-      if (ccError) throw ccError;
-      if (!communityChallenge) {
-        toast({ title: "Not found", description: "Challenge not found" , variant: "destructive"});
-        return;
-      }
-
-      // Try to find an existing general challenge by exact title
-      const { data: existingChallenge, error: findError } = await supabase
-        .from('challenges')
-        .select('id')
-        .eq('title', communityChallenge.title)
-        .maybeSingle();
-
-      if (findError) throw findError;
-
-      let challengeIdToUse = existingChallenge?.id as string | undefined;
-
-      // If not found, create a new general challenge (RLS policy allows insert)
-      if (!challengeIdToUse) {
-        const { data: created, error: createError } = await supabase
-          .from('challenges')
-          .insert({
-            title: communityChallenge.title,
-            description: communityChallenge.description,
-            duration_days: communityChallenge.duration_days,
-            target_unit: communityChallenge.target_unit
-          })
-          .select('id')
-          .single();
-
-        if (createError) throw createError;
-        challengeIdToUse = created.id;
-      }
-
-      // Prevent duplicate join
-      const { data: already, error: checkError } = await supabase
-        .from('user_challenges')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('challenge_id', challengeIdToUse)
-        .maybeSingle();
-
-      if (checkError) throw checkError;
-      if (already) {
-        toast({ title: "Already joined", description: "You've already joined this challenge!", variant: "destructive" });
-        return;
-      }
-
-      const { error: joinError } = await supabase.from('user_challenges').insert({
-        user_id: user.id,
-        challenge_id: challengeIdToUse,
-        start_date: new Date().toISOString().split('T')[0],
-      });
-
-      if (joinError) throw joinError;
-
-      // Auto-join the community when joining a challenge
-      if (communityChallenge.community_id) {
-        const { data: existingMember } = await supabase
-          .from('community_members')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('community_id', communityChallenge.community_id)
-          .maybeSingle();
-
-        if (!existingMember) {
-          await supabase.from('community_members').insert({
-            user_id: user.id,
-            community_id: communityChallenge.community_id,
-          });
-          
-          // Update member count
-          const { data: community } = await supabase
-            .from('communities')
-            .select('member_count')
-            .eq('id', communityChallenge.community_id)
-            .single();
-          
-          if (community) {
-            await supabase
-              .from('communities')
-              .update({ member_count: (community.member_count || 0) + 1 })
-              .eq('id', communityChallenge.community_id);
-          }
-        }
-      }
-
-      toast({ title: "Challenge joined!", description: "You've been added to the challenge and its community. Good luck!" });
-    } catch (error) {
-      console.error('Error joining challenge:', error);
-      toast({ title: "Error", description: "Failed to join challenge. Please try again.", variant: "destructive" });
-    }
-  };
-
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-
-    if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
-    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} hours ago`;
-    return `${Math.floor(diffInMinutes / 1440)} days ago`;
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
+    return `${Math.floor(diffInMinutes / 1440)}d ago`;
   };
 
   if (loading && !selectedCommunity) {
@@ -384,251 +198,183 @@ const Community = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Community Selector */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-center mb-6">Keto Communities</h1>
-        <div className="flex flex-wrap gap-4 justify-center">
-          {communities.map((community) => (
-            <Card 
-              key={community.id} 
-              className={`cursor-pointer transition-all hover:shadow-lg ${
-                selectedCommunity?.id === community.id ? 'ring-2 ring-primary' : ''
-              }`}
-              onClick={() => setSelectedCommunity(community)}
-            >
-              <CardContent className="p-4 text-center">
-                <img 
-                  src={community.image_url} 
-                  alt={community.name}
-                  className="w-16 h-16 rounded-full mx-auto mb-2 object-cover"
-                />
-                <h3 className="font-semibold">{community.name}</h3>
-                <p className="text-sm text-muted-foreground">{community.member_count} members</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Main Feed */}
-        <div className="lg:col-span-2 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                {selectedCommunity?.name} Community Feed
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Composer */}
-              {user ? (
-                <div className="border rounded-lg p-4 space-y-3">
-                  <Textarea
-                    placeholder={`Share something with ${selectedCommunity?.name}...`}
-                    value={newPostContent}
-                    onChange={(e) => setNewPostContent(e.target.value)}
-                  />
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-sm text-muted-foreground">Image</label>
-                      <Input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-sm text-muted-foreground">Video</label>
-                      <Input type="file" accept="video/*" onChange={(e) => setVideoFile(e.target.files?.[0] || null)} />
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-sm text-muted-foreground">Chart data (comma-separated numbers)</label>
-                    <Input
-                      placeholder="e.g. 10, 12, 9, 14, 18"
-                      value={chartSeriesStr}
-                      onChange={(e) => setChartSeriesStr(e.target.value)}
-                    />
-                  </div>
-                  <div className="flex justify-end">
-                    <Button onClick={createPost} disabled={submitting}>
-                      {submitting ? 'Posting...' : 'Post'}
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center text-muted-foreground">Sign in to create a post.</div>
-              )}
-
-              {/* Feed */}
-              {loading ? (
-                <div className="text-center py-8">Loading posts...</div>
-              ) : posts.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  No posts yet in this community. Be the first to post!
-                </div>
-              ) : (
-                posts.map((post) => (
-                  <div key={post.id} className="border-b pb-6 last:border-b-0">
-                    <div className="flex items-start gap-4">
-                      <Avatar>
-                        <AvatarImage src={post.author_avatar || undefined} />
-                        <AvatarFallback>{post.author_name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="font-semibold">{post.author_name}</span>
-                          <span className="text-sm text-muted-foreground">{formatTimeAgo(post.created_at)}</span>
-                        </div>
-                        {post.content && <p className="mb-3 text-foreground">{post.content}</p>}
-                        {post.image_url && (
-                          <img 
-                            src={post.image_url} 
-                            alt="Community post image" 
-                            className="rounded-lg w-full max-w-md mb-3 object-cover"
-                            loading="lazy"
-                          />
-                        )}
-                        {post.video_url && (
-                          <video
-                            controls
-                            src={post.video_url}
-                            className="rounded-lg w-full max-w-md mb-3"
-                          />
-                        )}
-                        {post.chart_data?.series && Array.isArray(post.chart_data.series) && post.chart_data.series.length > 0 && (
-                          <div className="my-4">
-                            <ChartContainer config={{}} className="w-full">
-                              <LineChart data={post.chart_data.series.map((y: number, i: number) => ({ x: i + 1, y }))}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="x" />
-                                <YAxis />
-                                <RechartsTooltip />
-                                <Line type="monotone" dataKey="y" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
-                              </LineChart>
-                            </ChartContainer>
-                          </div>
-                        )}
-                        <div className="flex flex-wrap gap-2 mb-3">
-                          {post.tags.map((tag, index) => (
-                            <Badge key={index} variant="secondary" className="text-xs">
-                              #{tag}
-                            </Badge>
-                          ))}
-                        </div>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <button 
-                            onClick={() => handleLikePost(post.id)}
-                            className="flex items-center gap-1 hover:text-primary transition-colors"
-                          >
-                            <Heart className="h-4 w-4" />
-                            {post.likes_count}
-                          </button>
-                          <button className="flex items-center gap-1 hover:text-primary transition-colors">
-                            <MessageCircle className="h-4 w-4" />
-                            {post.comments_count}
-                          </button>
-                          <button className="flex items-center gap-1 hover:text-primary transition-colors">
-                            <Share2 className="h-4 w-4" />
-                            Share
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Trophy className="h-5 w-5" />
-                Active Challenges
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {challenges.length === 0 ? (
-                <div className="text-center py-4 text-muted-foreground">
-                  No active challenges in this community yet.
-                </div>
-              ) : (
-                challenges.map((challenge) => (
-                  <div key={challenge.id} className="border rounded-lg p-4">
-                    <h4 className="font-semibold mb-2">{challenge.title}</h4>
-                    <p className="text-sm text-muted-foreground mb-3">{challenge.description}</p>
-                    <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
-                      <span>{challenge.participants_count} participants</span>
-                      <span>{challenge.duration_days} days</span>
-                    </div>
-                    <Button 
-                      size="sm" 
-                      className="w-full"
-                      onClick={() => joinChallenge(challenge.id)}
+      <h1 className="text-2xl md:text-3xl font-bold text-center mb-6">Communities</h1>
+      
+      <div className="flex gap-4 h-[calc(100vh-200px)] min-h-[500px]">
+        {/* Sidebar - Community Icons */}
+        <div className="w-16 md:w-20 bg-muted/30 rounded-lg border flex flex-col shrink-0">
+          <ScrollArea className="flex-1">
+            <div className="flex flex-col items-center py-3 gap-2">
+              {communities.map((community) => (
+                <Tooltip key={community.id} delayDuration={0}>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => setSelectedCommunity(community)}
+                      className={`
+                        w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden
+                        transition-all duration-200 hover:scale-105 shrink-0
+                        ${selectedCommunity?.id === community.id 
+                          ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' 
+                          : 'hover:ring-2 hover:ring-muted-foreground/50'
+                        }
+                      `}
                     >
-                      Join Challenge
-                    </Button>
-                  </div>
-                ))
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Top Contributors</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {[
-                { name: "Dr. Lisa K.", posts: 47, avatar: "DL" },
-                { name: "Coach Emma", posts: 38, avatar: "CE" },
-                { name: "Sarah M.", posts: 31, avatar: "SM" }
-              ].map((user, index) => (
-                <div key={index} className="flex items-center gap-3">
-                  <div className="flex items-center gap-1 text-primary">
-                    <Trophy className="h-3 w-3" />
-                    <span className="text-sm font-medium">#{index + 1}</span>
-                  </div>
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                      {user.avatar}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="text-sm font-medium">{user.name}</div>
-                    <div className="text-xs text-muted-foreground">{user.posts} posts</div>
-                  </div>
-                </div>
+                      {community.image_url ? (
+                        <img 
+                          src={community.image_url} 
+                          alt={community.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-primary/10 flex items-center justify-center">
+                          <Users className="h-5 w-5 text-primary" />
+                        </div>
+                      )}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    <p className="font-medium">{community.name}</p>
+                    <p className="text-xs text-muted-foreground">{community.member_count} members</p>
+                  </TooltipContent>
+                </Tooltip>
               ))}
-            </CardContent>
-          </Card>
+            </div>
+          </ScrollArea>
+        </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Stats</CardTitle>
-            </CardHeader>
-            <CardContent className="text-center space-y-4">
-              <div>
-                <div className="text-2xl font-bold text-primary">
-                  {communities.reduce((sum, c) => sum + c.member_count, 0).toLocaleString()}
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {selectedCommunity && (
+            <>
+              {/* Community Header */}
+              <Card className="mb-4 shrink-0">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    {selectedCommunity.image_url ? (
+                      <img 
+                        src={selectedCommunity.image_url} 
+                        alt={selectedCommunity.name}
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Users className="h-6 w-6 text-primary" />
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <h2 className="font-bold text-lg truncate">{selectedCommunity.name}</h2>
+                      <p className="text-sm text-muted-foreground">
+                        {selectedCommunity.member_count} members
+                      </p>
+                    </div>
+                  </div>
+                  {selectedCommunity.description && (
+                    <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                      {selectedCommunity.description}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Post Composer */}
+              {user && (
+                <Card className="mb-4 shrink-0">
+                  <CardContent className="p-4 space-y-3">
+                    <Textarea
+                      placeholder={`Share with ${selectedCommunity.name}...`}
+                      value={newPostContent}
+                      onChange={(e) => setNewPostContent(e.target.value)}
+                      className="min-h-[80px] resize-none"
+                    />
+                    <div className="flex flex-wrap gap-2 items-center">
+                      <Input 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                        className="flex-1 min-w-[150px]"
+                      />
+                      <Button onClick={createPost} disabled={submitting} size="sm">
+                        <Send className="h-4 w-4 mr-2" />
+                        {submitting ? 'Posting...' : 'Post'}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Posts Feed */}
+              <ScrollArea className="flex-1">
+                <div className="space-y-4 pr-2">
+                  {loading ? (
+                    <div className="text-center py-8 text-muted-foreground">Loading posts...</div>
+                  ) : posts.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No posts yet. Be the first to post!
+                    </div>
+                  ) : (
+                    posts.map((post) => (
+                      <Card key={post.id}>
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-3">
+                            <Avatar className="h-9 w-9 shrink-0">
+                              <AvatarImage src={post.author_avatar || undefined} />
+                              <AvatarFallback className="text-xs">
+                                {post.author_name.split(' ').map(n => n[0]).join('')}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-medium text-sm truncate">{post.author_name}</span>
+                                <span className="text-xs text-muted-foreground shrink-0">
+                                  {formatTimeAgo(post.created_at)}
+                                </span>
+                              </div>
+                              {post.content && (
+                                <p className="text-sm mb-3 break-words">{post.content}</p>
+                              )}
+                              {post.image_url && (
+                                <img 
+                                  src={post.image_url} 
+                                  alt="Post" 
+                                  className="rounded-lg w-full max-w-md mb-3 object-cover"
+                                />
+                              )}
+                              {post.chart_data?.series && (
+                                <div className="h-32 mb-3">
+                                  <ChartContainer config={{}}>
+                                    <LineChart data={post.chart_data.series.map((v: number, i: number) => ({ day: i + 1, value: v }))}>
+                                      <CartesianGrid strokeDasharray="3 3" />
+                                      <XAxis dataKey="day" tick={{ fontSize: 10 }} />
+                                      <YAxis tick={{ fontSize: 10 }} />
+                                      <RechartsTooltip />
+                                      <Line type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+                                    </LineChart>
+                                  </ChartContainer>
+                                </div>
+                              )}
+                              <div className="flex items-center gap-4">
+                                <button
+                                  onClick={() => handleLikePost(post.id)}
+                                  className="flex items-center gap-1 text-muted-foreground hover:text-red-500 transition-colors"
+                                >
+                                  <Heart className="h-4 w-4" />
+                                  <span className="text-xs">{post.likes_count}</span>
+                                </button>
+                                <div className="flex items-center gap-1 text-muted-foreground">
+                                  <MessageCircle className="h-4 w-4" />
+                                  <span className="text-xs">{post.comments_count}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  )}
                 </div>
-                <div className="text-sm text-muted-foreground">Total Members</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-primary">
-                  {posts.length}
-                </div>
-                <div className="text-sm text-muted-foreground">Recent Posts</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-primary">
-                  {challenges.length}
-                </div>
-                <div className="text-sm text-muted-foreground">Active Challenges</div>
-              </div>
-            </CardContent>
-          </Card>
+              </ScrollArea>
+            </>
+          )}
         </div>
       </div>
     </div>

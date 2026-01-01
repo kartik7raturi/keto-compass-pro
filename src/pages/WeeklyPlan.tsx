@@ -205,7 +205,78 @@ const WeeklyPlan = () => {
       planId = newPlan.id;
     }
 
-    // Add meal to plan
+    // First check if the selected meal exists in the meals table
+    const { data: mealExists } = await supabase
+      .from('meals')
+      .select('id')
+      .eq('id', selectedMeal)
+      .maybeSingle();
+
+    // If meal doesn't exist in meals table, we need to copy it from recipes
+    if (!mealExists) {
+      const selectedMealData = meals.find(m => m.id === selectedMeal);
+      if (selectedMealData) {
+        const { data: newMeal, error: insertError } = await supabase
+          .from('meals')
+          .insert({
+            title: selectedMealData.title,
+            description: selectedMealData.description,
+            prep_time: selectedMealData.prep_time,
+            cook_time: selectedMealData.cook_time,
+            servings: selectedMealData.servings,
+            calories: selectedMealData.calories,
+            carbs: selectedMealData.carbs,
+            protein: selectedMealData.protein,
+            fat: selectedMealData.fat,
+            difficulty: selectedMealData.difficulty,
+            meal_type: selectedMealData.meal_type,
+            ingredients: selectedMealData.ingredients,
+            instructions: selectedMealData.instructions,
+          })
+          .select('id')
+          .single();
+
+        if (insertError) {
+          toast({
+            title: "Error adding meal",
+            description: insertError.message,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Use the new meal ID
+        const { error } = await supabase
+          .from('meal_plan_items')
+          .insert({
+            meal_plan_id: planId,
+            meal_id: newMeal.id,
+            day_of_week: selectedDay,
+            meal_type: selectedMealType,
+          });
+
+        if (error) {
+          toast({
+            title: "Error adding meal",
+            description: error.message,
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Meal added!",
+            description: "Meal has been added to your weekly plan",
+          });
+          fetchWeeklyPlan();
+          setIsAddingMeal(false);
+          setSelectedMeal("");
+          setSelectedDay(0);
+          setSelectedMealType("");
+        }
+        return;
+      }
+    }
+
+    // Add meal to plan using existing meal
     const { error } = await supabase
       .from('meal_plan_items')
       .insert({
