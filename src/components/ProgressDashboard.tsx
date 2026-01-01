@@ -12,9 +12,7 @@ import KetoStreakChart from "@/components/charts/KetoStreakChart";
 import FastingChart from "@/components/charts/FastingChart";
 import WorkoutChart from "@/components/charts/WorkoutChart";
 import WaterChart from "@/components/charts/WaterChart";
-import { Link } from "react-router-dom";
 import UserProgressWidget from "@/components/UserProgressWidget";
-import ActiveChallengesWidget from "@/components/ActiveChallengesWidget";
 import { usePointsSystem, POINT_VALUES } from "@/hooks/usePointsSystem";
 
 const ProgressDashboard = () => {

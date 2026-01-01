@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,19 +7,150 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Settings, Target, Users, Clock } from "lucide-react";
+import { Settings, Target, Users, Clock, Loader2 } from "lucide-react";
 import { useDietMode } from "@/components/DietModeProvider";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/auth/AuthContext";
 
 const CustomPlan = () => {
   const { dietMode } = useDietMode();
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const [duration, setDuration] = useState("1week");
+  const [servings, setServings] = useState("2");
+  const [budget, setBudget] = useState("medium");
+  const [carbs, setCarbs] = useState("20");
+  const [protein, setProtein] = useState("100");
+  const [fat, setFat] = useState("150");
+  const [maxCookTime, setMaxCookTime] = useState("30");
+  const [skillLevel, setSkillLevel] = useState("intermediate");
+  const [preferences, setPreferences] = useState<string[]>([]);
+  const [generating, setGenerating] = useState(false);
+
+  const togglePreference = (pref: string) => {
+    setPreferences(prev => 
+      prev.includes(pref) ? prev.filter(p => p !== pref) : [...prev, pref]
+    );
+  };
+
+  const generatePlan = async () => {
+    if (!user) {
+      toast({ title: "Please sign in to generate a meal plan", variant: "destructive" });
+      navigate('/auth');
+      return;
+    }
+
+    setGenerating(true);
+    try {
+      const durationDays = duration === '1week' ? 7 : duration === '2weeks' ? 14 : 30;
+      const startDate = new Date();
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() + durationDays);
+
+      // Create meal plan
+      const { data: plan, error: planError } = await supabase
+        .from('meal_plans')
+        .insert({
+          user_id: user.id,
+          title: `Custom ${dietMode === 'pcos' ? 'PCOS' : 'Keto'} Plan`,
+          description: `${durationDays}-day plan with ${carbs}g carbs, ${protein}g protein, ${fat}g fat daily`,
+          plan_type: 'custom',
+          start_date: startDate.toISOString().split('T')[0],
+          end_date: endDate.toISOString().split('T')[0],
+        })
+        .select('id')
+        .single();
+
+      if (planError) throw planError;
+
+      // Fetch recipes matching criteria
+      let query = supabase
+        .from('recipes')
+        .select('id, title, carbs, protein, fat, prep_time, cook_time')
+        .eq('diet_type', dietMode);
+
+      if (parseInt(maxCookTime) > 0) {
+        query = query.lte('cook_time', parseInt(maxCookTime));
+      }
+
+      const { data: recipes } = await query;
+
+      if (!recipes || recipes.length === 0) {
+        toast({ 
+          title: "No matching recipes found", 
+          description: "Try adjusting your preferences",
+          variant: "destructive" 
+        });
+        setGenerating(false);
+        return;
+      }
+
+      // Add meals to plan for each day
+      const mealTypes = ['breakfast', 'lunch', 'dinner'];
+      const planItems = [];
+
+      for (let day = 0; day < durationDays; day++) {
+        for (const mealType of mealTypes) {
+          const randomRecipe = recipes[Math.floor(Math.random() * recipes.length)];
+          
+          // Create meal entry
+          const { data: meal, error: mealError } = await supabase
+            .from('meals')
+            .insert({
+              title: randomRecipe.title,
+              calories: (randomRecipe.carbs || 0) * 4 + (randomRecipe.protein || 0) * 4 + (randomRecipe.fat || 0) * 9,
+              carbs: randomRecipe.carbs,
+              protein: randomRecipe.protein,
+              fat: randomRecipe.fat,
+              prep_time: randomRecipe.prep_time,
+              cook_time: randomRecipe.cook_time,
+              servings: parseInt(servings),
+              ingredients: [],
+              instructions: [],
+            })
+            .select('id')
+            .single();
+
+          if (!mealError && meal) {
+            planItems.push({
+              meal_plan_id: plan.id,
+              meal_id: meal.id,
+              day_of_week: day % 7,
+              meal_type: mealType,
+              servings: parseInt(servings),
+            });
+          }
+        }
+      }
+
+      if (planItems.length > 0) {
+        await supabase.from('meal_plan_items').insert(planItems);
+      }
+
+      toast({ 
+        title: "Plan Generated!", 
+        description: `Your ${durationDays}-day meal plan is ready.` 
+      });
+      navigate('/weekly-plan');
+    } catch (error: any) {
+      console.error('Error generating plan:', error);
+      toast({ title: "Error generating plan", description: error.message, variant: "destructive" });
+    } finally {
+      setGenerating(false);
+    }
+  };
   
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">Create Custom Meal Plan</h1>
-          <p className="text-xl text-muted-foreground">
+          <h1 className="text-2xl md:text-4xl font-bold mb-4">Create Custom Meal Plan</h1>
+          <p className="text-base md:text-xl text-muted-foreground">
             Personalized {dietMode === 'pcos' ? 'PCOS-friendly' : 'keto'} meal plans tailored to your needs
           </p>
         </div>
@@ -29,15 +161,15 @@ const CustomPlan = () => {
             <div className="lg:col-span-1">
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Settings className="h-5 w-5 text-keto-green" />
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Settings className="h-5 w-5 text-primary" />
                     Plan Settings
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-2">
                     <Label htmlFor="duration">Plan Duration</Label>
-                    <Select>
+                    <Select value={duration} onValueChange={setDuration}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select duration" />
                       </SelectTrigger>
@@ -51,7 +183,7 @@ const CustomPlan = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="servings">Number of Servings</Label>
-                    <Select>
+                    <Select value={servings} onValueChange={setServings}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select servings" />
                       </SelectTrigger>
@@ -66,7 +198,7 @@ const CustomPlan = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="budget">Budget Range</Label>
-                    <Select>
+                    <Select value={budget} onValueChange={setBudget}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select budget" />
                       </SelectTrigger>
@@ -85,60 +217,56 @@ const CustomPlan = () => {
             <div className="lg:col-span-2 space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Target className="h-5 w-5 text-keto-green" />
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Target className="h-5 w-5 text-primary" />
                     Macro Targets
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="grid md:grid-cols-3 gap-4">
+                <CardContent className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="carbs">Daily Carbs (g)</Label>
-                    <Input id="carbs" placeholder="20" />
+                    <Input id="carbs" value={carbs} onChange={(e) => setCarbs(e.target.value)} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="protein">Daily Protein (g)</Label>
-                    <Input id="protein" placeholder="100" />
+                    <Input id="protein" value={protein} onChange={(e) => setProtein(e.target.value)} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="fat">Daily Fat (g)</Label>
-                    <Input id="fat" placeholder="150" />
+                    <Input id="fat" value={fat} onChange={(e) => setFat(e.target.value)} />
                   </div>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Dietary Preferences</CardTitle>
+                  <CardTitle className="text-lg">Dietary Preferences</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-3">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox id="dairy-free" />
-                        <Label htmlFor="dairy-free">Dairy-Free</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox id="nut-free" />
-                        <Label htmlFor="nut-free">Nut-Free</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox id="egg-free" />
-                        <Label htmlFor="egg-free">Egg-Free</Label>
-                      </div>
+                      {['dairy-free', 'nut-free', 'egg-free'].map(pref => (
+                        <div key={pref} className="flex items-center space-x-2">
+                          <Checkbox 
+                            id={pref} 
+                            checked={preferences.includes(pref)}
+                            onCheckedChange={() => togglePreference(pref)}
+                          />
+                          <Label htmlFor={pref} className="capitalize">{pref.replace('-', ' ')}</Label>
+                        </div>
+                      ))}
                     </div>
                     <div className="space-y-3">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox id="vegetarian" />
-                        <Label htmlFor="vegetarian">Vegetarian</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox id="pescatarian" />
-                        <Label htmlFor="pescatarian">Pescatarian</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox id="shellfish-free" />
-                        <Label htmlFor="shellfish-free">Shellfish-Free</Label>
-                      </div>
+                      {['vegetarian', 'pescatarian', 'shellfish-free'].map(pref => (
+                        <div key={pref} className="flex items-center space-x-2">
+                          <Checkbox 
+                            id={pref}
+                            checked={preferences.includes(pref)}
+                            onCheckedChange={() => togglePreference(pref)}
+                          />
+                          <Label htmlFor={pref} className="capitalize">{pref.replace('-', ' ')}</Label>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </CardContent>
@@ -146,18 +274,18 @@ const CustomPlan = () => {
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-keto-green" />
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Clock className="h-5 w-5 text-primary" />
                     Cooking Preferences
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
+                  <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Maximum Cooking Time</Label>
-                      <Select>
+                      <Select value={maxCookTime} onValueChange={setMaxCookTime}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select max time" />
+                          <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="15">15 minutes</SelectItem>
@@ -169,9 +297,9 @@ const CustomPlan = () => {
                     </div>
                     <div className="space-y-2">
                       <Label>Cooking Skill Level</Label>
-                      <Select>
+                      <Select value={skillLevel} onValueChange={setSkillLevel}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select skill level" />
+                          <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="beginner">Beginner</SelectItem>
@@ -184,9 +312,18 @@ const CustomPlan = () => {
                 </CardContent>
               </Card>
 
-              <Button size="lg" className="w-full">
-                <Users className="h-5 w-5 mr-2" />
-                Generate Custom Plan
+              <Button size="lg" className="w-full" onClick={generatePlan} disabled={generating}>
+                {generating ? (
+                  <>
+                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Users className="h-5 w-5 mr-2" />
+                    Generate Custom Plan
+                  </>
+                )}
               </Button>
             </div>
           </div>
