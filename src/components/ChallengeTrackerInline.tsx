@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Calendar, Trophy, Target } from 'lucide-react';
+import { CheckCircle, Trophy, Target } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { format, differenceInDays, addDays } from 'date-fns';
+import ChallengeCertificate from './ChallengeCertificate';
 
 interface UserChallenge {
   id: string;
@@ -145,14 +145,23 @@ const ChallengeTrackerInline = ({ userChallenge, onUpdate }: ChallengeTrackerInl
     return (
       <Card className="border-green-200 bg-green-50/50 dark:bg-green-900/20">
         <CardContent className="pt-4">
-          <div className="flex items-center gap-3">
-            <Trophy className="h-8 w-8 text-yellow-500" />
-            <div>
-              <h4 className="font-semibold text-green-700 dark:text-green-400">Challenge Completed!</h4>
-              <p className="text-sm text-muted-foreground">
-                You earned {challenge.reward_points || 50} points
-              </p>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <Trophy className="h-8 w-8 text-yellow-500" />
+              <div>
+                <h4 className="font-semibold text-green-700 dark:text-green-400">Challenge Completed!</h4>
+                <p className="text-sm text-muted-foreground">
+                  You earned {challenge.reward_points || 50} points
+                </p>
+              </div>
             </div>
+            <ChallengeCertificate
+              challengeTitle={challenge.title}
+              completedDate={userChallenge.start_date}
+              userName={user?.email?.split('@')[0] || 'Champion'}
+              durationDays={challenge.duration_days}
+              rewardPoints={challenge.reward_points || 50}
+            />
           </div>
         </CardContent>
       </Card>

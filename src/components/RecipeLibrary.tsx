@@ -10,6 +10,7 @@ import SocialShareButtons from "@/components/SocialShareButtons";
 import { DietTypeSwitch } from "./DietTypeSwitch";
 import { UserRecipeSubmission } from "./UserRecipeSubmission";
 import { useToast } from "@/hooks/use-toast";
+import RecipeRecommendations from "./RecipeRecommendations";
 
 interface Recipe {
   id: string;
@@ -314,6 +315,14 @@ const RecipeLibrary = () => {
             <DietTypeSwitch />
           </div>
         )}
+
+        {/* Recipe Recommendations */}
+        <div className="mb-8">
+          <RecipeRecommendations onSelectRecipe={(recipeId) => {
+            const recipe = recipes.find(r => r.id === recipeId);
+            if (recipe) handleViewRecipe(recipe);
+          }} />
+        </div>
 
         {/* Top Contributors */}
         {topContributors.length > 0 && (
