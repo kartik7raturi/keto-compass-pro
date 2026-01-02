@@ -16,6 +16,7 @@ import { AdminTopPointers } from "@/components/admin/AdminTopPointers";
 import { AdminChallenges } from "@/components/admin/AdminChallenges";
 import { AdminMessages } from "@/components/admin/AdminMessages";
 import { AdminBadges } from "@/components/admin/AdminBadges";
+import { AdminModeration } from "@/components/admin/AdminModeration";
 
 const Admin = () => {
   const { user } = useAuth();
@@ -125,6 +126,10 @@ const Admin = () => {
               <Star className="h-4 w-4" />
               <span className="hidden sm:inline">Pointers</span>
             </TabsTrigger>
+            <TabsTrigger value="moderation" className="flex items-center gap-1 text-xs md:text-sm">
+              <Shield className="h-4 w-4" />
+              <span className="hidden sm:inline">Moderation</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="recipes">
@@ -161,6 +166,10 @@ const Admin = () => {
 
           <TabsContent value="pointers">
             <AdminTopPointers />
+          </TabsContent>
+
+          <TabsContent value="moderation">
+            <AdminModeration />
           </TabsContent>
         </Tabs>
       </main>

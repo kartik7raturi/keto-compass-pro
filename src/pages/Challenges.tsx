@@ -2,16 +2,15 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Target, Calendar, Trophy, Flame, Timer, Dumbbell, Droplet, ChevronDown, ChevronUp } from 'lucide-react';
+import { Target, Calendar, Trophy, Flame, Timer, Dumbbell, Droplet, MessageSquare } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ChallengeLeaderboard from '@/components/ChallengeLeaderboard';
-import ChallengeTrackerInline from '@/components/ChallengeTrackerInline';
+import { ChallengeCommunity } from '@/components/ChallengeCommunity';
 
 interface Challenge {
   id: string;
@@ -38,7 +37,7 @@ const Challenges = () => {
   const [userChallenges, setUserChallenges] = useState<UserChallenge[]>([]);
   const [filter, setFilter] = useState<string>('all');
   const [loading, setLoading] = useState(true);
-  const [expandedChallenge, setExpandedChallenge] = useState<string | null>(null);
+  const [selectedChallengeId, setSelectedChallengeId] = useState<string | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -177,40 +176,6 @@ const Challenges = () => {
             Join challenges to push your limits, earn badges, and compete with the community.
           </p>
         </div>
-
-        {/* Active Challenges Section */}
-        {user && activeChallenges.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-              <Target className="h-5 w-5 text-primary" />
-              Your Active Challenges
-            </h2>
-            <div className="grid gap-4 md:grid-cols-2">
-              {activeChallenges.map((uc) => (
-                <div key={uc.id} className="space-y-3">
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="flex items-center justify-between text-base">
-                        <div className="flex items-center gap-2">
-                          {getChallengeIcon(uc.challenges?.challenge_type)}
-                          <span>{uc.challenges?.title}</span>
-                        </div>
-                        <Badge variant="secondary">{uc.current_progress}%</Badge>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <Progress value={uc.current_progress || 0} className="h-2" />
-                    </CardContent>
-                  </Card>
-                  <ChallengeTrackerInline 
-                    userChallenge={uc} 
-                    onUpdate={fetchUserChallenges} 
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         <Tabs defaultValue="all" className="w-full">
           <TabsList className="flex flex-wrap justify-center w-full max-w-lg mx-auto mb-8 h-auto gap-1">
