@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import UserProgressWidget from "@/components/UserProgressWidget";
-import ActiveChallengesWidget from "@/components/ActiveChallengesWidget";
 import NotificationBell from "@/components/NotificationBell";
 
 const Header = () => {
@@ -143,7 +142,6 @@ const Header = () => {
                   <DropdownMenuSeparator />
                   <div className="p-2 space-y-3 max-h-96 overflow-y-auto">
                     <UserProgressWidget />
-                    <ActiveChallengesWidget />
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate('/profile')}>
@@ -232,12 +230,6 @@ const Header = () => {
               Community
             </button>
             
-            {/* Mobile Active Challenges */}
-            {user && (
-              <div className="pt-4 border-t mt-4">
-                <ActiveChallengesWidget />
-              </div>
-            )}
             {!user && (
               <>
                 <button 
