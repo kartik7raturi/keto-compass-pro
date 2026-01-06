@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Target, Calendar, Trophy, Flame, Timer, Dumbbell, Droplet, MessageSquare } from 'lucide-react';
+import { Target, Calendar, Trophy, Flame, Timer, Dumbbell, Droplet, MessageSquare, ChevronUp, ChevronDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -11,6 +11,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ChallengeLeaderboard from '@/components/ChallengeLeaderboard';
 import { ChallengeCommunity } from '@/components/ChallengeCommunity';
+import ChallengeTrackerInline from '@/components/ChallengeTrackerInline';
 
 interface Challenge {
   id: string;
@@ -38,6 +39,7 @@ const Challenges = () => {
   const [filter, setFilter] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const [selectedChallengeId, setSelectedChallengeId] = useState<string | null>(null);
+  const [expandedChallenge, setExpandedChallenge] = useState<string | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
 
