@@ -65,6 +65,42 @@ const ChallengeTrackerInline = ({ userChallenge, onUpdate }: ChallengeTrackerInl
     setDailyLogs(data || []);
   };
 
+  const awardChallengeBadge = async (challengeType: string, challengeTitle: string) => {
+    if (!user) return;
+    
+    try {
+      // Find matching badge for this challenge type
+      const { data: badges } = await supabase
+        .from('badges')
+        .select('id, name')
+        .or(`badge_type.eq.${challengeType},badge_type.eq.challenge`);
+      
+      if (badges && badges.length > 0) {
+        // Check if user already has this badge
+        const { data: existingBadge } = await supabase
+          .from('user_badges')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('badge_id', badges[0].id)
+          .maybeSingle();
+        
+        if (!existingBadge) {
+          await supabase.from('user_badges').insert({
+            user_id: user.id,
+            badge_id: badges[0].id
+          });
+          
+          toast({
+            title: '🏆 Badge Earned!',
+            description: `You earned the "${badges[0].name}" badge!`,
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error awarding badge:', error);
+    }
+  };
+
   const toggleDayCompletion = async (date: Date) => {
     if (!user) return;
     
@@ -107,6 +143,9 @@ const ChallengeTrackerInline = ({ userChallenge, onUpdate }: ChallengeTrackerInl
         // Award points
         await supabase.rpc('award_points', { points_to_add: challenge.reward_points || 50 });
         
+        // Award badge based on challenge type
+        await awardChallengeBadge(challenge.challenge_type, challenge.title);
+        
         // Create notification
         await supabase.from('notifications').insert({
           user_id: user.id,
@@ -118,7 +157,7 @@ const ChallengeTrackerInline = ({ userChallenge, onUpdate }: ChallengeTrackerInl
 
         toast({
           title: '🎉 Challenge Completed!',
-          description: `You earned ${challenge.reward_points || 50} points!`,
+          description: `You earned ${challenge.reward_points || 50} points and a badge!`,
         });
       }
 

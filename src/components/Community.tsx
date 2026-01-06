@@ -7,13 +7,22 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Heart, MessageCircle, Share2, Users, Trophy, Send } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Heart, MessageCircle, Share2, Users, Trophy, Send, MoreVertical, Pencil, Trash2, Flag, Ban, UserCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { ChartContainer } from "@/components/ui/chart";
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip } from "recharts";
 import { usePointsSystem, POINT_VALUES } from "@/hooks/usePointsSystem";
+import { CommunityGuidelines } from "./CommunityGuidelines";
+import { ReportDialog } from "./ReportDialog";
+import { UserProfileDialog } from "./UserProfileDialog";
 
 interface Community {
   id: string;
@@ -25,6 +34,7 @@ interface Community {
 
 interface CommunityPost {
   id: string;
+  user_id: string;
   author_name: string;
   author_avatar: string | null;
   content: string;
@@ -37,10 +47,17 @@ interface CommunityPost {
   created_at: string;
 }
 
+interface CommunityMember {
+  user_id: string;
+  display_name: string;
+  avatar_url: string | null;
+}
+
 const Community = () => {
   const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(null);
   const [communities, setCommunities] = useState<Community[]>([]);
   const [posts, setPosts] = useState<CommunityPost[]>([]);
+  const [members, setMembers] = useState<CommunityMember[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -49,16 +66,53 @@ const Community = () => {
   const [newPostContent, setNewPostContent] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [showGuidelines, setShowGuidelines] = useState(false);
+  const [hasAcceptedGuidelines, setHasAcceptedGuidelines] = useState(false);
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState("");
+  const [reportPost, setReportPost] = useState<CommunityPost | null>(null);
+  const [viewingUser, setViewingUser] = useState<string | null>(null);
+  const [blockedUsers, setBlockedUsers] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchCommunities();
-  }, []);
+    if (user) {
+      checkGuidelinesAcceptance();
+      fetchBlockedUsers();
+    }
+  }, [user]);
 
   useEffect(() => {
     if (selectedCommunity) {
       fetchPosts(selectedCommunity.id);
+      fetchMembers(selectedCommunity.id);
     }
   }, [selectedCommunity]);
+
+  const checkGuidelinesAcceptance = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('community_guidelines_acceptance')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    
+    if (data) {
+      setHasAcceptedGuidelines(true);
+    } else {
+      setShowGuidelines(true);
+    }
+  };
+
+  const fetchBlockedUsers = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('user_blocks')
+      .select('blocked_id')
+      .eq('blocker_id', user.id);
+    
+    setBlockedUsers(new Set(data?.map(b => b.blocked_id) || []));
+  };
 
   const fetchCommunities = async () => {
     try {
@@ -72,6 +126,34 @@ const Community = () => {
       }
     } catch (error) {
       console.error('Error fetching communities:', error);
+    }
+  };
+
+  const fetchMembers = async (communityId: string) => {
+    try {
+      const { data } = await supabase
+        .from('community_members')
+        .select('user_id')
+        .eq('community_id', communityId)
+        .limit(20);
+      
+      if (data && data.length > 0) {
+        const userIds = data.map(m => m.user_id);
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('user_id, display_name, avatar_url')
+          .in('user_id', userIds);
+        
+        setMembers(profiles?.map(p => ({
+          user_id: p.user_id,
+          display_name: p.display_name || 'User',
+          avatar_url: p.avatar_url
+        })) || []);
+      } else {
+        setMembers([]);
+      }
+    } catch (error) {
+      console.error('Error fetching members:', error);
     }
   };
 
@@ -192,6 +274,63 @@ const Community = () => {
     return `${Math.floor(diffInMinutes / 1440)}d ago`;
   };
 
+  const updatePost = async (postId: string) => {
+    if (!editContent.trim()) return;
+    
+    try {
+      await supabase
+        .from('community_posts')
+        .update({ content: editContent.trim() })
+        .eq('id', postId);
+      
+      setPosts(prev => prev.map(p => 
+        p.id === postId ? { ...p, content: editContent.trim() } : p
+      ));
+      setEditingPostId(null);
+      setEditContent('');
+      toast({ title: 'Post updated!' });
+    } catch (error) {
+      toast({ title: 'Error updating post', variant: 'destructive' });
+    }
+  };
+
+  const deletePost = async (postId: string) => {
+    try {
+      await supabase.from('community_posts').delete().eq('id', postId);
+      setPosts(prev => prev.filter(p => p.id !== postId));
+      toast({ title: 'Post deleted' });
+    } catch (error) {
+      toast({ title: 'Error deleting post', variant: 'destructive' });
+    }
+  };
+
+  const blockUser = async (userId: string) => {
+    if (!user) return;
+    try {
+      await supabase.from('user_blocks').insert({ blocker_id: user.id, blocked_id: userId });
+      setBlockedUsers(prev => new Set([...prev, userId]));
+      toast({ title: 'User blocked', description: 'You will no longer see their posts.' });
+    } catch (error) {
+      toast({ title: 'Error blocking user', variant: 'destructive' });
+    }
+  };
+
+  // Filter blocked users posts
+  const visiblePosts = posts.filter(p => !blockedUsers.has(p.user_id));
+
+  // Show guidelines for new users
+  if (!hasAcceptedGuidelines && user && showGuidelines) {
+    return (
+      <CommunityGuidelines 
+        open={showGuidelines} 
+        onAccept={() => {
+          setShowGuidelines(false);
+          setHasAcceptedGuidelines(true);
+        }} 
+      />
+    );
+  }
+
   if (loading && !selectedCommunity) {
     return <div className="container mx-auto px-4 py-8">Loading communities...</div>;
   }
@@ -261,7 +400,7 @@ const Community = () => {
                         <Users className="h-6 w-6 text-primary" />
                       </div>
                     )}
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <h2 className="font-bold text-lg truncate">{selectedCommunity.name}</h2>
                       <p className="text-sm text-muted-foreground">
                         {selectedCommunity.member_count} members
@@ -272,6 +411,32 @@ const Community = () => {
                     <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
                       {selectedCommunity.description}
                     </p>
+                  )}
+                  
+                  {/* Members */}
+                  {members.length > 0 && (
+                    <div className="mt-3 pt-3 border-t">
+                      <p className="text-xs text-muted-foreground mb-2">Active Members</p>
+                      <div className="flex flex-wrap gap-1">
+                        {members.map((member) => (
+                          <Tooltip key={member.user_id} delayDuration={0}>
+                            <TooltipTrigger asChild>
+                              <button onClick={() => setViewingUser(member.user_id)}>
+                                <Avatar className="h-7 w-7 hover:ring-2 ring-primary transition-all">
+                                  <AvatarImage src={member.avatar_url || undefined} />
+                                  <AvatarFallback className="text-xs">
+                                    {member.display_name[0]}
+                                  </AvatarFallback>
+                                </Avatar>
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="text-sm">{member.display_name}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </CardContent>
               </Card>
@@ -307,31 +472,110 @@ const Community = () => {
                 <div className="space-y-4 pr-2">
                   {loading ? (
                     <div className="text-center py-8 text-muted-foreground">Loading posts...</div>
-                  ) : posts.length === 0 ? (
+                  ) : visiblePosts.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                       No posts yet. Be the first to post!
                     </div>
                   ) : (
-                    posts.map((post) => (
+                    visiblePosts.map((post) => (
                       <Card key={post.id}>
                         <CardContent className="p-4">
                           <div className="flex items-start gap-3">
-                            <Avatar className="h-9 w-9 shrink-0">
-                              <AvatarImage src={post.author_avatar || undefined} />
-                              <AvatarFallback className="text-xs">
-                                {post.author_name.split(' ').map(n => n[0]).join('')}
-                              </AvatarFallback>
-                            </Avatar>
+                            <button onClick={() => setViewingUser(post.user_id)}>
+                              <Avatar className="h-9 w-9 shrink-0 hover:ring-2 ring-primary transition-all">
+                                <AvatarImage src={post.author_avatar || undefined} />
+                                <AvatarFallback className="text-xs">
+                                  {post.author_name.split(' ').map(n => n[0]).join('')}
+                                </AvatarFallback>
+                              </Avatar>
+                            </button>
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="font-medium text-sm truncate">{post.author_name}</span>
-                                <span className="text-xs text-muted-foreground shrink-0">
-                                  {formatTimeAgo(post.created_at)}
-                                </span>
+                              <div className="flex items-center justify-between mb-1">
+                                <div className="flex items-center gap-2">
+                                  <button 
+                                    onClick={() => setViewingUser(post.user_id)}
+                                    className="font-medium text-sm truncate hover:underline"
+                                  >
+                                    {post.author_name}
+                                  </button>
+                                  <span className="text-xs text-muted-foreground shrink-0">
+                                    {formatTimeAgo(post.created_at)}
+                                  </span>
+                                </div>
+                                
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                      <MoreVertical className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    {user?.id === post.user_id ? (
+                                      <>
+                                        <DropdownMenuItem onClick={() => {
+                                          setEditingPostId(post.id);
+                                          setEditContent(post.content);
+                                        }}>
+                                          <Pencil className="h-4 w-4 mr-2" />
+                                          Edit
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem 
+                                          onClick={() => deletePost(post.id)}
+                                          className="text-destructive"
+                                        >
+                                          <Trash2 className="h-4 w-4 mr-2" />
+                                          Delete
+                                        </DropdownMenuItem>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <DropdownMenuItem onClick={() => setViewingUser(post.user_id)}>
+                                          <UserCircle className="h-4 w-4 mr-2" />
+                                          View Profile
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setReportPost(post)}>
+                                          <Flag className="h-4 w-4 mr-2" />
+                                          Report
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem 
+                                          onClick={() => blockUser(post.user_id)}
+                                          className="text-destructive"
+                                        >
+                                          <Ban className="h-4 w-4 mr-2" />
+                                          Block User
+                                        </DropdownMenuItem>
+                                      </>
+                                    )}
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                               </div>
-                              {post.content && (
-                                <p className="text-sm mb-3 break-words">{post.content}</p>
+
+                              {editingPostId === post.id ? (
+                                <div className="mt-2 space-y-2">
+                                  <Textarea
+                                    value={editContent}
+                                    onChange={(e) => setEditContent(e.target.value)}
+                                    className="min-h-[60px]"
+                                  />
+                                  <div className="flex gap-2">
+                                    <Button size="sm" onClick={() => updatePost(post.id)}>Save</Button>
+                                    <Button 
+                                      size="sm" 
+                                      variant="outline" 
+                                      onClick={() => setEditingPostId(null)}
+                                    >
+                                      Cancel
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <>
+                                  {post.content && (
+                                    <p className="text-sm mb-3 break-words">{post.content}</p>
+                                  )}
+                                </>
                               )}
+                              
                               {post.image_url && (
                                 <img 
                                   src={post.image_url} 
@@ -377,6 +621,25 @@ const Community = () => {
           )}
         </div>
       </div>
+
+      {/* Report Dialog */}
+      {reportPost && (
+        <ReportDialog
+          open={!!reportPost}
+          onClose={() => setReportPost(null)}
+          reportedUserId={reportPost.user_id}
+          postId={reportPost.id}
+        />
+      )}
+
+      {/* User Profile Dialog */}
+      {viewingUser && (
+        <UserProfileDialog
+          open={!!viewingUser}
+          onClose={() => setViewingUser(null)}
+          userId={viewingUser}
+        />
+      )}
     </div>
   );
 };

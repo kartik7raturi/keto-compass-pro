@@ -39,6 +39,7 @@ import Contact from "./pages/Contact";
 import Community from "./components/Community";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import Messages from "./pages/Messages";
 
 const queryClient = new QueryClient();
 
@@ -88,6 +89,7 @@ const App = () => (
                   <Footer />
                 </div>
               } />
+              <Route path="/messages" element={<Messages />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
