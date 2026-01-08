@@ -135,18 +135,32 @@ const Challenges = () => {
   };
 
   const getChallengeIcon = (type: string) => {
-    switch (type?.toLowerCase()) {
-      case 'keto': return <Flame className="h-5 w-5 text-orange-500" />;
-      case 'fasting': return <Timer className="h-5 w-5 text-blue-500" />;
-      case 'workout': return <Dumbbell className="h-5 w-5 text-purple-500" />;
-      case 'water': return <Droplet className="h-5 w-5 text-cyan-500" />;
-      default: return <Target className="h-5 w-5 text-primary" />;
+    const normalizedType = type?.toLowerCase() || '';
+    if (normalizedType.includes('keto') || normalizedType.includes('sugar') || normalizedType.includes('carb')) {
+      return <Flame className="h-5 w-5 text-orange-500" />;
     }
+    if (normalizedType.includes('fast') || normalizedType.includes('intermittent')) {
+      return <Timer className="h-5 w-5 text-blue-500" />;
+    }
+    if (normalizedType.includes('workout') || normalizedType.includes('step') || normalizedType.includes('exercise') || normalizedType.includes('endurance') || normalizedType.includes('recovery') || normalizedType.includes('fuel')) {
+      return <Dumbbell className="h-5 w-5 text-purple-500" />;
+    }
+    if (normalizedType.includes('water') || normalizedType.includes('hydra')) {
+      return <Droplet className="h-5 w-5 text-cyan-500" />;
+    }
+    return <Target className="h-5 w-5 text-primary" />;
   };
 
   const filteredChallenges = filter === 'all' 
     ? challenges 
-    : challenges.filter(c => c.challenge_type?.toLowerCase() === filter);
+    : challenges.filter(c => {
+        const type = c.challenge_type?.toLowerCase() || '';
+        if (filter === 'keto') return type.includes('keto') || type.includes('sugar') || type.includes('carb');
+        if (filter === 'fasting') return type.includes('fast') || type.includes('intermittent');
+        if (filter === 'workout') return type.includes('workout') || type.includes('step') || type.includes('exercise') || type.includes('endurance') || type.includes('recovery') || type.includes('fuel');
+        if (filter === 'water') return type.includes('water') || type.includes('hydra');
+        return type === filter;
+      });
 
   const isJoined = (challengeId: string) => 
     userChallenges.some(uc => uc.challenge_id === challengeId);
