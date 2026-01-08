@@ -413,25 +413,37 @@ const Community = () => {
                     </p>
                   )}
                   
-                  {/* Members */}
+                  {/* Members Section */}
                   {members.length > 0 && (
                     <div className="mt-3 pt-3 border-t">
-                      <p className="text-xs text-muted-foreground mb-2">Active Members</p>
-                      <div className="flex flex-wrap gap-1">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Users className="h-3 w-3" />
+                          Community Members ({members.length})
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
                         {members.map((member) => (
                           <Tooltip key={member.user_id} delayDuration={0}>
                             <TooltipTrigger asChild>
-                              <button onClick={() => setViewingUser(member.user_id)}>
-                                <Avatar className="h-7 w-7 hover:ring-2 ring-primary transition-all">
+                              <button 
+                                onClick={() => setViewingUser(member.user_id)}
+                                className="flex items-center gap-1.5 px-2 py-1 bg-muted/50 rounded-full hover:bg-muted transition-colors"
+                              >
+                                <Avatar className="h-6 w-6">
                                   <AvatarImage src={member.avatar_url || undefined} />
                                   <AvatarFallback className="text-xs">
                                     {member.display_name[0]}
                                   </AvatarFallback>
                                 </Avatar>
+                                <span className="text-xs font-medium truncate max-w-[80px]">
+                                  {member.display_name}
+                                </span>
                               </button>
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p className="text-sm">{member.display_name}</p>
+                              <p className="text-sm font-medium">{member.display_name}</p>
+                              <p className="text-xs text-muted-foreground">Click to view profile</p>
                             </TooltipContent>
                           </Tooltip>
                         ))}
