@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Trophy, Target } from 'lucide-react';
+import { CheckCircle, Trophy, Target, RotateCcw, Flame, Timer, Dumbbell, Droplet } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -38,6 +38,29 @@ interface ChallengeTrackerInlineProps {
   onUpdate?: () => void;
 }
 
+// Badge mapping for each challenge type
+const CHALLENGE_BADGE_MAP: Record<string, string> = {
+  'keto': 'keto',
+  'keto_30_days': 'keto',
+  'fasting': 'fasting',
+  'intermittent_fasting': 'fasting',
+  'workout': 'workout',
+  '10k_steps': 'workout',
+  'water': 'water',
+  'hydration': 'water',
+  'sugar_free': 'keto',
+  'challenge': 'challenge',
+};
+
+const getChallengeIcon = (type: string) => {
+  const normalizedType = type?.toLowerCase() || '';
+  if (normalizedType.includes('keto') || normalizedType.includes('sugar')) return <Flame className="h-5 w-5 text-orange-500" />;
+  if (normalizedType.includes('fast') || normalizedType.includes('timer')) return <Timer className="h-5 w-5 text-purple-500" />;
+  if (normalizedType.includes('workout') || normalizedType.includes('step') || normalizedType.includes('exercise')) return <Dumbbell className="h-5 w-5 text-blue-500" />;
+  if (normalizedType.includes('water') || normalizedType.includes('hydra')) return <Droplet className="h-5 w-5 text-cyan-500" />;
+  return <Target className="h-5 w-5 text-primary" />;
+};
+
 const ChallengeTrackerInline = ({ userChallenge, onUpdate }: ChallengeTrackerInlineProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -69,11 +92,16 @@ const ChallengeTrackerInline = ({ userChallenge, onUpdate }: ChallengeTrackerInl
     if (!user) return;
     
     try {
+      // Determine badge type from challenge type
+      const badgeType = CHALLENGE_BADGE_MAP[challengeType?.toLowerCase()] || 'challenge';
+      
       // Find matching badge for this challenge type
       const { data: badges } = await supabase
         .from('badges')
         .select('id, name')
-        .or(`badge_type.eq.${challengeType},badge_type.eq.challenge`);
+        .eq('badge_type', badgeType)
+        .order('requirement_value', { ascending: true })
+        .limit(1);
       
       if (badges && badges.length > 0) {
         // Check if user already has this badge
@@ -93,6 +121,43 @@ const ChallengeTrackerInline = ({ userChallenge, onUpdate }: ChallengeTrackerInl
           toast({
             title: '🏆 Badge Earned!',
             description: `You earned the "${badges[0].name}" badge!`,
+          });
+        }
+      }
+
+      // Also check for challenge completion badges (First Steps, Challenge Warrior, etc.)
+      const { count: completedCount } = await supabase
+        .from('user_challenges')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('is_completed', true);
+
+      // Find appropriate challenge completion badge
+      const { data: challengeBadges } = await supabase
+        .from('badges')
+        .select('id, name, requirement_value')
+        .eq('badge_type', 'challenge')
+        .lte('requirement_value', (completedCount || 0) + 1)
+        .order('requirement_value', { ascending: false })
+        .limit(1);
+
+      if (challengeBadges && challengeBadges.length > 0) {
+        const { data: existingChallengeBadge } = await supabase
+          .from('user_badges')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('badge_id', challengeBadges[0].id)
+          .maybeSingle();
+
+        if (!existingChallengeBadge) {
+          await supabase.from('user_badges').insert({
+            user_id: user.id,
+            badge_id: challengeBadges[0].id
+          });
+
+          toast({
+            title: '🎖️ Achievement Unlocked!',
+            description: `You earned the "${challengeBadges[0].name}" badge!`,
           });
         }
       }
@@ -170,6 +235,43 @@ const ChallengeTrackerInline = ({ userChallenge, onUpdate }: ChallengeTrackerInl
     }
   };
 
+  const resetChallenge = async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    try {
+      // Delete all daily logs
+      await supabase
+        .from('challenge_daily_logs')
+        .delete()
+        .eq('user_challenge_id', userChallenge.id);
+      
+      // Reset challenge progress
+      await supabase
+        .from('user_challenges')
+        .update({ 
+          current_progress: 0,
+          is_completed: false,
+          start_date: format(new Date(), 'yyyy-MM-dd')
+        })
+        .eq('id', userChallenge.id);
+
+      setDailyLogs([]);
+      
+      toast({
+        title: 'Challenge Reset',
+        description: 'Your challenge has been reset. Good luck!',
+      });
+
+      onUpdate?.();
+    } catch (error) {
+      console.error('Error resetting challenge:', error);
+      toast({ title: 'Error resetting challenge', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const isDayCompleted = (date: Date) => {
     const dateStr = format(date, 'yyyy-MM-dd');
     return dailyLogs.find(l => l.log_date === dateStr)?.completed || false;
@@ -184,23 +286,37 @@ const ChallengeTrackerInline = ({ userChallenge, onUpdate }: ChallengeTrackerInl
     return (
       <Card className="border-green-200 bg-green-50/50 dark:bg-green-900/20">
         <CardContent className="pt-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <Trophy className="h-8 w-8 text-yellow-500" />
-              <div>
-                <h4 className="font-semibold text-green-700 dark:text-green-400">Challenge Completed!</h4>
-                <p className="text-sm text-muted-foreground">
-                  You earned {challenge.reward_points || 50} points
-                </p>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <Trophy className="h-8 w-8 text-yellow-500" />
+                <div>
+                  <h4 className="font-semibold text-green-700 dark:text-green-400">Challenge Completed!</h4>
+                  <p className="text-sm text-muted-foreground">
+                    You earned {challenge.reward_points || 50} points
+                  </p>
+                </div>
               </div>
+              <ChallengeCertificate
+                challengeTitle={challenge.title}
+                completedDate={userChallenge.start_date}
+                userName={user?.email?.split('@')[0] || 'Champion'}
+                durationDays={challenge.duration_days}
+                rewardPoints={challenge.reward_points || 50}
+              />
             </div>
-            <ChallengeCertificate
-              challengeTitle={challenge.title}
-              completedDate={userChallenge.start_date}
-              userName={user?.email?.split('@')[0] || 'Champion'}
-              durationDays={challenge.duration_days}
-              rewardPoints={challenge.reward_points || 50}
-            />
+            
+            {/* Reset Button */}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={resetChallenge}
+              disabled={loading}
+              className="w-full sm:w-auto"
+            >
+              <RotateCcw className="h-4 w-4 mr-2" />
+              {loading ? 'Resetting...' : 'Restart Challenge'}
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -212,7 +328,7 @@ const ChallengeTrackerInline = ({ userChallenge, onUpdate }: ChallengeTrackerInl
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center justify-between text-base">
           <div className="flex items-center gap-2">
-            <Target className="h-5 w-5 text-primary" />
+            {getChallengeIcon(challenge.challenge_type)}
             <span>Daily Tracker</span>
           </div>
           <Badge variant="secondary">Day {dayNumber}/{challenge.duration_days}</Badge>

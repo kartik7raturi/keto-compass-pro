@@ -13,11 +13,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Trophy, Award, MessageSquare, Star, Target, Flame,
-  Timer, Dumbbell, Droplet, Crown, Medal
+  Timer, Dumbbell, Droplet, Crown, Medal, UserPlus, UserCheck,
+  ChefHat, ThumbsUp, Footprints, Hourglass, Sword, Leaf, Users
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import { CommunityGuidelines } from './CommunityGuidelines';
 
 interface UserProfileDialogProps {
   open: boolean;
@@ -28,6 +31,7 @@ interface UserProfileDialogProps {
 interface UserProfile {
   display_name: string;
   avatar_url: string | null;
+  email: string | null;
 }
 
 interface UserBadge {
@@ -49,6 +53,19 @@ interface UserPost {
   likes_count: number;
 }
 
+interface UserRecipe {
+  id: string;
+  title: string;
+  upvotes: number;
+  is_approved: boolean;
+  created_at: string;
+}
+
+interface UserProgress {
+  total_points: number;
+  current_level: number;
+}
+
 const iconMap: Record<string, React.ReactNode> = {
   award: <Award className="h-5 w-5" />,
   crown: <Crown className="h-5 w-5" />,
@@ -59,16 +76,27 @@ const iconMap: Record<string, React.ReactNode> = {
   droplet: <Droplet className="h-5 w-5" />,
   medal: <Medal className="h-5 w-5" />,
   target: <Target className="h-5 w-5" />,
+  footprints: <Footprints className="h-5 w-5" />,
+  hourglass: <Hourglass className="h-5 w-5" />,
+  sword: <Sword className="h-5 w-5" />,
+  leaf: <Leaf className="h-5 w-5" />,
+  users: <Users className="h-5 w-5" />,
 };
 
 export const UserProfileDialog = ({ open, onClose, userId }: UserProfileDialogProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [badges, setBadges] = useState<UserBadge[]>([]);
   const [posts, setPosts] = useState<UserPost[]>([]);
-  const [progress, setProgress] = useState<{ total_points: number; current_level: number } | null>(null);
+  const [recipes, setRecipes] = useState<UserRecipe[]>([]);
+  const [progress, setProgress] = useState<UserProgress | null>(null);
+  const [rank, setRank] = useState<number | null>(null);
+  const [challengesCompleted, setChallengesCompleted] = useState(0);
+  const [isFollowing, setIsFollowing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showGuidelines, setShowGuidelines] = useState(false);
 
   useEffect(() => {
     if (open && userId) {
@@ -82,7 +110,7 @@ export const UserProfileDialog = ({ open, onClose, userId }: UserProfileDialogPr
       // Fetch profile
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('display_name, avatar_url')
+        .select('display_name, avatar_url, email')
         .eq('user_id', userId)
         .maybeSingle();
       setProfile(profileData);
@@ -102,15 +130,56 @@ export const UserProfileDialog = ({ open, onClose, userId }: UserProfileDialogPr
         .maybeSingle();
       setProgress(progressData);
 
-      // Fetch recent posts
-      const { data: postsData } = await supabase
+      // Calculate global rank
+      if (progressData) {
+        const { count } = await supabase
+          .from('user_progress')
+          .select('*', { count: 'exact', head: true })
+          .gt('total_points', progressData.total_points);
+        setRank((count || 0) + 1);
+      }
+
+      // Fetch completed challenges count
+      const { count: challengeCount } = await supabase
+        .from('user_challenges')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('is_completed', true);
+      setChallengesCompleted(challengeCount || 0);
+
+      // Fetch user recipes
+      const { data: recipesData } = await supabase
+        .from('user_recipes')
+        .select('id, title, upvotes, is_approved, created_at')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(10);
+      setRecipes(recipesData || []);
+
+      // Fetch recent posts (both community and challenge posts)
+      const { data: communityPosts } = await supabase
+        .from('community_posts')
+        .select('id, content, created_at, likes_count')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(5);
+      
+      const { data: challengePosts } = await supabase
         .from('challenge_posts')
         .select('id, content, created_at, likes_count')
         .eq('user_id', userId)
         .eq('is_flagged', false)
         .order('created_at', { ascending: false })
-        .limit(10);
-      setPosts(postsData || []);
+        .limit(5);
+      
+      // Combine and sort posts
+      const allPosts = [...(communityPosts || []), ...(challengePosts || [])]
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 10);
+      setPosts(allPosts);
+
+      // Check if following (using user_blocks as inverse - if not blocked, can be followed)
+      // For now, we'll skip following since there's no follows table
 
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -124,116 +193,242 @@ export const UserProfileDialog = ({ open, onClose, userId }: UserProfileDialogPr
     navigate(`/messages?user=${userId}`);
   };
 
+  const handleFollow = async () => {
+    // For now, just show a toast - could add a follows table in future
+    toast({
+      title: isFollowing ? 'Unfollowed' : 'Following!',
+      description: isFollowing 
+        ? `You unfollowed ${profile?.display_name}` 
+        : `You are now following ${profile?.display_name}`,
+    });
+    setIsFollowing(!isFollowing);
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
   };
 
+  const getRankIcon = (rankNum: number) => {
+    if (rankNum === 1) return <Crown className="h-4 w-4 text-yellow-500" />;
+    if (rankNum === 2) return <Medal className="h-4 w-4 text-gray-400" />;
+    if (rankNum === 3) return <Medal className="h-4 w-4 text-amber-600" />;
+    return <Trophy className="h-4 w-4 text-primary" />;
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md max-h-[80vh]">
-        <DialogHeader>
-          <DialogTitle>User Profile</DialogTitle>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onClose}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle>User Profile</DialogTitle>
+          </DialogHeader>
 
-        {loading ? (
-          <div className="py-8 text-center text-muted-foreground">Loading...</div>
-        ) : (
-          <div className="space-y-4">
-            {/* Profile Header */}
-            <div className="flex items-center gap-4">
-              <Avatar className="h-16 w-16">
-                <AvatarImage src={profile?.avatar_url || undefined} />
-                <AvatarFallback className="text-lg">
-                  {profile?.display_name?.[0] || '?'}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <h3 className="font-bold text-lg">{profile?.display_name || 'User'}</h3>
-                {progress && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Badge variant="secondary" className="flex items-center gap-1">
-                      <Trophy className="h-3 w-3" />
-                      Level {progress.current_level}
-                    </Badge>
-                    <span>{progress.total_points} points</span>
+          {loading ? (
+            <div className="py-8 text-center text-muted-foreground">Loading...</div>
+          ) : !profile ? (
+            <div className="py-8 text-center text-muted-foreground">Profile not found</div>
+          ) : (
+            <div className="space-y-4 overflow-y-auto flex-1">
+              {/* Profile Header */}
+              <div className="flex items-center gap-4">
+                <Avatar className="h-20 w-20 border-2 border-primary">
+                  <AvatarImage src={profile?.avatar_url || undefined} />
+                  <AvatarFallback className="text-2xl">
+                    {profile?.display_name?.[0] || '?'}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <h3 className="font-bold text-xl">{profile?.display_name || 'User'}</h3>
+                  
+                  {/* Stats Row */}
+                  <div className="flex flex-wrap items-center gap-2 mt-2">
+                    {rank && (
+                      <Badge variant="outline" className="flex items-center gap-1">
+                        {getRankIcon(rank)}
+                        Rank #{rank}
+                      </Badge>
+                    )}
+                    {progress && (
+                      <Badge variant="secondary" className="flex items-center gap-1">
+                        <Trophy className="h-3 w-3" />
+                        Level {progress.current_level}
+                      </Badge>
+                    )}
                   </div>
-                )}
+                  
+                  {/* Points & Challenges */}
+                  <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
+                    {progress && <span>{progress.total_points} points</span>}
+                    <span>{challengesCompleted} challenges completed</span>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            {/* Action Buttons */}
-            {user && user.id !== userId && (
-              <Button onClick={startChat} className="w-full">
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Send Message
+              {/* Achievements Summary */}
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="p-2 bg-muted/50 rounded-lg">
+                  <Award className="h-5 w-5 mx-auto text-primary" />
+                  <div className="font-bold">{badges.length}</div>
+                  <div className="text-xs text-muted-foreground">Badges</div>
+                </div>
+                <div className="p-2 bg-muted/50 rounded-lg">
+                  <ChefHat className="h-5 w-5 mx-auto text-primary" />
+                  <div className="font-bold">{recipes.length}</div>
+                  <div className="text-xs text-muted-foreground">Recipes</div>
+                </div>
+                <div className="p-2 bg-muted/50 rounded-lg">
+                  <MessageSquare className="h-5 w-5 mx-auto text-primary" />
+                  <div className="font-bold">{posts.length}</div>
+                  <div className="text-xs text-muted-foreground">Posts</div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              {user && user.id !== userId && (
+                <div className="flex gap-2">
+                  <Button onClick={handleFollow} variant="outline" className="flex-1">
+                    {isFollowing ? (
+                      <>
+                        <UserCheck className="h-4 w-4 mr-2" />
+                        Following
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        Follow
+                      </>
+                    )}
+                  </Button>
+                  <Button onClick={startChat} className="flex-1">
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Message
+                  </Button>
+                </div>
+              )}
+
+              {/* Community Guidelines Link */}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="w-full text-muted-foreground"
+                onClick={() => setShowGuidelines(true)}
+              >
+                View Community Guidelines
               </Button>
-            )}
 
-            {/* Tabs */}
-            <Tabs defaultValue="badges">
-              <TabsList className="w-full">
-                <TabsTrigger value="badges" className="flex-1">
-                  Badges ({badges.length})
-                </TabsTrigger>
-                <TabsTrigger value="posts" className="flex-1">
-                  Posts ({posts.length})
-                </TabsTrigger>
-              </TabsList>
+              {/* Tabs */}
+              <Tabs defaultValue="badges" className="flex-1">
+                <TabsList className="w-full grid grid-cols-3">
+                  <TabsTrigger value="badges">
+                    Badges
+                  </TabsTrigger>
+                  <TabsTrigger value="recipes">
+                    Recipes
+                  </TabsTrigger>
+                  <TabsTrigger value="posts">
+                    Posts
+                  </TabsTrigger>
+                </TabsList>
 
-              <TabsContent value="badges">
-                <ScrollArea className="h-[200px]">
-                  {badges.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground text-sm">
-                      No badges earned yet
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-4 gap-2">
-                      {badges.map((ub) => (
-                        <div 
-                          key={ub.id} 
-                          className="p-2 bg-muted/50 rounded-lg flex flex-col items-center text-center"
-                          title={ub.badges?.description}
-                        >
-                          <div className="p-2 bg-primary/10 rounded-full text-primary">
-                            {iconMap[ub.badges?.icon] || <Award className="h-5 w-5" />}
-                          </div>
-                          <span className="text-xs mt-1 line-clamp-1">
-                            {ub.badges?.name}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </ScrollArea>
-              </TabsContent>
-
-              <TabsContent value="posts">
-                <ScrollArea className="h-[200px]">
-                  {posts.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground text-sm">
-                      No posts yet
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {posts.map((post) => (
-                        <Card key={post.id}>
-                          <CardContent className="p-3">
-                            <p className="text-sm line-clamp-2">{post.content}</p>
-                            <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
-                              <span>{formatDate(post.created_at)}</span>
-                              <span>{post.likes_count} likes</span>
+                <TabsContent value="badges">
+                  <ScrollArea className="h-[180px]">
+                    {badges.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground text-sm">
+                        No badges earned yet
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-4 gap-2">
+                        {badges.map((ub) => (
+                          <div 
+                            key={ub.id} 
+                            className="p-2 bg-muted/50 rounded-lg flex flex-col items-center text-center"
+                            title={ub.badges?.description}
+                          >
+                            <div className="p-2 bg-primary/10 rounded-full text-primary">
+                              {iconMap[ub.badges?.icon] || <Award className="h-5 w-5" />}
                             </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </ScrollArea>
-              </TabsContent>
-            </Tabs>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+                            <span className="text-xs mt-1 line-clamp-2">
+                              {ub.badges?.name}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </ScrollArea>
+                </TabsContent>
+
+                <TabsContent value="recipes">
+                  <ScrollArea className="h-[180px]">
+                    {recipes.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground text-sm">
+                        No recipes submitted yet
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {recipes.map((recipe) => (
+                          <Card key={recipe.id}>
+                            <CardContent className="p-3">
+                              <div className="flex items-center justify-between">
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium truncate">{recipe.title}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {formatDate(recipe.created_at)}
+                                  </p>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  {recipe.is_approved && (
+                                    <Badge variant="secondary" className="text-xs">Approved</Badge>
+                                  )}
+                                  <Badge variant="outline" className="flex items-center gap-1">
+                                    <ThumbsUp className="h-3 w-3" />
+                                    {recipe.upvotes || 0}
+                                  </Badge>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </ScrollArea>
+                </TabsContent>
+
+                <TabsContent value="posts">
+                  <ScrollArea className="h-[180px]">
+                    {posts.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground text-sm">
+                        No posts yet
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {posts.map((post) => (
+                          <Card key={post.id}>
+                            <CardContent className="p-3">
+                              <p className="text-sm line-clamp-2">{post.content}</p>
+                              <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
+                                <span>{formatDate(post.created_at)}</span>
+                                <span>{post.likes_count} likes</span>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </ScrollArea>
+                </TabsContent>
+              </Tabs>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Community Guidelines Dialog */}
+      {showGuidelines && (
+        <CommunityGuidelines 
+          open={showGuidelines} 
+          onAccept={() => setShowGuidelines(false)} 
+        />
+      )}
+    </>
   );
 };
