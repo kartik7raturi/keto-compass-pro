@@ -341,10 +341,11 @@ const Community = () => {
       <h1 className="text-2xl md:text-3xl font-bold text-center mb-6">Communities</h1>
       
       <div className="flex gap-4 h-[calc(100vh-200px)] min-h-[500px]">
-        {/* Sidebar - Community Icons */}
+        {/* Sidebar - Community Icons + User Icons */}
         <div className="w-16 md:w-20 bg-muted/30 rounded-lg border flex flex-col shrink-0">
           <ScrollArea className="flex-1">
             <div className="flex flex-col items-center py-3 gap-2">
+              {/* Community Icons */}
               {communities.map((community) => (
                 <Tooltip key={community.id} delayDuration={0}>
                   <TooltipTrigger asChild>
@@ -375,6 +376,34 @@ const Community = () => {
                   <TooltipContent side="right">
                     <p className="font-medium">{community.name}</p>
                     <p className="text-xs text-muted-foreground">{community.member_count} members</p>
+                  </TooltipContent>
+                </Tooltip>
+              ))}
+              
+              {/* Divider */}
+              {members.length > 0 && (
+                <div className="w-8 h-px bg-border my-2" />
+              )}
+              
+              {/* Member Profile Icons */}
+              {members.map((member) => (
+                <Tooltip key={member.user_id} delayDuration={0}>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => setViewingUser(member.user_id)}
+                      className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden transition-all duration-200 hover:scale-105 shrink-0 hover:ring-2 hover:ring-primary/50"
+                    >
+                      <Avatar className="w-full h-full">
+                        <AvatarImage src={member.avatar_url || undefined} />
+                        <AvatarFallback className="text-sm bg-secondary text-secondary-foreground">
+                          {member.display_name[0]?.toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    <p className="font-medium">{member.display_name}</p>
+                    <p className="text-xs text-muted-foreground">View profile</p>
                   </TooltipContent>
                 </Tooltip>
               ))}
