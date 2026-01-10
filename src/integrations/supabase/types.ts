@@ -945,6 +945,57 @@ export type Database = {
         }
         Relationships: []
       }
+      post_comments: {
+        Row: {
+          author_avatar: string | null
+          author_name: string
+          content: string
+          created_at: string
+          id: string
+          parent_comment_id: string | null
+          post_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          author_avatar?: string | null
+          author_name: string
+          content: string
+          created_at?: string
+          id?: string
+          parent_comment_id?: string | null
+          post_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          author_avatar?: string | null
+          author_name?: string
+          content?: string
+          created_at?: string
+          id?: string
+          parent_comment_id?: string | null
+          post_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "post_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           activity_level: string | null
@@ -955,6 +1006,8 @@ export type Database = {
           diet_type: string | null
           display_name: string | null
           email: string | null
+          follower_count: number | null
+          following_count: number | null
           goal_weight: number | null
           height: number | null
           id: string
@@ -970,6 +1023,8 @@ export type Database = {
           diet_type?: string | null
           display_name?: string | null
           email?: string | null
+          follower_count?: number | null
+          following_count?: number | null
           goal_weight?: number | null
           height?: number | null
           id?: string
@@ -985,6 +1040,8 @@ export type Database = {
           diet_type?: string | null
           display_name?: string | null
           email?: string | null
+          follower_count?: number | null
+          following_count?: number | null
           goal_weight?: number | null
           height?: number | null
           id?: string
@@ -1329,6 +1386,27 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      user_follows: {
+        Row: {
+          created_at: string
+          follower_id: string
+          following_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          following_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          following_id?: string
+          id?: string
+        }
+        Relationships: []
       }
       user_messages: {
         Row: {
