@@ -23,6 +23,7 @@ import { usePointsSystem, POINT_VALUES } from "@/hooks/usePointsSystem";
 import { CommunityGuidelines } from "./CommunityGuidelines";
 import { ReportDialog } from "./ReportDialog";
 import { UserProfileDialog } from "./UserProfileDialog";
+import { PostComments } from "./PostComments";
 
 interface Community {
   id: string;
@@ -616,11 +617,20 @@ const Community = () => {
                                   <Heart className="h-4 w-4" />
                                   <span className="text-xs">{post.likes_count}</span>
                                 </button>
-                                <div className="flex items-center gap-1 text-muted-foreground">
-                                  <MessageCircle className="h-4 w-4" />
-                                  <span className="text-xs">{post.comments_count}</span>
-                                </div>
                               </div>
+                              
+                              {/* Comments Section */}
+                              <PostComments 
+                                postId={post.id} 
+                                commentsCount={post.comments_count || 0}
+                                onCommentsCountChange={(delta) => {
+                                  setPosts(prev => prev.map(p => 
+                                    p.id === post.id 
+                                      ? { ...p, comments_count: Math.max(0, (p.comments_count || 0) + delta) }
+                                      : p
+                                  ));
+                                }}
+                              />
                             </div>
                           </div>
                         </CardContent>

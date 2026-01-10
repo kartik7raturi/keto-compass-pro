@@ -95,7 +95,10 @@ export const UserProfileDialog = ({ open, onClose, userId }: UserProfileDialogPr
   const [rank, setRank] = useState<number | null>(null);
   const [challengesCompleted, setChallengesCompleted] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [followerCount, setFollowerCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [followLoading, setFollowLoading] = useState(false);
   const [showGuidelines, setShowGuidelines] = useState(false);
 
   useEffect(() => {
@@ -178,8 +181,29 @@ export const UserProfileDialog = ({ open, onClose, userId }: UserProfileDialogPr
         .slice(0, 10);
       setPosts(allPosts);
 
-      // Check if following (using user_blocks as inverse - if not blocked, can be followed)
-      // For now, we'll skip following since there's no follows table
+      // Fetch follower/following counts
+      const { count: followers } = await supabase
+        .from('user_follows')
+        .select('*', { count: 'exact', head: true })
+        .eq('following_id', userId);
+      setFollowerCount(followers || 0);
+
+      const { count: following } = await supabase
+        .from('user_follows')
+        .select('*', { count: 'exact', head: true })
+        .eq('follower_id', userId);
+      setFollowingCount(following || 0);
+
+      // Check if current user is following this user
+      if (user && user.id !== userId) {
+        const { data: followData } = await supabase
+          .from('user_follows')
+          .select('id')
+          .eq('follower_id', user.id)
+          .eq('following_id', userId)
+          .maybeSingle();
+        setIsFollowing(!!followData);
+      }
 
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -194,14 +218,47 @@ export const UserProfileDialog = ({ open, onClose, userId }: UserProfileDialogPr
   };
 
   const handleFollow = async () => {
-    // For now, just show a toast - could add a follows table in future
-    toast({
-      title: isFollowing ? 'Unfollowed' : 'Following!',
-      description: isFollowing 
-        ? `You unfollowed ${profile?.display_name}` 
-        : `You are now following ${profile?.display_name}`,
-    });
-    setIsFollowing(!isFollowing);
+    if (!user || followLoading) return;
+    
+    setFollowLoading(true);
+    try {
+      if (isFollowing) {
+        // Unfollow
+        await supabase
+          .from('user_follows')
+          .delete()
+          .eq('follower_id', user.id)
+          .eq('following_id', userId);
+        
+        setIsFollowing(false);
+        setFollowerCount(prev => Math.max(0, prev - 1));
+        toast({
+          title: 'Unfollowed',
+          description: `You unfollowed ${profile?.display_name}`,
+        });
+      } else {
+        // Follow
+        await supabase
+          .from('user_follows')
+          .insert({ follower_id: user.id, following_id: userId });
+        
+        setIsFollowing(true);
+        setFollowerCount(prev => prev + 1);
+        toast({
+          title: 'Following!',
+          description: `You are now following ${profile?.display_name}`,
+        });
+      }
+    } catch (error) {
+      console.error('Error toggling follow:', error);
+      toast({
+        title: 'Error',
+        description: 'Could not update follow status',
+        variant: 'destructive',
+      });
+    } finally {
+      setFollowLoading(false);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -259,7 +316,13 @@ export const UserProfileDialog = ({ open, onClose, userId }: UserProfileDialogPr
                   {/* Points & Challenges */}
                   <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
                     {progress && <span>{progress.total_points} points</span>}
-                    <span>{challengesCompleted} challenges completed</span>
+                    <span>{challengesCompleted} challenges</span>
+                  </div>
+                  
+                  {/* Follower/Following counts */}
+                  <div className="flex gap-4 mt-1 text-sm">
+                    <span><strong>{followerCount}</strong> followers</span>
+                    <span><strong>{followingCount}</strong> following</span>
                   </div>
                 </div>
               </div>
