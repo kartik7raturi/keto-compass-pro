@@ -348,7 +348,7 @@ const Community = () => {
       <h1 className="text-2xl md:text-3xl font-bold text-center mb-6">Communities</h1>
       
       <div className="flex gap-4 h-[calc(100vh-200px)] min-h-[500px]">
-        {/* Sidebar - Community Icons + User Icons */}
+        {/* Sidebar - Community Icons + Member Icons with DM */}
         <div className="w-16 md:w-20 bg-muted/30 rounded-lg border flex flex-col shrink-0">
           <ScrollArea className="flex-1">
             <div className="flex flex-col items-center py-3 gap-2">
@@ -387,6 +387,59 @@ const Community = () => {
                 </Tooltip>
               ))}
               
+              {/* Divider */}
+              {selectedCommunity && members.length > 0 && (
+                <>
+                  <div className="w-8 h-px bg-border my-2" />
+                  <p className="text-[10px] text-muted-foreground">Members</p>
+                </>
+              )}
+              
+              {/* Member Icons with DM button */}
+              {selectedCommunity && members.slice(0, 10).map((member) => (
+                <Tooltip key={member.user_id} delayDuration={0}>
+                  <TooltipTrigger asChild>
+                    <div className="relative group">
+                      <button
+                        onClick={() => setViewingUser(member.user_id)}
+                        className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden transition-all duration-200 hover:scale-105 shrink-0 hover:ring-2 hover:ring-muted-foreground/50"
+                      >
+                        <Avatar className="w-full h-full">
+                          <AvatarImage src={member.avatar_url || undefined} />
+                          <AvatarFallback className="text-sm">
+                            {member.display_name?.[0]?.toUpperCase() || '?'}
+                          </AvatarFallback>
+                        </Avatar>
+                        {/* Online indicator */}
+                        <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-background ${
+                          isOnline(member.user_id) ? 'bg-green-500' : 'bg-gray-400'
+                        }`} />
+                      </button>
+                      {/* DM button overlay */}
+                      {user && member.user_id !== user.id && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            startDirectMessage(member.user_id);
+                          }}
+                          className="absolute -bottom-1 -right-1 w-5 h-5 bg-primary text-primary-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center shadow-md hover:bg-primary/90"
+                        >
+                          <MessageSquare className="h-3 w-3" />
+                        </button>
+                      )}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    <p className="font-medium">{member.display_name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {isOnline(member.user_id) ? 'Online' : 'Offline'}
+                    </p>
+                    {user && member.user_id !== user.id && (
+                      <p className="text-xs text-primary mt-1">Click message icon to DM</p>
+                    )}
+                  </TooltipContent>
+                </Tooltip>
+              ))}
             </div>
           </ScrollArea>
         </div>
