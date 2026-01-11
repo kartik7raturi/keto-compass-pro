@@ -15,6 +15,12 @@ import WaterChart from "@/components/charts/WaterChart";
 import UserProgressWidget from "@/components/UserProgressWidget";
 import { usePointsSystem, POINT_VALUES } from "@/hooks/usePointsSystem";
 
+interface WeeklySummary {
+  ketoDays: number;
+  currentStreak: number;
+  weeklyWeightChange: number;
+}
+
 const ProgressDashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -26,6 +32,11 @@ const ProgressDashboard = () => {
   const [newCurrentWeight, setNewCurrentWeight] = useState("");
   const [newGoalWeight, setNewGoalWeight] = useState("");
   const [loading, setLoading] = useState(true);
+  const [weeklySummary, setWeeklySummary] = useState<WeeklySummary>({
+    ketoDays: 0,
+    currentStreak: 0,
+    weeklyWeightChange: 0
+  });
 
   useEffect(() => {
     if (user) {
@@ -49,6 +60,53 @@ const ProgressDashboard = () => {
         .eq('user_id', user?.id)
         .order('logged_at', { ascending: false })
         .limit(10);
+
+      // Fetch weekly keto data
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      const weekAgoStr = weekAgo.toISOString().split('T')[0];
+
+      const { data: ketoData } = await supabase
+        .from('keto_streaks')
+        .select('*')
+        .eq('user_id', user?.id)
+        .eq('completed', true)
+        .gte('date', weekAgoStr);
+
+      // Calculate current streak
+      const { data: allKetoData } = await supabase
+        .from('keto_streaks')
+        .select('date, completed')
+        .eq('user_id', user?.id)
+        .order('date', { ascending: false })
+        .limit(30);
+
+      let streak = 0;
+      if (allKetoData) {
+        for (const entry of allKetoData) {
+          if (entry.completed) {
+            streak++;
+          } else {
+            break;
+          }
+        }
+      }
+
+      // Calculate weekly weight change
+      let weeklyWeightChange = 0;
+      if (weightData && weightData.length >= 1) {
+        const recentWeight = weightData[0].weight;
+        const weekOldWeight = weightData.find(w => 
+          new Date(w.logged_at) <= weekAgo
+        )?.weight || (weightData.length > 1 ? weightData[weightData.length - 1].weight : recentWeight);
+        weeklyWeightChange = weekOldWeight - recentWeight;
+      }
+
+      setWeeklySummary({
+        ketoDays: ketoData?.length || 0,
+        currentStreak: streak,
+        weeklyWeightChange: weeklyWeightChange
+      });
 
       setProfile(profileData);
       setWeightLogs(weightData || []);
@@ -372,20 +430,28 @@ const ProgressDashboard = () => {
                 <div className="grid md:grid-cols-3 gap-6">
                   <div className="text-center p-6 bg-gradient-to-br from-keto-green-light to-transparent rounded-lg">
                     <div className="text-3xl mb-2">🎯</div>
-                    <div className="text-2xl font-bold text-keto-green">7/7</div>
+                    <div className="text-2xl font-bold text-keto-green">{weeklySummary.ketoDays}/7</div>
                     <div className="text-sm text-muted-foreground">Days in Ketosis</div>
+                    <Progress value={(weeklySummary.ketoDays / 7) * 100} className="h-2 mt-2" />
                   </div>
                   
                   <div className="text-center p-6 bg-gradient-to-br from-keto-yellow-light to-transparent rounded-lg">
                     <div className="text-3xl mb-2">🔥</div>
-                    <div className="text-2xl font-bold text-keto-yellow">28</div>
+                    <div className="text-2xl font-bold text-keto-yellow">{weeklySummary.currentStreak}</div>
                     <div className="text-sm text-muted-foreground">Day Streak</div>
+                    <Progress value={Math.min(100, (weeklySummary.currentStreak / 30) * 100)} className="h-2 mt-2" />
                   </div>
                   
                   <div className="text-center p-6 bg-gradient-to-br from-secondary to-transparent rounded-lg">
                     <div className="text-3xl mb-2">⚡</div>
-                    <div className="text-2xl font-bold">2.1 lbs</div>
+                    <div className={`text-2xl font-bold ${weeklySummary.weeklyWeightChange > 0 ? 'text-keto-green' : 'text-orange-500'}`}>
+                      {weeklySummary.weeklyWeightChange > 0 ? '-' : '+'}{Math.abs(weeklySummary.weeklyWeightChange).toFixed(1)} lbs
+                    </div>
                     <div className="text-sm text-muted-foreground">This Week</div>
+                    <Progress 
+                      value={Math.min(100, Math.abs(weeklySummary.weeklyWeightChange) * 20)} 
+                      className="h-2 mt-2" 
+                    />
                   </div>
                 </div>
               </CardContent>

@@ -7,8 +7,12 @@ import HealthBadges from "@/components/HealthBadges";
 import Footer from "@/components/Footer";
 import { AdvertisementBanner } from "@/components/AdvertisementBanner";
 import ContactForm from "@/components/ContactForm";
+import WelcomeProgressModal from "@/components/WelcomeProgressModal";
+import { useWelcomeModal } from "@/hooks/useWelcomeModal";
 
 const Index = () => {
+  const { showWelcome, closeWelcome } = useWelcomeModal();
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -35,6 +39,9 @@ const Index = () => {
       </section>
       
       <Footer />
+
+      {/* Welcome Progress Modal */}
+      <WelcomeProgressModal open={showWelcome} onClose={closeWelcome} />
     </div>
   );
 };
