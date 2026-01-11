@@ -40,6 +40,7 @@ import Community from "./components/Community";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Messages from "./pages/Messages";
+import Leaderboard from "./pages/Leaderboard";
 
 const queryClient = new QueryClient();
 
@@ -90,6 +91,7 @@ const App = () => (
                 </div>
               } />
               <Route path="/messages" element={<Messages />} />
+              <Route path="/leaderboard" element={<Leaderboard />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
