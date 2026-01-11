@@ -14,13 +14,14 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Trophy, Award, MessageSquare, Star, Target, Flame,
   Timer, Dumbbell, Droplet, Crown, Medal, UserPlus, UserCheck,
-  ChefHat, ThumbsUp, Footprints, Hourglass, Sword, Leaf, Users
+  ChefHat, ThumbsUp, Footprints, Hourglass, Sword, Leaf, Users, Circle
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { CommunityGuidelines } from './CommunityGuidelines';
+import { useOnlinePresence } from '@/hooks/useOnlinePresence';
 
 interface UserProfileDialogProps {
   open: boolean;
@@ -87,6 +88,7 @@ export const UserProfileDialog = ({ open, onClose, userId }: UserProfileDialogPr
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isOnline } = useOnlinePresence();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [badges, setBadges] = useState<UserBadge[]>([]);
   const [posts, setPosts] = useState<UserPost[]>([]);
@@ -100,6 +102,8 @@ export const UserProfileDialog = ({ open, onClose, userId }: UserProfileDialogPr
   const [loading, setLoading] = useState(true);
   const [followLoading, setFollowLoading] = useState(false);
   const [showGuidelines, setShowGuidelines] = useState(false);
+  
+  const userIsOnline = isOnline(userId);
 
   useEffect(() => {
     if (open && userId) {
@@ -288,14 +292,23 @@ export const UserProfileDialog = ({ open, onClose, userId }: UserProfileDialogPr
             <div className="space-y-4 overflow-y-auto flex-1">
               {/* Profile Header */}
               <div className="flex items-center gap-4">
-                <Avatar className="h-20 w-20 border-2 border-primary">
-                  <AvatarImage src={profile?.avatar_url || undefined} />
-                  <AvatarFallback className="text-2xl">
-                    {profile?.display_name?.[0] || '?'}
-                  </AvatarFallback>
-                </Avatar>
+                <div className="relative">
+                  <Avatar className="h-20 w-20 border-2 border-primary">
+                    <AvatarImage src={profile?.avatar_url || undefined} />
+                    <AvatarFallback className="text-2xl">
+                      {profile?.display_name?.[0] || '?'}
+                    </AvatarFallback>
+                  </Avatar>
+                  {/* Online Status Indicator */}
+                  <div className={`absolute bottom-1 right-1 h-4 w-4 rounded-full border-2 border-background ${userIsOnline ? 'bg-green-500' : 'bg-muted-foreground'}`} />
+                </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-xl">{profile?.display_name || 'User'}</h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-bold text-xl">{profile?.display_name || 'User'}</h3>
+                    <Badge variant={userIsOnline ? "default" : "secondary"} className={`text-xs ${userIsOnline ? 'bg-green-500 hover:bg-green-600' : ''}`}>
+                      {userIsOnline ? 'Online' : 'Offline'}
+                    </Badge>
+                  </div>
                   
                   {/* Stats Row */}
                   <div className="flex flex-wrap items-center gap-2 mt-2">

@@ -57,6 +57,40 @@ export const DirectMessages = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Real-time subscription for new messages
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('direct-messages-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'direct_messages',
+          filter: `receiver_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('New message received:', payload);
+          const newMsg = payload.new as Message;
+          
+          // Add to messages if in current conversation
+          if (selectedConversation?.other_user_id === newMsg.sender_id) {
+            setMessages(prev => [...prev, newMsg]);
+          }
+          
+          // Refresh conversation list
+          fetchConversations();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, selectedConversation]);
+
   const fetchConversations = async () => {
     if (!user) return;
     

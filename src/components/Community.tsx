@@ -13,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Heart, MessageCircle, Share2, Users, Trophy, Send, MoreVertical, Pencil, Trash2, Flag, Ban, UserCircle } from "lucide-react";
+import { Heart, MessageCircle, Share2, Users, Trophy, Send, MoreVertical, Pencil, Trash2, Flag, Ban, UserCircle, MessageSquare } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -24,6 +24,8 @@ import { CommunityGuidelines } from "./CommunityGuidelines";
 import { ReportDialog } from "./ReportDialog";
 import { UserProfileDialog } from "./UserProfileDialog";
 import { PostComments } from "./PostComments";
+import { useOnlinePresence } from "@/hooks/useOnlinePresence";
+import { useNavigate } from "react-router-dom";
 
 interface Community {
   id: string;
@@ -63,6 +65,8 @@ const Community = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const { awardPoints } = usePointsSystem();
+  const { isOnline } = useOnlinePresence();
+  const navigate = useNavigate();
 
   const [newPostContent, setNewPostContent] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -75,6 +79,9 @@ const Community = () => {
   const [viewingUser, setViewingUser] = useState<string | null>(null);
   const [blockedUsers, setBlockedUsers] = useState<Set<string>>(new Set());
 
+  const startDirectMessage = (userId: string) => {
+    navigate(`/messages?user=${userId}`);
+  };
   useEffect(() => {
     fetchCommunities();
     if (user) {
@@ -380,33 +387,6 @@ const Community = () => {
                 </Tooltip>
               ))}
               
-              {/* Divider */}
-              {members.length > 0 && (
-                <div className="w-8 h-px bg-border my-2" />
-              )}
-              
-              {/* Member Profile Icons */}
-              {members.map((member) => (
-                <Tooltip key={member.user_id} delayDuration={0}>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => setViewingUser(member.user_id)}
-                      className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden transition-all duration-200 hover:scale-105 shrink-0 hover:ring-2 hover:ring-primary/50"
-                    >
-                      <Avatar className="w-full h-full">
-                        <AvatarImage src={member.avatar_url || undefined} />
-                        <AvatarFallback className="text-sm bg-secondary text-secondary-foreground">
-                          {member.display_name[0]?.toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="right">
-                    <p className="font-medium">{member.display_name}</p>
-                    <p className="text-xs text-muted-foreground">View profile</p>
-                  </TooltipContent>
-                </Tooltip>
-              ))}
             </div>
           </ScrollArea>
         </div>
@@ -456,24 +436,42 @@ const Community = () => {
                         {members.map((member) => (
                           <Tooltip key={member.user_id} delayDuration={0}>
                             <TooltipTrigger asChild>
-                              <button 
-                                onClick={() => setViewingUser(member.user_id)}
-                                className="flex items-center gap-1.5 px-2 py-1 bg-muted/50 rounded-full hover:bg-muted transition-colors"
-                              >
-                                <Avatar className="h-6 w-6">
-                                  <AvatarImage src={member.avatar_url || undefined} />
-                                  <AvatarFallback className="text-xs">
-                                    {member.display_name[0]}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <span className="text-xs font-medium truncate max-w-[80px]">
-                                  {member.display_name}
-                                </span>
-                              </button>
+                              <div className="flex items-center gap-1 px-2 py-1 bg-muted/50 rounded-full hover:bg-muted transition-colors group">
+                                <button 
+                                  onClick={() => setViewingUser(member.user_id)}
+                                  className="flex items-center gap-1.5"
+                                >
+                                  <div className="relative">
+                                    <Avatar className="h-6 w-6">
+                                      <AvatarImage src={member.avatar_url || undefined} />
+                                      <AvatarFallback className="text-xs">
+                                        {member.display_name[0]}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <div className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border border-background ${isOnline(member.user_id) ? 'bg-green-500' : 'bg-muted-foreground'}`} />
+                                  </div>
+                                  <span className="text-xs font-medium truncate max-w-[60px]">
+                                    {member.display_name}
+                                  </span>
+                                </button>
+                                {user && user.id !== member.user_id && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      startDirectMessage(member.user_id);
+                                    }}
+                                    className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:bg-primary/20 rounded"
+                                  >
+                                    <MessageSquare className="h-3 w-3 text-primary" />
+                                  </button>
+                                )}
+                              </div>
                             </TooltipTrigger>
                             <TooltipContent>
                               <p className="text-sm font-medium">{member.display_name}</p>
-                              <p className="text-xs text-muted-foreground">Click to view profile</p>
+                              <p className={`text-xs ${isOnline(member.user_id) ? 'text-green-500' : 'text-muted-foreground'}`}>
+                                {isOnline(member.user_id) ? '● Online' : '○ Offline'}
+                              </p>
                             </TooltipContent>
                           </Tooltip>
                         ))}
