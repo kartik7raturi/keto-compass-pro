@@ -9,12 +9,20 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Camera, Upload, User, Edit, Trophy, Star } from "lucide-react";
+import { Camera, Upload, User, Edit, Trophy, Star, Users, FileText, Award } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { usePointsSystem } from "@/hooks/usePointsSystem";
 import { DietModeSelector } from "@/components/DietModeSelector";
 import ProfileBadges from "@/components/ProfileBadges";
+
+interface ProfileStats {
+  followerCount: number;
+  followingCount: number;
+  postsCount: number;
+  badgesCount: number;
+  recipesCount: number;
+}
 
 const Profile = () => {
   const { user } = useAuth();
@@ -24,11 +32,19 @@ const Profile = () => {
   const [uploading, setUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string>("");
   const [displayName, setDisplayName] = useState(user?.user_metadata?.display_name || "");
+  const [stats, setStats] = useState<ProfileStats>({
+    followerCount: 0,
+    followingCount: 0,
+    postsCount: 0,
+    badgesCount: 0,
+    recipesCount: 0
+  });
 
   // Fetch profile data on mount
   useEffect(() => {
     if (user) {
       fetchProfile();
+      fetchProfileStats();
     }
   }, [user]);
 
@@ -46,6 +62,31 @@ const Profile = () => {
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
+    }
+  };
+
+  const fetchProfileStats = async () => {
+    if (!user) return;
+    
+    try {
+      // Fetch all stats in parallel
+      const [followersRes, followingRes, postsRes, badgesRes, recipesRes] = await Promise.all([
+        supabase.from('user_follows').select('id', { count: 'exact', head: true }).eq('following_id', user.id),
+        supabase.from('user_follows').select('id', { count: 'exact', head: true }).eq('follower_id', user.id),
+        supabase.from('community_posts').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+        supabase.from('user_badges').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+        supabase.from('user_recipes').select('id', { count: 'exact', head: true }).eq('user_id', user.id)
+      ]);
+
+      setStats({
+        followerCount: followersRes.count || 0,
+        followingCount: followingRes.count || 0,
+        postsCount: postsRes.count || 0,
+        badgesCount: badgesRes.count || 0,
+        recipesCount: recipesRes.count || 0
+      });
+    } catch (error) {
+      console.error('Error fetching profile stats:', error);
     }
   };
 
@@ -263,6 +304,36 @@ const Profile = () => {
 
             {/* Progress Stats */}
             <div className="space-y-6">
+              {/* Social Stats */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-primary" />
+                    Activity Stats
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center p-3 bg-muted/50 rounded-lg">
+                      <div className="text-2xl font-bold">{stats.followerCount}</div>
+                      <div className="text-xs text-muted-foreground">Followers</div>
+                    </div>
+                    <div className="text-center p-3 bg-muted/50 rounded-lg">
+                      <div className="text-2xl font-bold">{stats.followingCount}</div>
+                      <div className="text-xs text-muted-foreground">Following</div>
+                    </div>
+                    <div className="text-center p-3 bg-muted/50 rounded-lg">
+                      <div className="text-2xl font-bold">{stats.postsCount}</div>
+                      <div className="text-xs text-muted-foreground">Posts</div>
+                    </div>
+                    <div className="text-center p-3 bg-muted/50 rounded-lg">
+                      <div className="text-2xl font-bold">{stats.recipesCount}</div>
+                      <div className="text-xs text-muted-foreground">Recipes</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -283,17 +354,12 @@ const Profile = () => {
                   <Separator />
                   
                   <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-sm">Current Streak</span>
-                      <Badge variant="secondary">7 days</Badge>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm">Total Workouts</span>
-                      <Badge variant="secondary">23</Badge>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm">Meals Logged</span>
-                      <Badge variant="secondary">156</Badge>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm flex items-center gap-2">
+                        <Award className="h-4 w-4 text-yellow-500" />
+                        Badges Earned
+                      </span>
+                      <Badge variant="secondary">{stats.badgesCount}</Badge>
                     </div>
                   </div>
                 </CardContent>

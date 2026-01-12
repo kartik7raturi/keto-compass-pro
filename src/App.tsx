@@ -39,8 +39,6 @@ import Contact from "./pages/Contact";
 import Community from "./components/Community";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-import Messages from "./pages/Messages";
-import Leaderboard from "./pages/Leaderboard";
 
 const queryClient = new QueryClient();
 
@@ -90,8 +88,14 @@ const App = () => (
                   <Footer />
                 </div>
               } />
-              <Route path="/messages" element={<Messages />} />
-              <Route path="/leaderboard" element={<Leaderboard />} />
+              <Route path="/messages" element={
+                <div className="min-h-screen bg-background">
+                  <Header />
+                  <Community />
+                  <Footer />
+                </div>
+              } />
+              <Route path="/leaderboard" element={<Progress />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
