@@ -13,6 +13,7 @@ import FastingChart from "@/components/charts/FastingChart";
 import WorkoutChart from "@/components/charts/WorkoutChart";
 import WaterChart from "@/components/charts/WaterChart";
 import UserProgressWidget from "@/components/UserProgressWidget";
+import LeaderboardWidget from "@/components/LeaderboardWidget";
 import { usePointsSystem, POINT_VALUES } from "@/hooks/usePointsSystem";
 
 interface WeeklySummary {
@@ -456,6 +457,11 @@ const ProgressDashboard = () => {
                 </div>
               </CardContent>
             </Card>
+          </div>
+
+          {/* Leaderboard Section */}
+          <div className="mt-8">
+            <LeaderboardWidget />
           </div>
         </div>
       </div>

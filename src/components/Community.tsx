@@ -25,7 +25,8 @@ import { ReportDialog } from "./ReportDialog";
 import { UserProfileDialog } from "./UserProfileDialog";
 import { PostComments } from "./PostComments";
 import { useOnlinePresence } from "@/hooks/useOnlinePresence";
-import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
+import { CommunityMessaging } from "./CommunityMessaging";
 
 interface Community {
   id: string;
@@ -66,7 +67,8 @@ const Community = () => {
   const { toast } = useToast();
   const { awardPoints } = usePointsSystem();
   const { isOnline } = useOnlinePresence();
-  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialMessageUser = searchParams.get('user');
 
   const [newPostContent, setNewPostContent] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -78,9 +80,12 @@ const Community = () => {
   const [reportPost, setReportPost] = useState<CommunityPost | null>(null);
   const [viewingUser, setViewingUser] = useState<string | null>(null);
   const [blockedUsers, setBlockedUsers] = useState<Set<string>>(new Set());
+  const [showMessaging, setShowMessaging] = useState(!!initialMessageUser);
+  const [messagingUserId, setMessagingUserId] = useState<string | null>(initialMessageUser);
 
   const startDirectMessage = (userId: string) => {
-    navigate(`/messages?user=${userId}`);
+    setMessagingUserId(userId);
+    setShowMessaging(true);
   };
   useEffect(() => {
     fetchCommunities();
@@ -345,7 +350,17 @@ const Community = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl md:text-3xl font-bold text-center mb-6">Communities</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl md:text-3xl font-bold">Communities</h1>
+        <Button
+          variant={showMessaging ? "default" : "outline"}
+          onClick={() => setShowMessaging(!showMessaging)}
+          className="gap-2"
+        >
+          <MessageSquare className="h-4 w-4" />
+          Messages
+        </Button>
+      </div>
       
       <div className="flex gap-4 h-[calc(100vh-200px)] min-h-[500px]">
         {/* Sidebar - Community Icons + Member Icons with DM */}
@@ -722,6 +737,19 @@ const Community = () => {
             </>
           )}
         </div>
+
+        {/* Messaging Panel */}
+        {showMessaging && (
+          <div className="w-80 shrink-0 hidden lg:block">
+            <CommunityMessaging 
+              initialUserId={messagingUserId}
+              onClose={() => {
+                setShowMessaging(false);
+                setMessagingUserId(null);
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {/* Report Dialog */}
