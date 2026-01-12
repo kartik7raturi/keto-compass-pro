@@ -30,16 +30,11 @@ interface Message {
   created_at: string;
 }
 
-interface DirectMessagesProps {
-  initialSelectedUser?: string | null;
-  onClose?: () => void;
-}
-
-export const DirectMessages = ({ initialSelectedUser, onClose }: DirectMessagesProps) => {
+export const DirectMessages = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
-  const initialUserId = initialSelectedUser || searchParams.get('user');
+  const initialUserId = searchParams.get('user');
   
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
@@ -263,16 +258,9 @@ export const DirectMessages = ({ initialSelectedUser, onClose }: DirectMessagesP
   return (
     <Card className="h-[600px] flex flex-col">
       <CardHeader className="pb-3 shrink-0">
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5" />
-            Messages
-          </div>
-          {onClose && (
-            <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0">
-              ×
-            </Button>
-          )}
+        <CardTitle className="flex items-center gap-2">
+          <MessageSquare className="h-5 w-5" />
+          Messages
         </CardTitle>
       </CardHeader>
 

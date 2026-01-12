@@ -88,6 +88,14 @@ const App = () => (
                   <Footer />
                 </div>
               } />
+              <Route path="/messages" element={
+                <div className="min-h-screen bg-background">
+                  <Header />
+                  <Community />
+                  <Footer />
+                </div>
+              } />
+              <Route path="/leaderboard" element={<Progress />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

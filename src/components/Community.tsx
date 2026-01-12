@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +25,8 @@ import { ReportDialog } from "./ReportDialog";
 import { UserProfileDialog } from "./UserProfileDialog";
 import { PostComments } from "./PostComments";
 import { useOnlinePresence } from "@/hooks/useOnlinePresence";
-import { DirectMessages } from "./DirectMessages";
+import { useSearchParams } from "react-router-dom";
+import { CommunityMessaging } from "./CommunityMessaging";
 
 interface Community {
   id: string;
@@ -66,6 +67,8 @@ const Community = () => {
   const { toast } = useToast();
   const { awardPoints } = usePointsSystem();
   const { isOnline } = useOnlinePresence();
+  const [searchParams] = useSearchParams();
+  const initialMessageUser = searchParams.get('user');
 
   const [newPostContent, setNewPostContent] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -77,10 +80,12 @@ const Community = () => {
   const [reportPost, setReportPost] = useState<CommunityPost | null>(null);
   const [viewingUser, setViewingUser] = useState<string | null>(null);
   const [blockedUsers, setBlockedUsers] = useState<Set<string>>(new Set());
-  const [messagingUserId, setMessagingUserId] = useState<string | null>(null);
+  const [showMessaging, setShowMessaging] = useState(!!initialMessageUser);
+  const [messagingUserId, setMessagingUserId] = useState<string | null>(initialMessageUser);
 
   const startDirectMessage = (userId: string) => {
     setMessagingUserId(userId);
+    setShowMessaging(true);
   };
   useEffect(() => {
     fetchCommunities();
@@ -347,6 +352,14 @@ const Community = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl md:text-3xl font-bold">Communities</h1>
+        <Button
+          variant={showMessaging ? "default" : "outline"}
+          onClick={() => setShowMessaging(!showMessaging)}
+          className="gap-2"
+        >
+          <MessageSquare className="h-4 w-4" />
+          Messages
+        </Button>
       </div>
       
       <div className="flex gap-4 h-[calc(100vh-200px)] min-h-[500px]">
@@ -725,12 +738,15 @@ const Community = () => {
           )}
         </div>
 
-        {/* Direct Messages Panel - shows when user selected */}
-        {messagingUserId && (
+        {/* Messaging Panel */}
+        {showMessaging && (
           <div className="w-80 shrink-0 hidden lg:block">
-            <DirectMessages 
-              initialSelectedUser={messagingUserId}
-              onClose={() => setMessagingUserId(null)}
+            <CommunityMessaging 
+              initialUserId={messagingUserId}
+              onClose={() => {
+                setShowMessaging(false);
+                setMessagingUserId(null);
+              }}
             />
           </div>
         )}
