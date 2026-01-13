@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Settings, Target, Users, Clock, Loader2 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Settings, Target, Users, Clock, Loader2, Bell, CalendarCheck } from "lucide-react";
 import { useDietMode } from "@/components/DietModeProvider";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -30,6 +31,12 @@ const CustomPlan = () => {
   const [skillLevel, setSkillLevel] = useState("intermediate");
   const [preferences, setPreferences] = useState<string[]>([]);
   const [generating, setGenerating] = useState(false);
+  const [enableReminders, setEnableReminders] = useState(true);
+  const [mealTimes, setMealTimes] = useState({
+    breakfast: "08:00",
+    lunch: "12:30",
+    dinner: "19:00"
+  });
 
   const togglePreference = (pref: string) => {
     setPreferences(prev => 
@@ -51,16 +58,30 @@ const CustomPlan = () => {
       const endDate = new Date();
       endDate.setDate(endDate.getDate() + durationDays);
 
+      // Deactivate existing plans
+      await supabase
+        .from('meal_plans')
+        .update({ is_active: false })
+        .eq('user_id', user.id)
+        .eq('is_active', true);
+
       // Create meal plan
       const { data: plan, error: planError } = await supabase
         .from('meal_plans')
         .insert({
           user_id: user.id,
           title: `Custom ${dietMode === 'pcos' ? 'PCOS' : 'Keto'} Plan`,
-          description: `${durationDays}-day plan with ${carbs}g carbs, ${protein}g protein, ${fat}g fat daily`,
+          description: JSON.stringify({
+            macros: { carbs: parseInt(carbs), protein: parseInt(protein), fat: parseInt(fat) },
+            duration: durationDays,
+            preferences,
+            mealTimes: enableReminders ? mealTimes : null,
+            remindersEnabled: enableReminders
+          }),
           plan_type: 'custom',
           start_date: startDate.toISOString().split('T')[0],
           end_date: endDate.toISOString().split('T')[0],
+          is_active: true,
         })
         .select('id')
         .single();
@@ -312,16 +333,64 @@ const CustomPlan = () => {
                 </CardContent>
               </Card>
 
+              {/* Meal Reminders */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Bell className="h-5 w-5 text-primary" />
+                    Meal Reminders
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Enable Daily Reminders</Label>
+                      <p className="text-sm text-muted-foreground">Get notified for each meal</p>
+                    </div>
+                    <Switch checked={enableReminders} onCheckedChange={setEnableReminders} />
+                  </div>
+                  
+                  {enableReminders && (
+                    <div className="grid grid-cols-3 gap-4 pt-2">
+                      <div className="space-y-2">
+                        <Label className="text-xs">Breakfast</Label>
+                        <Input 
+                          type="time" 
+                          value={mealTimes.breakfast}
+                          onChange={(e) => setMealTimes(prev => ({ ...prev, breakfast: e.target.value }))}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-xs">Lunch</Label>
+                        <Input 
+                          type="time" 
+                          value={mealTimes.lunch}
+                          onChange={(e) => setMealTimes(prev => ({ ...prev, lunch: e.target.value }))}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-xs">Dinner</Label>
+                        <Input 
+                          type="time" 
+                          value={mealTimes.dinner}
+                          onChange={(e) => setMealTimes(prev => ({ ...prev, dinner: e.target.value }))}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
               <Button size="lg" className="w-full" onClick={generatePlan} disabled={generating}>
                 {generating ? (
                   <>
                     <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                    Generating...
+                    Generating Your Plan...
                   </>
                 ) : (
                   <>
-                    <Users className="h-5 w-5 mr-2" />
-                    Generate Custom Plan
+                    <CalendarCheck className="h-5 w-5 mr-2" />
+                    Generate & Save Plan
                   </>
                 )}
               </Button>

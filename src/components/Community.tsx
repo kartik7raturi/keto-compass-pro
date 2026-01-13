@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,6 +28,7 @@ import { PostComments } from "./PostComments";
 import { useOnlinePresence } from "@/hooks/useOnlinePresence";
 import { useSearchParams } from "react-router-dom";
 import { CommunityMessaging } from "./CommunityMessaging";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Community {
   id: string;
@@ -69,6 +71,8 @@ const Community = () => {
   const { isOnline } = useOnlinePresence();
   const [searchParams] = useSearchParams();
   const initialMessageUser = searchParams.get('user');
+  const isMobile = useIsMobile();
+  const [activeTab, setActiveTab] = useState<'discussion' | 'messages'>('discussion');
 
   const [newPostContent, setNewPostContent] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -348,6 +352,180 @@ const Community = () => {
     return <div className="container mx-auto px-4 py-8">Loading communities...</div>;
   }
 
+  // Mobile view with tabs
+  if (isMobile) {
+    return (
+      <div className="container mx-auto px-4 py-4">
+        <h1 className="text-2xl font-bold mb-4">Communities</h1>
+        
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'discussion' | 'messages')}>
+          <TabsList className="w-full mb-4">
+            <TabsTrigger value="discussion" className="flex-1 gap-2">
+              <Users className="h-4 w-4" />
+              Discussion
+            </TabsTrigger>
+            <TabsTrigger value="messages" className="flex-1 gap-2">
+              <MessageSquare className="h-4 w-4" />
+              Messages
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="discussion" className="mt-0">
+            {/* Community Selector for Mobile */}
+            <ScrollArea className="w-full mb-4">
+              <div className="flex gap-2 pb-2">
+                {communities.map((community) => (
+                  <button
+                    key={community.id}
+                    onClick={() => setSelectedCommunity(community)}
+                    className={`shrink-0 px-3 py-2 rounded-full text-sm font-medium transition-all ${
+                      selectedCommunity?.id === community.id 
+                        ? 'bg-primary text-primary-foreground' 
+                        : 'bg-muted hover:bg-muted/80'
+                    }`}
+                  >
+                    {community.name}
+                  </button>
+                ))}
+              </div>
+            </ScrollArea>
+
+            {selectedCommunity && (
+              <div className="space-y-4">
+                {/* Community Header */}
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      {selectedCommunity.image_url ? (
+                        <img 
+                          src={selectedCommunity.image_url} 
+                          alt={selectedCommunity.name}
+                          className="w-10 h-10 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Users className="h-5 w-5 text-primary" />
+                        </div>
+                      )}
+                      <div>
+                        <h2 className="font-bold">{selectedCommunity.name}</h2>
+                        <p className="text-xs text-muted-foreground">{selectedCommunity.member_count} members</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Post Composer */}
+                {user && (
+                  <Card>
+                    <CardContent className="p-3 space-y-2">
+                      <Textarea
+                        placeholder={`Share with ${selectedCommunity.name}...`}
+                        value={newPostContent}
+                        onChange={(e) => setNewPostContent(e.target.value)}
+                        className="min-h-[60px] resize-none text-sm"
+                      />
+                      <div className="flex gap-2">
+                        <Input 
+                          type="file" 
+                          accept="image/*" 
+                          onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                          className="flex-1 text-xs"
+                        />
+                        <Button onClick={createPost} disabled={submitting} size="sm">
+                          <Send className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Posts */}
+                <div className="space-y-3">
+                  {loading ? (
+                    <div className="text-center py-8 text-muted-foreground">Loading...</div>
+                  ) : visiblePosts.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">No posts yet</div>
+                  ) : (
+                    visiblePosts.map((post) => (
+                      <Card key={post.id}>
+                        <CardContent className="p-3">
+                          <div className="flex items-start gap-2">
+                            <button onClick={() => setViewingUser(post.user_id)}>
+                              <Avatar className="h-8 w-8">
+                                <AvatarImage src={post.author_avatar || undefined} />
+                                <AvatarFallback className="text-xs">
+                                  {post.author_name[0]}
+                                </AvatarFallback>
+                              </Avatar>
+                            </button>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between">
+                                <p className="font-medium text-sm truncate">{post.author_name}</p>
+                                <span className="text-xs text-muted-foreground">{formatTimeAgo(post.created_at)}</span>
+                              </div>
+                              <p className="text-sm mt-1 break-words">{post.content}</p>
+                              {post.image_url && (
+                                <img src={post.image_url} alt="Post" className="rounded-lg w-full mt-2" />
+                              )}
+                              <div className="flex items-center gap-4 mt-2">
+                                <button
+                                  onClick={() => handleLikePost(post.id)}
+                                  className="flex items-center gap-1 text-muted-foreground hover:text-red-500"
+                                >
+                                  <Heart className="h-4 w-4" />
+                                  <span className="text-xs">{post.likes_count}</span>
+                                </button>
+                              </div>
+                              <PostComments 
+                                postId={post.id} 
+                                commentsCount={post.comments_count || 0}
+                                onCommentsCountChange={(delta) => {
+                                  setPosts(prev => prev.map(p => 
+                                    p.id === post.id ? { ...p, comments_count: Math.max(0, (p.comments_count || 0) + delta) } : p
+                                  ));
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="messages" className="mt-0">
+            <CommunityMessaging 
+              initialUserId={messagingUserId}
+              onClose={() => setMessagingUserId(null)}
+            />
+          </TabsContent>
+        </Tabs>
+
+        {/* Dialogs */}
+        {reportPost && (
+          <ReportDialog
+            open={!!reportPost}
+            onClose={() => setReportPost(null)}
+            reportedUserId={reportPost.user_id}
+            postId={reportPost.id}
+          />
+        )}
+        {viewingUser && (
+          <UserProfileDialog
+            open={!!viewingUser}
+            onClose={() => setViewingUser(null)}
+            userId={viewingUser}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // Desktop view
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">

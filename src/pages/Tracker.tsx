@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import EnhancedMacroTracker from "@/components/EnhancedMacroTracker";
+import TodaysPlan from "@/components/TodaysPlan";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -114,10 +115,15 @@ const Tracker = () => {
           })}
         </div>
 
-        {/* Current Macro Tracker */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">Current: Macro Tracker</h2>
-          <EnhancedMacroTracker />
+        {/* Today's Plan + Macro Tracker */}
+        <div className="grid lg:grid-cols-3 gap-6 mb-8">
+          <div className="lg:col-span-1">
+            <TodaysPlan />
+          </div>
+          <div className="lg:col-span-2">
+            <h2 className="text-2xl font-bold mb-4">Macro Tracker</h2>
+            <EnhancedMacroTracker />
+          </div>
         </div>
       </main>
       <Footer />
