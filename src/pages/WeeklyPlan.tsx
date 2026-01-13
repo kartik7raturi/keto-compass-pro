@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Plus, ShoppingCart, Utensils, Clock, ChefHat } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Calendar, Plus, ShoppingCart, Utensils, Clock, ChefHat, GripVertical, X, Flame } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useDietMode } from "@/components/DietModeProvider";
@@ -41,11 +43,19 @@ const WeeklyPlan = () => {
   const [selectedDay, setSelectedDay] = useState<number>(0);
   const [selectedMealType, setSelectedMealType] = useState<string>("");
   const [isAddingMeal, setIsAddingMeal] = useState(false);
+  const [draggedItem, setDraggedItem] = useState<MealPlanItem | null>(null);
+  const [dragOverSlot, setDragOverSlot] = useState<{ day: number; type: string } | null>(null);
   const { toast } = useToast();
   const { dietMode } = useDietMode();
 
-  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const fullDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const mealTypes = ['breakfast', 'lunch', 'dinner'];
+  const mealTypeIcons = {
+    breakfast: '☀️',
+    lunch: '🌤️',
+    dinner: '🌙'
+  };
 
   useEffect(() => {
     fetchMeals();
@@ -53,7 +63,6 @@ const WeeklyPlan = () => {
   }, [dietMode]);
 
   const fetchMeals = async () => {
-    // First try recipes table with diet_type filter
     const { data: recipesData, error: recipesError } = await supabase
       .from('recipes')
       .select('*')
@@ -81,19 +90,12 @@ const WeeklyPlan = () => {
       return;
     }
 
-    // Fallback to meals table
     const { data, error } = await supabase
       .from('meals')
       .select('*')
       .order('title');
 
-    if (error) {
-      toast({
-        title: "Error fetching meals",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
+    if (!error) {
       setMeals(data || []);
     }
   };
@@ -102,72 +104,111 @@ const WeeklyPlan = () => {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) return;
 
-    // Get current week's plan
     const startOfWeek = new Date();
     startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
     
-    const { data: planData, error: planError } = await supabase
+    const { data: planData } = await supabase
       .from('meal_plans')
       .select('id')
       .eq('user_id', user.user.id)
-      .eq('plan_type', 'weekly')
-      .eq('start_date', startOfWeek.toISOString().split('T')[0])
+      .or(`plan_type.eq.weekly,plan_type.eq.custom`)
+      .gte('end_date', new Date().toISOString().split('T')[0])
+      .order('created_at', { ascending: false })
+      .limit(1)
       .maybeSingle();
 
-    if (planError) {
-      console.error('Error fetching plan:', planError);
+    if (planData) {
+      const { data: items } = await supabase
+        .from('meal_plan_items')
+        .select(`id, day_of_week, meal_type, meals (*)`)
+        .eq('meal_plan_id', planData.id);
+
+      setWeeklyPlan(items?.map(item => ({
+        id: item.id,
+        day_of_week: item.day_of_week ?? 0,
+        meal_type: item.meal_type,
+        meal: item.meals as Meal
+      })) || []);
+    }
+  };
+
+  const getMealForSlot = (dayIndex: number, mealType: string) => {
+    return weeklyPlan.find(item => item.day_of_week === dayIndex && item.meal_type === mealType);
+  };
+
+  const handleDragStart = (e: React.DragEvent, item: MealPlanItem) => {
+    setDraggedItem(item);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', item.id);
+  };
+
+  const handleDragOver = (e: React.DragEvent, day: number, mealType: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverSlot({ day, type: mealType });
+  };
+
+  const handleDragLeave = () => {
+    setDragOverSlot(null);
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetDay: number, targetMealType: string) => {
+    e.preventDefault();
+    setDragOverSlot(null);
+
+    if (!draggedItem) return;
+
+    // Check if target slot already has a meal
+    const existingMeal = getMealForSlot(targetDay, targetMealType);
+    if (existingMeal && existingMeal.id !== draggedItem.id) {
+      toast({
+        title: "Slot occupied",
+        description: "Remove the existing meal first or swap them",
+        variant: "destructive",
+      });
+      setDraggedItem(null);
       return;
     }
 
-    if (planData) {
-      const { data: items, error: itemsError } = await supabase
-        .from('meal_plan_items')
-        .select(`
-          id,
-          day_of_week,
-          meal_type,
-          meals (*)
-        `)
-        .eq('meal_plan_id', planData.id);
+    // Update the meal position in database
+    const { error } = await supabase
+      .from('meal_plan_items')
+      .update({
+        day_of_week: targetDay,
+        meal_type: targetMealType,
+      })
+      .eq('id', draggedItem.id);
 
-      if (itemsError) {
-        toast({
-          title: "Error fetching plan items",
-          description: itemsError.message,
-          variant: "destructive",
-        });
-      } else {
-        setWeeklyPlan(items?.map(item => ({
-          id: item.id,
-          day_of_week: item.day_of_week,
-          meal_type: item.meal_type,
-          meal: item.meals as Meal
-        })) || []);
-      }
+    if (error) {
+      toast({
+        title: "Error moving meal",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      // Update local state
+      setWeeklyPlan(prev => prev.map(item => 
+        item.id === draggedItem.id 
+          ? { ...item, day_of_week: targetDay, meal_type: targetMealType }
+          : item
+      ));
+      toast({ title: "Meal moved!" });
     }
+    setDraggedItem(null);
   };
 
   const addMealToPlan = async () => {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to create meal plans",
-        variant: "destructive",
-      });
+      toast({ title: "Please sign in", variant: "destructive" });
       return;
     }
 
-    if (!selectedMeal || selectedDay === null || !selectedMealType) {
-      toast({
-        title: "Missing information",
-        description: "Please select a meal, day, and meal type",
-        variant: "destructive",
-      });
+    if (!selectedMeal || !selectedMealType) {
+      toast({ title: "Select a meal and type", variant: "destructive" });
       return;
     }
 
-    // Create or get current week's plan
     const startOfWeek = new Date();
     startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
     
@@ -183,6 +224,9 @@ const WeeklyPlan = () => {
     if (existingPlan) {
       planId = existingPlan.id;
     } else {
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(endOfWeek.getDate() + 6);
+      
       const { data: newPlan, error: planError } = await supabase
         .from('meal_plans')
         .insert({
@@ -190,29 +234,28 @@ const WeeklyPlan = () => {
           title: `Week of ${startOfWeek.toLocaleDateString()}`,
           plan_type: 'weekly',
           start_date: startOfWeek.toISOString().split('T')[0],
+          end_date: endOfWeek.toISOString().split('T')[0],
+          is_active: true,
         })
         .select('id')
         .single();
 
       if (planError) {
-        toast({
-          title: "Error creating plan",
-          description: planError.message,
-          variant: "destructive",
-        });
+        toast({ title: "Error", description: planError.message, variant: "destructive" });
         return;
       }
       planId = newPlan.id;
     }
 
-    // First check if the selected meal exists in the meals table
+    // Check if meal exists in meals table
     const { data: mealExists } = await supabase
       .from('meals')
       .select('id')
       .eq('id', selectedMeal)
       .maybeSingle();
 
-    // If meal doesn't exist in meals table, we need to copy it from recipes
+    let mealId = selectedMeal;
+
     if (!mealExists) {
       const selectedMealData = meals.find(m => m.id === selectedMeal);
       if (selectedMealData) {
@@ -237,76 +280,31 @@ const WeeklyPlan = () => {
           .single();
 
         if (insertError) {
-          toast({
-            title: "Error adding meal",
-            description: insertError.message,
-            variant: "destructive",
-          });
+          toast({ title: "Error", description: insertError.message, variant: "destructive" });
           return;
         }
-
-        // Use the new meal ID
-        const { error } = await supabase
-          .from('meal_plan_items')
-          .insert({
-            meal_plan_id: planId,
-            meal_id: newMeal.id,
-            day_of_week: selectedDay,
-            meal_type: selectedMealType,
-          });
-
-        if (error) {
-          toast({
-            title: "Error adding meal",
-            description: error.message,
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Meal added!",
-            description: "Meal has been added to your weekly plan",
-          });
-          fetchWeeklyPlan();
-          setIsAddingMeal(false);
-          setSelectedMeal("");
-          setSelectedDay(0);
-          setSelectedMealType("");
-        }
-        return;
+        mealId = newMeal.id;
       }
     }
 
-    // Add meal to plan using existing meal
     const { error } = await supabase
       .from('meal_plan_items')
       .insert({
         meal_plan_id: planId,
-        meal_id: selectedMeal,
+        meal_id: mealId,
         day_of_week: selectedDay,
         meal_type: selectedMealType,
       });
 
     if (error) {
-      toast({
-        title: "Error adding meal",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
-      toast({
-        title: "Meal added!",
-        description: "Meal has been added to your weekly plan",
-      });
+      toast({ title: "Meal added!" });
       fetchWeeklyPlan();
       setIsAddingMeal(false);
       setSelectedMeal("");
-      setSelectedDay(0);
       setSelectedMealType("");
     }
-  };
-
-  const getMealForSlot = (dayIndex: number, mealType: string) => {
-    return weeklyPlan.find(item => item.day_of_week === dayIndex && item.meal_type === mealType);
   };
 
   const removeMealFromPlan = async (itemId: string) => {
@@ -315,214 +313,309 @@ const WeeklyPlan = () => {
       .delete()
       .eq('id', itemId);
 
-    if (error) {
-      toast({
-        title: "Error removing meal",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Meal removed",
-        description: "Meal has been removed from your plan",
-      });
-      fetchWeeklyPlan();
+    if (!error) {
+      setWeeklyPlan(prev => prev.filter(item => item.id !== itemId));
+      toast({ title: "Meal removed" });
     }
   };
 
   const generateShoppingList = () => {
     if (weeklyPlan.length === 0) {
-      toast({
-        title: "No meals planned",
-        description: "Add meals to your weekly plan first",
-        variant: "destructive",
-      });
+      toast({ title: "No meals planned", variant: "destructive" });
       return;
     }
 
     const allIngredients: string[] = [];
     weeklyPlan.forEach(item => {
-      if (item.meal.ingredients) {
+      if (item.meal?.ingredients) {
         allIngredients.push(...item.meal.ingredients);
       }
     });
 
-    // Group and count similar ingredients
     const ingredientMap = new Map<string, number>();
     allIngredients.forEach(ingredient => {
-      const normalizedIngredient = ingredient.toLowerCase().trim();
-      ingredientMap.set(normalizedIngredient, (ingredientMap.get(normalizedIngredient) || 0) + 1);
+      const normalized = ingredient.toLowerCase().trim();
+      ingredientMap.set(normalized, (ingredientMap.get(normalized) || 0) + 1);
     });
 
-    // Create shopping list text
     const shoppingList = Array.from(ingredientMap.entries())
       .map(([ingredient, count]) => count > 1 ? `${ingredient} (x${count})` : ingredient)
       .sort()
       .join('\n');
 
-    // Copy to clipboard
     navigator.clipboard.writeText(shoppingList).then(() => {
-      toast({
-        title: "Shopping list generated!",
-        description: `${ingredientMap.size} unique ingredients copied to clipboard`,
-      });
+      toast({ title: "Shopping list copied!", description: `${ingredientMap.size} items` });
     }).catch(() => {
-      // Fallback: show in alert
       alert(`Shopping List:\n\n${shoppingList}`);
-      toast({
-        title: "Shopping list generated!",
-        description: "Shopping list shown in popup",
-      });
     });
   };
+
+  // Calculate daily totals
+  const getDailyTotals = (dayIndex: number) => {
+    const dayMeals = weeklyPlan.filter(item => item.day_of_week === dayIndex);
+    return dayMeals.reduce((acc, item) => ({
+      calories: acc.calories + (item.meal?.calories || 0),
+      carbs: acc.carbs + (item.meal?.carbs || 0),
+      protein: acc.protein + (item.meal?.protein || 0),
+      fat: acc.fat + (item.meal?.fat || 0),
+    }), { calories: 0, carbs: 0, protein: 0, fat: 0 });
+  };
+
+  const today = new Date().getDay();
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container mx-auto px-4 py-8">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">Weekly Meal Plan</h1>
-          <p className="text-xl text-muted-foreground">
-            Plan your {dietMode === 'pcos' ? 'PCOS-friendly' : 'keto'} meals for the entire week
-          </p>
-        </div>
-
-        <div className="mb-6 flex gap-4">
-          <Dialog open={isAddingMeal} onOpenChange={setIsAddingMeal}>
-            <DialogTrigger asChild>
-              <Button className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                Add Meal
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add Meal to Plan</DialogTitle>
-                <DialogDescription>
-                  Select a meal, day, and meal type to add to your weekly plan
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium">Day</label>
-                  <Select value={selectedDay.toString()} onValueChange={(value) => setSelectedDay(parseInt(value))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select day" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {days.map((day, index) => (
-                        <SelectItem key={index} value={index.toString()}>{day}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Meal Type</label>
-                  <Select value={selectedMealType} onValueChange={setSelectedMealType}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select meal type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {mealTypes.map((type) => (
-                        <SelectItem key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Meal</label>
-                  <Select value={selectedMeal} onValueChange={setSelectedMeal}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select meal" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {meals.map((meal) => (
-                        <SelectItem key={meal.id} value={meal.id}>{meal.title}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button onClick={addMealToPlan} className="w-full">Add to Plan</Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-          <Button variant="outline" className="flex items-center gap-2" onClick={generateShoppingList}>
-            <ShoppingCart className="h-4 w-4" />
-            Generate Shopping List
-          </Button>
-        </div>
-
-        <div className="grid gap-6">
-          {days.map((day, dayIndex) => (
-            <Card key={day}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-primary" />
-                  {day}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-3 gap-4">
-                  {mealTypes.map((mealType) => {
-                    const plannedMeal = getMealForSlot(dayIndex, mealType);
-                    return (
-                      <div key={mealType} className="space-y-2">
-                        <h4 className="font-semibold capitalize">{mealType}</h4>
-                        {plannedMeal ? (
-                          <Card className="p-4">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <h5 className="font-medium">{plannedMeal.meal.title}</h5>
-                                <p className="text-sm text-muted-foreground mt-1">
-                                  {plannedMeal.meal.description}
-                                </p>
-                                <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2">
-                                  <span className="flex items-center gap-1">
-                                    <Clock className="h-3 w-3" />
-                                    {plannedMeal.meal.prep_time + plannedMeal.meal.cook_time}min
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    <Utensils className="h-3 w-3" />
-                                    {plannedMeal.meal.servings} servings
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    <ChefHat className="h-3 w-3" />
-                                    {plannedMeal.meal.difficulty}
-                                  </span>
-                                </div>
-                                <div className="text-xs text-muted-foreground mt-1">
-                                  {plannedMeal.meal.calories} cal • {plannedMeal.meal.carbs}g carbs • {plannedMeal.meal.protein}g protein • {plannedMeal.meal.fat}g fat
-                                </div>
+      <main className="container mx-auto px-4 py-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
+              <Calendar className="h-7 w-7 text-primary" />
+              Weekly Meal Calendar
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Drag and drop to rearrange your {dietMode === 'pcos' ? 'PCOS-friendly' : 'keto'} meals
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Dialog open={isAddingMeal} onOpenChange={setIsAddingMeal}>
+              <DialogTrigger asChild>
+                <Button className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  Add Meal
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add Meal to Plan</DialogTitle>
+                  <DialogDescription>Select a meal to add to your weekly plan</DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium">Day</label>
+                    <Select value={selectedDay.toString()} onValueChange={(v) => setSelectedDay(parseInt(v))}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select day" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {fullDays.map((day, i) => (
+                          <SelectItem key={i} value={i.toString()}>{day}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Meal Type</label>
+                    <Select value={selectedMealType} onValueChange={setSelectedMealType}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {mealTypes.map((type) => (
+                          <SelectItem key={type} value={type} className="capitalize">{type}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Meal</label>
+                    <Select value={selectedMeal} onValueChange={setSelectedMeal}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select meal" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <ScrollArea className="h-60">
+                          {meals.map((meal) => (
+                            <SelectItem key={meal.id} value={meal.id}>
+                              <div className="flex items-center gap-2">
+                                <span>{meal.title}</span>
+                                <span className="text-xs text-muted-foreground">{meal.calories} cal</span>
                               </div>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => removeMealFromPlan(plannedMeal.id)}
-                              >
-                                Remove
-                              </Button>
+                            </SelectItem>
+                          ))}
+                        </ScrollArea>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button onClick={addMealToPlan} className="w-full">Add to Plan</Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+            <Button variant="outline" className="gap-2" onClick={generateShoppingList}>
+              <ShoppingCart className="h-4 w-4" />
+              <span className="hidden sm:inline">Shopping List</span>
+            </Button>
+          </div>
+        </div>
+
+        {/* Calendar Grid */}
+        <div className="overflow-x-auto">
+          <div className="min-w-[800px]">
+            {/* Header Row */}
+            <div className="grid grid-cols-8 gap-2 mb-2">
+              <div className="p-2 text-center text-sm font-medium text-muted-foreground">Meal</div>
+              {days.map((day, i) => (
+                <div 
+                  key={day} 
+                  className={`p-2 text-center rounded-lg ${
+                    i === today 
+                      ? 'bg-primary text-primary-foreground font-bold' 
+                      : 'bg-muted/50 font-medium'
+                  }`}
+                >
+                  <div className="text-sm">{day}</div>
+                  {i === today && <div className="text-xs opacity-80">Today</div>}
+                </div>
+              ))}
+            </div>
+
+            {/* Meal Type Rows */}
+            {mealTypes.map((mealType) => (
+              <div key={mealType} className="grid grid-cols-8 gap-2 mb-2">
+                {/* Meal Type Label */}
+                <div className="p-3 flex items-center gap-2 bg-muted/30 rounded-lg">
+                  <span className="text-lg">{mealTypeIcons[mealType as keyof typeof mealTypeIcons]}</span>
+                  <span className="text-sm font-medium capitalize">{mealType}</span>
+                </div>
+
+                {/* Day Slots */}
+                {days.map((_, dayIndex) => {
+                  const plannedMeal = getMealForSlot(dayIndex, mealType);
+                  const isOver = dragOverSlot?.day === dayIndex && dragOverSlot?.type === mealType;
+
+                  return (
+                    <div
+                      key={`${dayIndex}-${mealType}`}
+                      className={`min-h-[100px] rounded-lg border-2 border-dashed transition-all ${
+                        isOver 
+                          ? 'border-primary bg-primary/10' 
+                          : plannedMeal 
+                            ? 'border-transparent bg-card shadow-sm' 
+                            : 'border-muted-foreground/20 bg-muted/10 hover:bg-muted/20'
+                      }`}
+                      onDragOver={(e) => handleDragOver(e, dayIndex, mealType)}
+                      onDragLeave={handleDragLeave}
+                      onDrop={(e) => handleDrop(e, dayIndex, mealType)}
+                    >
+                      {plannedMeal ? (
+                        <div
+                          draggable
+                          onDragStart={(e) => handleDragStart(e, plannedMeal)}
+                          className={`h-full p-2 cursor-grab active:cursor-grabbing ${
+                            draggedItem?.id === plannedMeal.id ? 'opacity-50' : ''
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-1">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-1">
+                                <GripVertical className="h-3 w-3 text-muted-foreground shrink-0" />
+                                <p className="text-xs font-medium truncate">{plannedMeal.meal?.title}</p>
+                              </div>
+                              <div className="flex items-center gap-1 mt-1 text-[10px] text-muted-foreground">
+                                <Flame className="h-3 w-3" />
+                                <span>{plannedMeal.meal?.calories || 0} cal</span>
+                              </div>
+                              <div className="mt-1 flex flex-wrap gap-1">
+                                <Badge variant="outline" className="text-[9px] px-1 py-0">
+                                  C: {plannedMeal.meal?.carbs || 0}g
+                                </Badge>
+                                <Badge variant="outline" className="text-[9px] px-1 py-0">
+                                  P: {plannedMeal.meal?.protein || 0}g
+                                </Badge>
+                              </div>
                             </div>
-                          </Card>
-                        ) : (
-                          <div 
-                            className="p-4 border-2 border-dashed border-muted rounded-lg text-center text-muted-foreground cursor-pointer hover:border-primary/50"
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeMealFromPlan(plannedMeal.id);
+                              }}
+                              className="p-0.5 hover:bg-destructive/20 rounded shrink-0"
+                            >
+                              <X className="h-3 w-3 text-muted-foreground hover:text-destructive" />
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="h-full flex items-center justify-center">
+                          <button
                             onClick={() => {
                               setSelectedDay(dayIndex);
                               setSelectedMealType(mealType);
                               setIsAddingMeal(true);
                             }}
+                            className="p-2 text-muted-foreground/50 hover:text-primary transition-colors"
                           >
-                            Click to add {mealType}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                            <Plus className="h-5 w-5" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+
+            {/* Daily Totals Row */}
+            <div className="grid grid-cols-8 gap-2 mt-4 pt-4 border-t">
+              <div className="p-2 text-sm font-medium text-muted-foreground">Daily Total</div>
+              {days.map((_, dayIndex) => {
+                const totals = getDailyTotals(dayIndex);
+                return (
+                  <div 
+                    key={`total-${dayIndex}`} 
+                    className={`p-2 rounded-lg text-center ${
+                      dayIndex === today ? 'bg-primary/10' : 'bg-muted/30'
+                    }`}
+                  >
+                    <div className="text-sm font-bold">{totals.calories}</div>
+                    <div className="text-[10px] text-muted-foreground">calories</div>
+                    <div className="flex justify-center gap-1 mt-1 text-[9px]">
+                      <span className="text-blue-500">C:{totals.carbs}g</span>
+                      <span className="text-green-500">P:{totals.protein}g</span>
+                      <span className="text-orange-500">F:{totals.fat}g</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
+
+        {/* Week Summary */}
+        <Card className="mt-6">
+          <CardContent className="p-4">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h3 className="font-semibold">Weekly Summary</h3>
+                <p className="text-sm text-muted-foreground">
+                  {weeklyPlan.length} meals planned across {new Set(weeklyPlan.map(m => m.day_of_week)).size} days
+                </p>
+              </div>
+              <div className="flex gap-4 text-center">
+                <div>
+                  <div className="text-2xl font-bold text-primary">
+                    {weeklyPlan.reduce((acc, item) => acc + (item.meal?.calories || 0), 0)}
+                  </div>
+                  <div className="text-xs text-muted-foreground">Total Calories</div>
+                </div>
+                <div className="w-px bg-border" />
+                <div>
+                  <div className="text-2xl font-bold text-blue-500">
+                    {weeklyPlan.reduce((acc, item) => acc + (item.meal?.carbs || 0), 0)}g
+                  </div>
+                  <div className="text-xs text-muted-foreground">Total Carbs</div>
+                </div>
+                <div className="w-px bg-border" />
+                <div>
+                  <div className="text-2xl font-bold text-green-500">
+                    {weeklyPlan.reduce((acc, item) => acc + (item.meal?.protein || 0), 0)}g
+                  </div>
+                  <div className="text-xs text-muted-foreground">Total Protein</div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </main>
       <Footer />
     </div>
