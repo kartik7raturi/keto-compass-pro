@@ -88,10 +88,10 @@ const CustomPlan = () => {
 
       if (planError) throw planError;
 
-      // Fetch recipes matching criteria
+      // Fetch recipes matching criteria with full data
       let query = supabase
         .from('recipes')
-        .select('id, title, carbs, protein, fat, prep_time, cook_time')
+        .select('id, title, description, carbs, protein, fat, calories, prep_time, cook_time, servings, difficulty, ingredients, instructions')
         .eq('diet_type', dietMode);
 
       if (parseInt(maxCookTime) > 0) {
@@ -118,20 +118,23 @@ const CustomPlan = () => {
         for (const mealType of mealTypes) {
           const randomRecipe = recipes[Math.floor(Math.random() * recipes.length)];
           
-          // Create meal entry
+          // Create meal entry with full recipe data
           const { data: meal, error: mealError } = await supabase
             .from('meals')
             .insert({
               title: randomRecipe.title,
-              calories: (randomRecipe.carbs || 0) * 4 + (randomRecipe.protein || 0) * 4 + (randomRecipe.fat || 0) * 9,
-              carbs: randomRecipe.carbs,
-              protein: randomRecipe.protein,
-              fat: randomRecipe.fat,
-              prep_time: randomRecipe.prep_time,
-              cook_time: randomRecipe.cook_time,
+              description: randomRecipe.description || '',
+              calories: randomRecipe.calories || ((randomRecipe.carbs || 0) * 4 + (randomRecipe.protein || 0) * 4 + (randomRecipe.fat || 0) * 9),
+              carbs: randomRecipe.carbs || 0,
+              protein: randomRecipe.protein || 0,
+              fat: randomRecipe.fat || 0,
+              prep_time: randomRecipe.prep_time || 0,
+              cook_time: randomRecipe.cook_time || 0,
               servings: parseInt(servings),
-              ingredients: [],
-              instructions: [],
+              difficulty: randomRecipe.difficulty || 'easy',
+              meal_type: mealType,
+              ingredients: randomRecipe.ingredients || [],
+              instructions: randomRecipe.instructions || [],
             })
             .select('id')
             .single();

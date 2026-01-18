@@ -59,11 +59,18 @@ interface CommunityMember {
   avatar_url: string | null;
 }
 
+interface FollowedUser {
+  user_id: string;
+  display_name: string;
+  avatar_url: string | null;
+}
+
 const Community = () => {
   const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(null);
   const [communities, setCommunities] = useState<Community[]>([]);
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [members, setMembers] = useState<CommunityMember[]>([]);
+  const [followedUsers, setFollowedUsers] = useState<FollowedUser[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -90,12 +97,43 @@ const Community = () => {
   const startDirectMessage = (userId: string) => {
     setMessagingUserId(userId);
     setShowMessaging(true);
+    if (isMobile) {
+      setActiveTab('messages');
+    }
   };
+
+  const fetchFollowedUsers = async () => {
+    if (!user) return;
+    try {
+      const { data: follows } = await supabase
+        .from('user_follows')
+        .select('following_id')
+        .eq('follower_id', user.id);
+      
+      if (follows && follows.length > 0) {
+        const followingIds = follows.map(f => f.following_id);
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('user_id, display_name, avatar_url')
+          .in('user_id', followingIds);
+        
+        setFollowedUsers(profiles?.map(p => ({
+          user_id: p.user_id,
+          display_name: p.display_name || 'User',
+          avatar_url: p.avatar_url
+        })) || []);
+      }
+    } catch (error) {
+      console.error('Error fetching followed users:', error);
+    }
+  };
+
   useEffect(() => {
     fetchCommunities();
     if (user) {
       checkGuidelinesAcceptance();
       fetchBlockedUsers();
+      fetchFollowedUsers();
     }
   }, [user]);
 
@@ -390,11 +428,46 @@ const Community = () => {
               </div>
             </ScrollArea>
 
+            {/* Followed Users Quick Chat - Mobile */}
+            {user && followedUsers.length > 0 && (
+              <div className="mb-4">
+                <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
+                  <Heart className="h-3 w-3 text-primary" /> Quick Chat with Following
+                </p>
+                <ScrollArea className="w-full">
+                  <div className="flex gap-2 pb-2">
+                    {followedUsers.map((fUser) => (
+                      <button
+                        key={fUser.user_id}
+                        onClick={() => startDirectMessage(fUser.user_id)}
+                        className="flex flex-col items-center gap-1 shrink-0"
+                      >
+                        <div className="relative">
+                          <Avatar className="h-10 w-10 ring-2 ring-primary/30">
+                            <AvatarImage src={fUser.avatar_url || undefined} />
+                            <AvatarFallback className="text-xs bg-primary/10">
+                              {fUser.display_name?.[0]?.toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-background ${
+                            isOnline(fUser.user_id) ? 'bg-green-500' : 'bg-gray-400'
+                          }`} />
+                        </div>
+                        <span className="text-[10px] text-muted-foreground max-w-[50px] truncate">
+                          {fUser.display_name}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+            )}
+
             {selectedCommunity && (
               <div className="space-y-4">
                 {/* Community Header */}
                 <Card>
-                  <CardContent className="p-4">
+                  <CardContent className="p-3">
                     <div className="flex items-center gap-3">
                       {selectedCommunity.image_url ? (
                         <img 
@@ -407,8 +480,8 @@ const Community = () => {
                           <Users className="h-5 w-5 text-primary" />
                         </div>
                       )}
-                      <div>
-                        <h2 className="font-bold">{selectedCommunity.name}</h2>
+                      <div className="flex-1 min-w-0">
+                        <h2 className="font-bold text-base truncate">{selectedCommunity.name}</h2>
                         <p className="text-xs text-muted-foreground">{selectedCommunity.member_count} members</p>
                       </div>
                     </div>
@@ -580,7 +653,47 @@ const Community = () => {
                 </Tooltip>
               ))}
               
-              {/* Divider */}
+              {/* Divider - Following */}
+              {user && followedUsers.length > 0 && (
+                <>
+                  <div className="w-8 h-px bg-primary/50 my-2" />
+                  <p className="text-[10px] text-primary font-medium">Following</p>
+                </>
+              )}
+              
+              {/* Followed Users for Quick Chat */}
+              {user && followedUsers.map((fUser) => (
+                <Tooltip key={fUser.user_id} delayDuration={0}>
+                  <TooltipTrigger asChild>
+                    <div className="relative group">
+                      <button
+                        onClick={() => startDirectMessage(fUser.user_id)}
+                        className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden transition-all duration-200 hover:scale-105 shrink-0 ring-2 ring-primary/30 hover:ring-primary"
+                      >
+                        <Avatar className="w-full h-full">
+                          <AvatarImage src={fUser.avatar_url || undefined} />
+                          <AvatarFallback className="text-sm bg-primary/10">
+                            {fUser.display_name?.[0]?.toUpperCase() || '?'}
+                          </AvatarFallback>
+                        </Avatar>
+                        {/* Online indicator */}
+                        <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-background ${
+                          isOnline(fUser.user_id) ? 'bg-green-500' : 'bg-gray-400'
+                        }`} />
+                      </button>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    <p className="font-medium">{fUser.display_name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {isOnline(fUser.user_id) ? '● Online' : '○ Offline'}
+                    </p>
+                    <p className="text-xs text-primary mt-1">Click to message</p>
+                  </TooltipContent>
+                </Tooltip>
+              ))}
+
+              {/* Divider - Members */}
               {selectedCommunity && members.length > 0 && (
                 <>
                   <div className="w-8 h-px bg-border my-2" />
@@ -589,7 +702,7 @@ const Community = () => {
               )}
               
               {/* Member Icons with DM button */}
-              {selectedCommunity && members.slice(0, 10).map((member) => (
+              {selectedCommunity && members.filter(m => !followedUsers.some(f => f.user_id === m.user_id)).slice(0, 10).map((member) => (
                 <Tooltip key={member.user_id} delayDuration={0}>
                   <TooltipTrigger asChild>
                     <div className="relative group">

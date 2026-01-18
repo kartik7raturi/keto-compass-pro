@@ -7,8 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Calendar, Plus, ShoppingCart, Utensils, Clock, ChefHat, GripVertical, X, Flame } from "lucide-react";
+import { Calendar, Plus, ShoppingCart, GripVertical, X, Flame, Copy, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { useDietMode } from "@/components/DietModeProvider";
 
@@ -45,8 +46,10 @@ const WeeklyPlan = () => {
   const [isAddingMeal, setIsAddingMeal] = useState(false);
   const [draggedItem, setDraggedItem] = useState<MealPlanItem | null>(null);
   const [dragOverSlot, setDragOverSlot] = useState<{ day: number; type: string } | null>(null);
+  const [copying, setCopying] = useState(false);
   const { toast } = useToast();
   const { dietMode } = useDietMode();
+  const isMobile = useIsMobile();
 
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const fullDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -247,45 +250,47 @@ const WeeklyPlan = () => {
       planId = newPlan.id;
     }
 
-    // Check if meal exists in meals table
-    const { data: mealExists } = await supabase
-      .from('meals')
-      .select('id')
+    // Get full recipe data with ingredients/instructions
+    const selectedMealData = meals.find(m => m.id === selectedMeal);
+    if (!selectedMealData) {
+      toast({ title: "Error", description: "Meal not found", variant: "destructive" });
+      return;
+    }
+
+    // Fetch complete recipe data if needed
+    const { data: fullRecipe } = await supabase
+      .from('recipes')
+      .select('*')
       .eq('id', selectedMeal)
       .maybeSingle();
 
-    let mealId = selectedMeal;
+    // Always create a new meal entry with complete data
+    const { data: newMeal, error: insertError } = await supabase
+      .from('meals')
+      .insert({
+        title: selectedMealData.title,
+        description: selectedMealData.description || fullRecipe?.description || '',
+        prep_time: selectedMealData.prep_time || 0,
+        cook_time: selectedMealData.cook_time || 0,
+        servings: selectedMealData.servings || 1,
+        calories: selectedMealData.calories || 0,
+        carbs: selectedMealData.carbs || 0,
+        protein: selectedMealData.protein || 0,
+        fat: selectedMealData.fat || 0,
+        difficulty: selectedMealData.difficulty || 'easy',
+        meal_type: selectedMealData.meal_type || selectedMealType,
+        ingredients: fullRecipe?.ingredients || selectedMealData.ingredients || [],
+        instructions: fullRecipe?.instructions || selectedMealData.instructions || [],
+      })
+      .select('id')
+      .single();
 
-    if (!mealExists) {
-      const selectedMealData = meals.find(m => m.id === selectedMeal);
-      if (selectedMealData) {
-        const { data: newMeal, error: insertError } = await supabase
-          .from('meals')
-          .insert({
-            title: selectedMealData.title,
-            description: selectedMealData.description,
-            prep_time: selectedMealData.prep_time,
-            cook_time: selectedMealData.cook_time,
-            servings: selectedMealData.servings,
-            calories: selectedMealData.calories,
-            carbs: selectedMealData.carbs,
-            protein: selectedMealData.protein,
-            fat: selectedMealData.fat,
-            difficulty: selectedMealData.difficulty,
-            meal_type: selectedMealData.meal_type,
-            ingredients: selectedMealData.ingredients,
-            instructions: selectedMealData.instructions,
-          })
-          .select('id')
-          .single();
-
-        if (insertError) {
-          toast({ title: "Error", description: insertError.message, variant: "destructive" });
-          return;
-        }
-        mealId = newMeal.id;
-      }
+    if (insertError) {
+      toast({ title: "Error", description: insertError.message, variant: "destructive" });
+      return;
     }
+    
+    const mealId = newMeal.id;
 
     const { error } = await supabase
       .from('meal_plan_items')
@@ -362,6 +367,94 @@ const WeeklyPlan = () => {
   };
 
   const today = new Date().getDay();
+
+  // Copy week to next week
+  const copyWeekToNextWeek = async () => {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) {
+      toast({ title: "Please sign in", variant: "destructive" });
+      return;
+    }
+
+    if (weeklyPlan.length === 0) {
+      toast({ title: "No meals to copy", description: "Add some meals first", variant: "destructive" });
+      return;
+    }
+
+    setCopying(true);
+    try {
+      // Calculate next week's dates
+      const startOfNextWeek = new Date();
+      startOfNextWeek.setDate(startOfNextWeek.getDate() - startOfNextWeek.getDay() + 7);
+      const endOfNextWeek = new Date(startOfNextWeek);
+      endOfNextWeek.setDate(endOfNextWeek.getDate() + 6);
+
+      // Create new meal plan for next week
+      const { data: newPlan, error: planError } = await supabase
+        .from('meal_plans')
+        .insert({
+          user_id: user.user.id,
+          title: `Week of ${startOfNextWeek.toLocaleDateString()}`,
+          plan_type: 'weekly',
+          start_date: startOfNextWeek.toISOString().split('T')[0],
+          end_date: endOfNextWeek.toISOString().split('T')[0],
+          is_active: true,
+        })
+        .select('id')
+        .single();
+
+      if (planError) throw planError;
+
+      // Copy each meal to next week
+      const newItems = [];
+      for (const item of weeklyPlan) {
+        if (item.meal) {
+          // Create new meal entry
+          const { data: newMeal } = await supabase
+            .from('meals')
+            .insert({
+              title: item.meal.title,
+              description: item.meal.description,
+              prep_time: item.meal.prep_time,
+              cook_time: item.meal.cook_time,
+              servings: item.meal.servings,
+              calories: item.meal.calories,
+              carbs: item.meal.carbs,
+              protein: item.meal.protein,
+              fat: item.meal.fat,
+              difficulty: item.meal.difficulty,
+              meal_type: item.meal.meal_type,
+              ingredients: item.meal.ingredients,
+              instructions: item.meal.instructions,
+            })
+            .select('id')
+            .single();
+
+          if (newMeal) {
+            newItems.push({
+              meal_plan_id: newPlan.id,
+              meal_id: newMeal.id,
+              day_of_week: item.day_of_week,
+              meal_type: item.meal_type,
+            });
+          }
+        }
+      }
+
+      if (newItems.length > 0) {
+        await supabase.from('meal_plan_items').insert(newItems);
+      }
+
+      toast({ 
+        title: "Week copied!", 
+        description: `${newItems.length} meals copied to next week` 
+      });
+    } catch (error: any) {
+      toast({ title: "Error copying week", description: error.message, variant: "destructive" });
+    } finally {
+      setCopying(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -444,6 +537,19 @@ const WeeklyPlan = () => {
             <Button variant="outline" className="gap-2" onClick={generateShoppingList}>
               <ShoppingCart className="h-4 w-4" />
               <span className="hidden sm:inline">Shopping List</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              className="gap-2" 
+              onClick={copyWeekToNextWeek}
+              disabled={copying || weeklyPlan.length === 0}
+            >
+              {copying ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
+              <span className="hidden sm:inline">Copy to Next Week</span>
             </Button>
           </div>
         </div>
