@@ -9,12 +9,12 @@ import { AdvertisementBanner } from "@/components/AdvertisementBanner";
 import ContactForm from "@/components/ContactForm";
 import WelcomeProgressModal from "@/components/WelcomeProgressModal";
 import { useWelcomeModal } from "@/hooks/useWelcomeModal";
-
 const Index = () => {
-  const { showWelcome, closeWelcome } = useWelcomeModal();
-
-  return (
-    <div className="min-h-screen bg-background">
+  const {
+    showWelcome,
+    closeWelcome
+  } = useWelcomeModal();
+  return <div className="min-h-screen bg-background">
       <Header />
       <Hero />
       <div className="container mx-auto px-4 py-4">
@@ -29,7 +29,7 @@ const Index = () => {
       <section className="py-16 bg-secondary/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-4">Have a Question?</h2>
+            <h2 className="text-3xl font-bold mb-4 text-destructive bg-amber-200">Get a chance to win $1000 reward by sending a website review </h2>
             <p className="text-muted-foreground">
               Send us your recipe suggestions, feedback, or report any issues
             </p>
@@ -42,8 +42,6 @@ const Index = () => {
 
       {/* Welcome Progress Modal */}
       <WelcomeProgressModal open={showWelcome} onClose={closeWelcome} />
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
