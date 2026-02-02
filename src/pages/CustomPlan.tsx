@@ -135,6 +135,7 @@ const CustomPlan = () => {
               meal_type: mealType,
               ingredients: randomRecipe.ingredients || [],
               instructions: randomRecipe.instructions || [],
+              user_id: user.id,
             })
             .select('id')
             .single();

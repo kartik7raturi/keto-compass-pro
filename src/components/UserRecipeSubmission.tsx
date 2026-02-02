@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/components/auth/AuthContext";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Image, Video, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -29,6 +28,10 @@ export const UserRecipeSubmission = () => {
   const [fat, setFat] = useState("");
   const [ingredients, setIngredients] = useState<string[]>([""]);
   const [instructions, setInstructions] = useState<string[]>([""]);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   // Sync diet type with profile and page switch
   useEffect(() => {
@@ -72,6 +75,49 @@ export const UserRecipeSubmission = () => {
     setInstructions(newInstructions);
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast({ variant: "destructive", title: "Image must be under 10MB" });
+        return;
+      }
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setImagePreview(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 50 * 1024 * 1024) {
+        toast({ variant: "destructive", title: "Video must be under 50MB" });
+        return;
+      }
+      const validTypes = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo'];
+      if (!validTypes.includes(file.type)) {
+        toast({ variant: "destructive", title: "Please upload MP4, WebM, MOV, or AVI video" });
+        return;
+      }
+      setVideoFile(file);
+    }
+  };
+
+  const uploadFile = async (file: File, type: 'image' | 'video'): Promise<string | null> => {
+    if (!user) return null;
+    const ext = file.name.split('.').pop();
+    const path = `${user.id}/${Date.now()}-${type}.${ext}`;
+    const { error } = await supabase.storage.from('recipe-media').upload(path, file);
+    if (error) {
+      console.error('Upload error:', error);
+      return null;
+    }
+    const { data } = supabase.storage.from('recipe-media').getPublicUrl(path);
+    return data.publicUrl;
+  };
+
   const resetForm = () => {
     setTitle("");
     setDescription("");
@@ -87,6 +133,9 @@ export const UserRecipeSubmission = () => {
     setFat("");
     setIngredients([""]);
     setInstructions([""]);
+    setImageFile(null);
+    setVideoFile(null);
+    setImagePreview(null);
   };
 
   const handleSubmit = async () => {
@@ -95,7 +144,29 @@ export const UserRecipeSubmission = () => {
       return;
     }
 
+    setUploading(true);
     try {
+      let imageUrl: string | null = null;
+      let videoUrl: string | null = null;
+
+      if (imageFile) {
+        imageUrl = await uploadFile(imageFile, 'image');
+        if (!imageUrl) {
+          toast({ variant: "destructive", title: "Failed to upload image" });
+          setUploading(false);
+          return;
+        }
+      }
+
+      if (videoFile) {
+        videoUrl = await uploadFile(videoFile, 'video');
+        if (!videoUrl) {
+          toast({ variant: "destructive", title: "Failed to upload video" });
+          setUploading(false);
+          return;
+        }
+      }
+
       await supabase.from('user_recipes').insert({
         user_id: user?.id,
         title,
@@ -111,7 +182,9 @@ export const UserRecipeSubmission = () => {
         protein: protein ? parseFloat(protein) : null,
         fat: fat ? parseFloat(fat) : null,
         ingredients: ingredients.filter(i => i),
-        instructions: instructions.filter(i => i)
+        instructions: instructions.filter(i => i),
+        image_url: imageUrl,
+        video_url: videoUrl
       });
 
       toast({ 
@@ -124,6 +197,8 @@ export const UserRecipeSubmission = () => {
       resetForm();
     } catch (error) {
       toast({ variant: "destructive", title: "Error submitting recipe" });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -164,6 +239,73 @@ export const UserRecipeSubmission = () => {
           <div>
             <Label>Description</Label>
             <Textarea value={description} onChange={(e) => setDescription(e.target.value)} />
+          </div>
+
+          {/* Image Upload */}
+          <div>
+            <Label className="flex items-center gap-2">
+              <Image className="h-4 w-4" />
+              Recipe Image
+            </Label>
+            <div className="mt-2">
+              {imagePreview ? (
+                <div className="relative w-full h-40 rounded-lg overflow-hidden border">
+                  <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="destructive"
+                    className="absolute top-2 right-2 h-7 w-7"
+                    onClick={() => { setImageFile(null); setImagePreview(null); }}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+                  <Image className="h-8 w-8 text-muted-foreground mb-2" />
+                  <span className="text-sm text-muted-foreground">Click to upload image (max 10MB)</span>
+                  <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+                </label>
+              )}
+            </div>
+          </div>
+
+          {/* Video Upload */}
+          <div>
+            <Label className="flex items-center gap-2">
+              <Video className="h-4 w-4" />
+              Recipe Video (Optional)
+            </Label>
+            <div className="mt-2">
+              {videoFile ? (
+                <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/30">
+                  <div className="flex items-center gap-2">
+                    <Video className="h-5 w-5 text-primary" />
+                    <span className="text-sm truncate max-w-[200px]">{videoFile.name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      ({(videoFile.size / (1024 * 1024)).toFixed(1)}MB)
+                    </span>
+                  </div>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    className="h-7 w-7"
+                    onClick={() => setVideoFile(null)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+                  <Video className="h-6 w-6 text-muted-foreground mb-1" />
+                  <span className="text-sm text-muted-foreground">Click to upload video (max 50MB)</span>
+                  <span className="text-xs text-muted-foreground">MP4, WebM, MOV, AVI</span>
+                  <input type="file" accept="video/mp4,video/webm,video/quicktime,video/x-msvideo" className="hidden" onChange={handleVideoChange} />
+                </label>
+              )}
+            </div>
           </div>
 
           <div className="grid md:grid-cols-3 gap-4">
@@ -278,8 +420,15 @@ export const UserRecipeSubmission = () => {
             ))}
           </div>
 
-          <Button onClick={handleSubmit} className="w-full">
-            Submit Recipe
+          <Button onClick={handleSubmit} className="w-full" disabled={uploading}>
+            {uploading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Uploading...
+              </>
+            ) : (
+              "Submit Recipe"
+            )}
           </Button>
         </div>
       </DialogContent>

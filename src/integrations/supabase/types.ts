@@ -829,6 +829,7 @@ export type Database = {
           tags: string[] | null
           title: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           calories?: number | null
@@ -851,6 +852,7 @@ export type Database = {
           tags?: string[] | null
           title: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           calories?: number | null
@@ -873,6 +875,7 @@ export type Database = {
           tags?: string[] | null
           title?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1494,6 +1497,7 @@ export type Database = {
           updated_at: string | null
           upvotes: number | null
           user_id: string
+          video_url: string | null
         }
         Insert: {
           calories?: number | null
@@ -1517,6 +1521,7 @@ export type Database = {
           updated_at?: string | null
           upvotes?: number | null
           user_id: string
+          video_url?: string | null
         }
         Update: {
           calories?: number | null
@@ -1540,6 +1545,7 @@ export type Database = {
           updated_at?: string | null
           upvotes?: number | null
           user_id?: string
+          video_url?: string | null
         }
         Relationships: []
       }

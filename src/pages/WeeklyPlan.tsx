@@ -281,6 +281,7 @@ const WeeklyPlan = () => {
         meal_type: selectedMealData.meal_type || selectedMealType,
         ingredients: fullRecipe?.ingredients || selectedMealData.ingredients || [],
         instructions: fullRecipe?.instructions || selectedMealData.instructions || [],
+        user_id: user.user.id,
       })
       .select('id')
       .single();
@@ -426,6 +427,7 @@ const WeeklyPlan = () => {
               meal_type: item.meal.meal_type,
               ingredients: item.meal.ingredients,
               instructions: item.meal.instructions,
+              user_id: user.user.id,
             })
             .select('id')
             .single();
