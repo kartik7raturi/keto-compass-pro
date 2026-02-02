@@ -1,124 +1,239 @@
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import EnhancedMacroTracker from "@/components/EnhancedMacroTracker";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Calendar, Clock, Utensils, Target, Droplet, Dumbbell, Timer, CheckSquare, Heart } from "lucide-react";
+import { Calendar, Clock, Utensils, Target, Droplet, Dumbbell, Timer, CheckSquare, Heart, Zap } from "lucide-react";
+import { CalorieRing } from "@/components/tracker/CalorieRing";
+import { MealSection } from "@/components/tracker/MealSection";
+import { MacroSummary } from "@/components/tracker/MacroSummary";
+import { DateNavigator } from "@/components/tracker/DateNavigator";
+import { AddFoodSheet } from "@/components/tracker/AddFoodSheet";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { format } from "date-fns";
+
+interface MealItem {
+  id: string;
+  name: string;
+  calories: number;
+  carbs: number;
+  protein: number;
+  fat: number;
+  time?: string;
+  mealType: string;
+}
 
 const Tracker = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [addFoodOpen, setAddFoodOpen] = useState(false);
+  const [activeMealType, setActiveMealType] = useState("breakfast");
+  const [meals, setMeals] = useState<MealItem[]>([]);
+  
+  // Goals - in a real app these would come from user profile
+  const calorieGoal = 2000;
+  const macroGoals = { carbs: 25, protein: 120, fat: 150 };
+
+  // Load meals from localStorage on date change
+  useEffect(() => {
+    const dateKey = format(selectedDate, 'yyyy-MM-dd');
+    const saved = localStorage.getItem(`meals_${dateKey}`);
+    if (saved) {
+      setMeals(JSON.parse(saved));
+    } else {
+      setMeals([]);
+    }
+  }, [selectedDate]);
+
+  // Save meals to localStorage
+  const saveMeals = (newMeals: MealItem[]) => {
+    const dateKey = format(selectedDate, 'yyyy-MM-dd');
+    localStorage.setItem(`meals_${dateKey}`, JSON.stringify(newMeals));
+    setMeals(newMeals);
+  };
+
+  // Calculate totals
+  const totals = meals.reduce((acc, meal) => ({
+    calories: acc.calories + meal.calories,
+    carbs: acc.carbs + meal.carbs,
+    protein: acc.protein + meal.protein,
+    fat: acc.fat + meal.fat,
+  }), { calories: 0, carbs: 0, protein: 0, fat: 0 });
+
+  const getMealsByType = (type: string) => 
+    meals.filter(m => m.mealType === type);
+
+  const getMealTotalCalories = (type: string) =>
+    getMealsByType(type).reduce((sum, m) => sum + m.calories, 0);
+
+  const handleAddFood = (food: { id: string; name: string; carbs: number; protein: number; fat: number; calories: number }, mealType: string) => {
+    const newMeal: MealItem = {
+      id: `${Date.now()}-${food.id}`,
+      name: food.name,
+      calories: food.calories,
+      carbs: food.carbs,
+      protein: food.protein,
+      fat: food.fat,
+      time: format(new Date(), 'h:mm a'),
+      mealType,
+    };
+    saveMeals([...meals, newMeal]);
+  };
+
+  const openAddFood = (mealType: string) => {
+    setActiveMealType(mealType);
+    setAddFoodOpen(true);
+  };
 
   const trackerOptions = [
-    {
-      title: "Macro Tracker",
-      description: "Track your daily macronutrients and calories",
-      icon: Target,
-      path: "/tracker",
-      current: true
-    },
-    {
-      title: "30-Day Keto",
-      description: "Stay on a 30-day keto streak",
-      icon: CheckSquare,
-      path: "/tracker/30-day-keto"
-    },
-    {
-      title: "Intermittent Fasting",
-      description: "Start and monitor your fasting windows",
-      icon: Timer,
-      path: "/tracker/fasting"
-    },
-    {
-      title: "Workout Tracker",
-      description: "Log your workouts and duration",
-      icon: Dumbbell,
-      path: "/tracker/workout"
-    },
-    {
-      title: "Water Tracker",
-      description: "Track daily hydration and goals",
-      icon: Droplet,
-      path: "/tracker/water"
-    },
-    {
-      title: "Weekly Plan",
-      description: "Create weekly meal schedules",
-      icon: Calendar,
-      path: "/tracker/weekly-plan"
-    },
-    {
-      title: "Quick Meals",
-      description: "Fast and easy keto meal options",
-      icon: Clock,
-      path: "/quick-meals"
-    },
-    {
-      title: "Custom Plan",
-      description: "Create personalized meal plans",
-      icon: Utensils,
-      path: "/custom-plan"
-    },
-    {
-      title: "Period Tracker",
-      description: "Track your menstrual cycle",
-      icon: Heart,
-      path: "/tracker/period"
-    }
+    { title: "30-Day Keto", icon: CheckSquare, path: "/tracker/30-day-keto" },
+    { title: "Fasting", icon: Timer, path: "/tracker/fasting" },
+    { title: "Workout", icon: Dumbbell, path: "/tracker/workout" },
+    { title: "Water", icon: Droplet, path: "/tracker/water" },
+    { title: "Weekly Plan", icon: Calendar, path: "/tracker/weekly-plan" },
+    { title: "Period", icon: Heart, path: "/tracker/period" },
   ];
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Tracker Dashboard</h1>
-          <p className="text-muted-foreground">Track your keto journey with precision</p>
+      <main className="container mx-auto px-4 py-6">
+        {/* Date Navigator */}
+        <div className="mb-6">
+          <DateNavigator date={selectedDate} onDateChange={setSelectedDate} />
         </div>
 
-        {/* Tracker Options */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {trackerOptions.map((option) => {
-            const Icon = option.icon;
-            return (
-              <Card 
-                key={option.path} 
-                className={`cursor-pointer transition-all hover:shadow-md ${
-                  option.current ? 'ring-2 ring-primary bg-primary/5' : ''
-                }`}
-                onClick={() => !option.current && navigate(option.path)}
-              >
-                <CardHeader className="text-center">
-                  <div className="mx-auto w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
-                    <Icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <CardTitle className="text-lg">{option.title}</CardTitle>
-                  <CardDescription>{option.description}</CardDescription>
-                </CardHeader>
-                {!option.current && (
-                  <CardContent className="pt-0">
-                    <Button 
-                      variant="outline" 
-                      className="w-full"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(option.path);
-                      }}
-                    >
-                      Open
-                    </Button>
-                  </CardContent>
-                )}
-              </Card>
-            );
-          })}
+        {/* Calorie Summary Card */}
+        <Card className="mb-6 overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              {/* Calorie Ring */}
+              <div className="flex flex-col items-center">
+                <CalorieRing consumed={totals.calories} goal={calorieGoal} />
+                <div className="mt-3 flex items-center gap-4 text-sm text-muted-foreground">
+                  <span>{calorieGoal} Goal</span>
+                  <span>-</span>
+                  <span>{totals.calories} Food</span>
+                  <span>=</span>
+                  <span className="text-foreground font-medium">
+                    {Math.max(0, calorieGoal - totals.calories)} Remaining
+                  </span>
+                </div>
+              </div>
+              
+              {/* Macro Summary */}
+              <div className="flex-1 w-full md:w-auto">
+                <MacroSummary
+                  carbs={{ current: totals.carbs, target: macroGoals.carbs }}
+                  protein={{ current: totals.protein, target: macroGoals.protein }}
+                  fat={{ current: totals.fat, target: macroGoals.fat }}
+                />
+              </div>
+            </div>
+
+            {/* Ketosis Status */}
+            <div className="mt-4 pt-4 border-t">
+              <div className="flex items-center gap-2">
+                <Zap className={`h-5 w-5 ${totals.carbs <= 25 ? 'text-primary' : 'text-destructive'}`} />
+                <span className="font-medium">
+                  {totals.carbs <= 25 
+                    ? "In Ketosis Range 🎯" 
+                    : "Above Carb Limit ⚠️"
+                  }
+                </span>
+                <span className="text-sm text-muted-foreground ml-auto">
+                  {totals.carbs <= 25 
+                    ? `${25 - totals.carbs}g carbs left` 
+                    : `${totals.carbs - 25}g over limit`
+                  }
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Meal Sections */}
+        <div className="space-y-4 mb-8">
+          <MealSection
+            title="Breakfast"
+            icon="☀️"
+            items={getMealsByType("breakfast")}
+            onAddFood={() => openAddFood("breakfast")}
+            totalCalories={getMealTotalCalories("breakfast")}
+          />
+          <MealSection
+            title="Lunch"
+            icon="🌤️"
+            items={getMealsByType("lunch")}
+            onAddFood={() => openAddFood("lunch")}
+            totalCalories={getMealTotalCalories("lunch")}
+          />
+          <MealSection
+            title="Dinner"
+            icon="🌙"
+            items={getMealsByType("dinner")}
+            onAddFood={() => openAddFood("dinner")}
+            totalCalories={getMealTotalCalories("dinner")}
+          />
+          <MealSection
+            title="Snacks"
+            icon="🍎"
+            items={getMealsByType("snacks")}
+            onAddFood={() => openAddFood("snacks")}
+            totalCalories={getMealTotalCalories("snacks")}
+          />
         </div>
 
-        {/* Macro Tracker */}
+        {/* Other Trackers */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">Macro Tracker</h2>
-          <EnhancedMacroTracker />
+          <h2 className="text-lg font-semibold mb-4">More Trackers</h2>
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+            {trackerOptions.map((option) => {
+              const Icon = option.icon;
+              return (
+                <Button
+                  key={option.path}
+                  variant="outline"
+                  className="h-auto py-4 flex flex-col gap-2"
+                  onClick={() => navigate(option.path)}
+                >
+                  <Icon className="h-5 w-5 text-primary" />
+                  <span className="text-xs">{option.title}</span>
+                </Button>
+              );
+            })}
+          </div>
         </div>
+
+        {/* Quick Links */}
+        <div className="grid grid-cols-2 gap-4">
+          <Button
+            variant="outline"
+            className="h-auto py-4"
+            onClick={() => navigate("/quick-meals")}
+          >
+            <Clock className="h-5 w-5 mr-2" />
+            Quick Meals
+          </Button>
+          <Button
+            variant="outline"
+            className="h-auto py-4"
+            onClick={() => navigate("/custom-plan")}
+          >
+            <Utensils className="h-5 w-5 mr-2" />
+            Custom Plan
+          </Button>
+        </div>
+
+        {/* Add Food Sheet */}
+        <AddFoodSheet
+          open={addFoodOpen}
+          onOpenChange={setAddFoodOpen}
+          mealType={activeMealType}
+          onAddFood={handleAddFood}
+        />
       </main>
       <Footer />
     </div>
