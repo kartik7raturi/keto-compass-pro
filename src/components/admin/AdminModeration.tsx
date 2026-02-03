@@ -243,6 +243,8 @@ export const AdminModeration = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Date</TableHead>
+                  <TableHead>Reporter ID</TableHead>
+                  <TableHead>Reported User ID</TableHead>
                   <TableHead>Reason</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
@@ -251,7 +253,7 @@ export const AdminModeration = () => {
               <TableBody>
                 {reports.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground">
+                    <TableCell colSpan={6} className="text-center text-muted-foreground">
                       No reports yet
                     </TableCell>
                   </TableRow>
@@ -259,6 +261,16 @@ export const AdminModeration = () => {
                   reports.map((report) => (
                     <TableRow key={report.id}>
                       <TableCell>{formatDate(report.created_at)}</TableCell>
+                      <TableCell>
+                        <code className="text-xs bg-muted px-2 py-1 rounded">
+                          {report.reporter_id}
+                        </code>
+                      </TableCell>
+                      <TableCell>
+                        <code className="text-xs bg-muted px-2 py-1 rounded">
+                          {report.reported_user_id}
+                        </code>
+                      </TableCell>
                       <TableCell>
                         <span className="capitalize">{report.reason.replace('_', ' ')}</span>
                       </TableCell>
@@ -321,8 +333,10 @@ export const AdminModeration = () => {
                 ) : (
                   activeBans.map((ban) => (
                     <TableRow key={ban.id}>
-                      <TableCell className="font-mono text-xs">
-                        {ban.user_id.slice(0, 8)}...
+                      <TableCell>
+                        <code className="text-xs bg-muted px-2 py-1 rounded">
+                          {ban.user_id}
+                        </code>
                       </TableCell>
                       <TableCell>
                         <Badge variant={ban.ban_type === 'banned' ? 'destructive' : 'secondary'}>
@@ -372,8 +386,10 @@ export const AdminModeration = () => {
                 ) : (
                   inactiveBans.map((ban) => (
                     <TableRow key={ban.id}>
-                      <TableCell className="font-mono text-xs">
-                        {ban.user_id.slice(0, 8)}...
+                      <TableCell>
+                        <code className="text-xs bg-muted px-2 py-1 rounded">
+                          {ban.user_id}
+                        </code>
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline">{ban.ban_type}</Badge>

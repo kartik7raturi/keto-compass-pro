@@ -8,13 +8,12 @@ import { useAuth } from "@/components/auth/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import KetoStreakChart from "@/components/charts/KetoStreakChart";
-import FastingChart from "@/components/charts/FastingChart";
-import WorkoutChart from "@/components/charts/WorkoutChart";
-import WaterChart from "@/components/charts/WaterChart";
 import UserProgressWidget from "@/components/UserProgressWidget";
-import LeaderboardWidget from "@/components/LeaderboardWidget";
 import { usePointsSystem, POINT_VALUES } from "@/hooks/usePointsSystem";
+import { MacroRings } from "@/components/progress/MacroRings";
+import { ExpenditureChart } from "@/components/progress/ExpenditureChart";
+import { WeightTrendChart } from "@/components/progress/WeightTrendChart";
+import { BodyComposition } from "@/components/progress/BodyComposition";
 
 interface WeeklySummary {
   ketoDays: number;
@@ -411,15 +410,38 @@ const ProgressDashboard = () => {
             </Card>
           </div>
 
-          {/* Tracker Charts */}
-          <div className="mt-8">
-            <h3 className="text-2xl font-bold mb-6">Tracker Analytics</h3>
-            <div className="grid lg:grid-cols-2 gap-6 mb-8">
-              <KetoStreakChart />
-              <FastingChart />
-              <WorkoutChart />
-              <WaterChart />
-            </div>
+          {/* MacroFactor Style Charts */}
+          <div className="mt-8 grid lg:grid-cols-2 gap-6">
+            <MacroRings 
+              protein={{ current: 85, goal: 120 }}
+              carbs={{ current: 18, goal: 25 }}
+              fat={{ current: 95, goal: 130 }}
+            />
+            <ExpenditureChart 
+              data={[
+                { day: 'Mon', consumed: 1850, burned: 2100 },
+                { day: 'Tue', consumed: 1920, burned: 2200 },
+                { day: 'Wed', consumed: 1780, burned: 1950 },
+                { day: 'Thu', consumed: 1900, burned: 2150 },
+                { day: 'Fri', consumed: 2050, burned: 2300 },
+                { day: 'Sat', consumed: 1950, burned: 2000 },
+                { day: 'Sun', consumed: 1800, burned: 1900 },
+              ]}
+            />
+          </div>
+
+          <div className="mt-6">
+            <WeightTrendChart 
+              data={weightLogs.slice().reverse().map((log: any) => ({
+                date: new Date(log.logged_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                weight: log.weight
+              }))}
+              goalWeight={goalWeight}
+            />
+          </div>
+
+          <div className="mt-6">
+            <BodyComposition />
           </div>
 
           <div className="mt-8">
@@ -459,10 +481,6 @@ const ProgressDashboard = () => {
             </Card>
           </div>
 
-          {/* Leaderboard Section */}
-          <div className="mt-8">
-            <LeaderboardWidget />
-          </div>
         </div>
       </div>
     </section>

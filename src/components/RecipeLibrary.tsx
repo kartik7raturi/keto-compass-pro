@@ -34,7 +34,7 @@ interface Recipe {
 const RecipeLibrary = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState("people recipes");
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [userRecipes, setUserRecipes] = useState<any[]>([]);
   const [weeklyTopRecipes, setWeeklyTopRecipes] = useState<any[]>([]);
@@ -291,7 +291,7 @@ const RecipeLibrary = () => {
     setIsDetailOpen(true);
   };
 
-  const categories = ["all", "people recipes", "breakfast", "lunch", "dinner", "snacks", "drinks"];
+  const categories = ["people recipes", "breakfast", "lunch", "dinner", "snacks", "drinks"];
   const displayRecipes = selectedCategory === "people recipes" ? userRecipes : recipes;
 
   return (
@@ -402,6 +402,16 @@ const RecipeLibrary = () => {
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {weeklyTopRecipes.slice(0, 10).map((recipe: any) => (
                     <Card key={recipe.id} className="group hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden">
+                      {/* Recipe Main Image */}
+                      {recipe.image_url && (
+                        <div className="aspect-video overflow-hidden">
+                          <img 
+                            src={recipe.image_url} 
+                            alt={recipe.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        </div>
+                      )}
                       <CardHeader className="pb-4">
                         <CardTitle className={`text-lg transition-colors ${
                           dietType === 'pcos' 
@@ -515,6 +525,16 @@ const RecipeLibrary = () => {
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {userRecipes.map((recipe: any) => (
                   <Card key={recipe.id} className="group hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden">
+                    {/* Recipe Main Image */}
+                    {recipe.image_url && (
+                      <div className="aspect-video overflow-hidden">
+                        <img 
+                          src={recipe.image_url} 
+                          alt={recipe.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+                    )}
                     <CardHeader className="pb-4">
                       <CardTitle className={`text-lg transition-colors ${
                         dietType === 'pcos' 
