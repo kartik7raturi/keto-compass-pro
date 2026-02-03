@@ -6,13 +6,11 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Loader2, ChefHat, FileText, BookOpen, Image, Trophy, Star, Target, MessageSquare, Award } from "lucide-react";
+import { Shield, Loader2, ChefHat, FileText, BookOpen, Image, Target, MessageSquare, Award } from "lucide-react";
 import { AdminRecipes } from "@/components/admin/AdminRecipes";
 import { AdminArticles } from "@/components/admin/AdminArticles";
 import { AdminStories } from "@/components/admin/AdminStories";
 import { AdminAdvertisements } from "@/components/admin/AdminAdvertisements";
-import { AdminTopContributors } from "@/components/admin/AdminTopContributors";
-import { AdminTopPointers } from "@/components/admin/AdminTopPointers";
 import { AdminChallenges } from "@/components/admin/AdminChallenges";
 import { AdminMessages } from "@/components/admin/AdminMessages";
 import { AdminBadges } from "@/components/admin/AdminBadges";
@@ -118,14 +116,6 @@ const Admin = () => {
               <MessageSquare className="h-4 w-4" />
               <span className="hidden sm:inline">Messages</span>
             </TabsTrigger>
-            <TabsTrigger value="contributors" className="flex items-center gap-1 text-xs md:text-sm">
-              <Trophy className="h-4 w-4" />
-              <span className="hidden sm:inline">Contributors</span>
-            </TabsTrigger>
-            <TabsTrigger value="pointers" className="flex items-center gap-1 text-xs md:text-sm">
-              <Star className="h-4 w-4" />
-              <span className="hidden sm:inline">Pointers</span>
-            </TabsTrigger>
             <TabsTrigger value="moderation" className="flex items-center gap-1 text-xs md:text-sm">
               <Shield className="h-4 w-4" />
               <span className="hidden sm:inline">Moderation</span>
@@ -158,14 +148,6 @@ const Admin = () => {
 
           <TabsContent value="messages">
             <AdminMessages />
-          </TabsContent>
-
-          <TabsContent value="contributors">
-            <AdminTopContributors />
-          </TabsContent>
-
-          <TabsContent value="pointers">
-            <AdminTopPointers />
           </TabsContent>
 
           <TabsContent value="moderation">

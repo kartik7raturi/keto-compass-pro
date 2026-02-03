@@ -26,6 +26,7 @@ interface Recipe {
   fat: number;
   calories: number;
   image_url?: string;
+  video_url?: string;
 }
 
 interface RecipeDetailProps {
@@ -138,7 +139,35 @@ const RecipeDetail = ({ recipe, isOpen, onClose }: RecipeDetailProps) => {
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* Recipe Image */}
+          {recipe.image_url && (
+            <div className="w-full aspect-video rounded-lg overflow-hidden">
+              <img 
+                src={recipe.image_url} 
+                alt={recipe.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+
           <p className="text-muted-foreground">{recipe.description}</p>
+
+          {/* Instruction Video */}
+          {recipe.video_url && (
+            <Card>
+              <CardContent className="p-4">
+                <h3 className="font-semibold mb-3">Video Instructions</h3>
+                <div className="aspect-video rounded-lg overflow-hidden">
+                  <video 
+                    src={recipe.video_url} 
+                    controls 
+                    className="w-full h-full object-cover"
+                    preload="metadata"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <div className="flex flex-wrap gap-4 justify-between items-center">
             <div className="flex flex-wrap gap-4">
