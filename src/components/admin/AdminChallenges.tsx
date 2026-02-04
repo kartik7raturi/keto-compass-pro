@@ -240,12 +240,12 @@ export const AdminChallenges = () => {
                   </div>
                   <div>
                     <label className="text-sm font-medium mb-1 block">Reward Badge</label>
-                    <Select value={rewardBadgeId} onValueChange={setRewardBadgeId}>
+                    <Select value={rewardBadgeId || "none"} onValueChange={(val) => setRewardBadgeId(val === "none" ? "" : val)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select badge" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">None</SelectItem>
+                        <SelectItem value="none">None</SelectItem>
                         {badges.map(badge => (
                           <SelectItem key={badge.id} value={badge.id}>
                             {badge.name}
