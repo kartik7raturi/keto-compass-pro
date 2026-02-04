@@ -36,7 +36,11 @@ interface GroupInvite {
   };
 }
 
-export const MessageRequests = () => {
+interface MessageRequestsProps {
+  onAcceptRequest?: (userId: string) => void;
+}
+
+export const MessageRequests = ({ onAcceptRequest }: MessageRequestsProps = {}) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [messageRequests, setMessageRequests] = useState<MessageRequest[]>([]);
@@ -111,7 +115,7 @@ export const MessageRequests = () => {
     }
   };
 
-  const handleMessageRequest = async (requestId: string, action: 'approved' | 'declined') => {
+  const handleMessageRequest = async (requestId: string, senderId: string, action: 'approved' | 'declined') => {
     try {
       await supabase
         .from('message_requests')
@@ -122,6 +126,11 @@ export const MessageRequests = () => {
         .eq('id', requestId);
 
       toast({ title: action === 'approved' ? 'Message request approved!' : 'Message request declined' });
+      
+      if (action === 'approved' && onAcceptRequest) {
+        onAcceptRequest(senderId);
+      }
+      
       fetchRequests();
     } catch (error) {
       toast({ title: 'Error updating request', variant: 'destructive' });
@@ -215,7 +224,7 @@ export const MessageRequests = () => {
                           size="icon" 
                           variant="ghost" 
                           className="h-7 w-7"
-                          onClick={() => handleMessageRequest(request.id, 'approved')}
+                          onClick={() => handleMessageRequest(request.id, request.sender_id, 'approved')}
                         >
                           <Check className="h-4 w-4 text-green-500" />
                         </Button>
@@ -223,7 +232,7 @@ export const MessageRequests = () => {
                           size="icon" 
                           variant="ghost" 
                           className="h-7 w-7"
-                          onClick={() => handleMessageRequest(request.id, 'declined')}
+                          onClick={() => handleMessageRequest(request.id, request.sender_id, 'declined')}
                         >
                           <X className="h-4 w-4 text-red-500" />
                         </Button>

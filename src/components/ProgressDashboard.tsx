@@ -14,6 +14,12 @@ import { MacroRings } from "@/components/progress/MacroRings";
 import { ExpenditureChart } from "@/components/progress/ExpenditureChart";
 import { WeightTrendChart } from "@/components/progress/WeightTrendChart";
 import { BodyComposition } from "@/components/progress/BodyComposition";
+import NutritionAnalytics from "@/components/progress/NutritionAnalytics";
+import StreakWidget from "@/components/progress/StreakWidget";
+import LeaderboardWidget from "@/components/LeaderboardWidget";
+import KetoStreakChart from "@/components/charts/KetoStreakChart";
+import WorkoutChart from "@/components/charts/WorkoutChart";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface WeeklySummary {
   ketoDays: number;
@@ -25,6 +31,7 @@ const ProgressDashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const { awardPoints } = usePointsSystem();
+  const isMobile = useIsMobile();
   const [profile, setProfile] = useState<any>(null);
   const [weightLogs, setWeightLogs] = useState<any[]>([]);
   const [editingWeight, setEditingWeight] = useState(false);
@@ -212,6 +219,33 @@ const ProgressDashboard = () => {
     { title: "Goal Weight", date: "", achieved: currentWeight <= goalWeight && goalWeight > 0 }
   ];
 
+  // Mobile view - MacroFactor-style precision dashboard
+  if (isMobile) {
+    return (
+      <section id="progress" className="py-4">
+        <div className="container px-4">
+          <h2 className="text-2xl font-bold mb-4">Your Progress</h2>
+          
+          {/* Mobile Nutrition Analytics Dashboard */}
+          <NutritionAnalytics />
+          
+          {/* Streaks and Leaderboard */}
+          <div className="mt-4 space-y-4">
+            <StreakWidget />
+            <LeaderboardWidget />
+          </div>
+          
+          {/* Keto and Workout Charts */}
+          <div className="mt-4 space-y-4">
+            <KetoStreakChart />
+            <WorkoutChart />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Desktop view
   return (
     <section id="progress" className="py-20 bg-secondary/30">
       <div className="container">
@@ -229,6 +263,18 @@ const ProgressDashboard = () => {
           {/* User Progress Widget */}
           <div className="mb-8">
             <UserProgressWidget />
+          </div>
+
+          {/* Leaderboard and Streaks Row */}
+          <div className="grid lg:grid-cols-2 gap-6 mb-8">
+            <LeaderboardWidget />
+            <StreakWidget />
+          </div>
+
+          {/* Keto and Workout Charts */}
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            <KetoStreakChart />
+            <WorkoutChart />
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

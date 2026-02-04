@@ -14,7 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Heart, MessageCircle, Share2, Users, Trophy, Send, MoreVertical, Pencil, Trash2, Flag, Ban, UserCircle, MessageSquare } from "lucide-react";
+import { Heart, MessageCircle, Share2, Users, Trophy, Send, MoreVertical, Pencil, Trash2, Flag, Ban, UserCircle, MessageSquare, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -29,6 +29,7 @@ import { useOnlinePresence } from "@/hooks/useOnlinePresence";
 import { useSearchParams } from "react-router-dom";
 import { CommunityMessaging } from "./CommunityMessaging";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { CommunitySidebarPanel } from "./community/CommunitySidebarPanel";
 
 interface Community {
   id: string;
@@ -79,7 +80,8 @@ const Community = () => {
   const [searchParams] = useSearchParams();
   const initialMessageUser = searchParams.get('user');
   const isMobile = useIsMobile();
-  const [activeTab, setActiveTab] = useState<'discussion' | 'messages'>('discussion');
+  const [activeTab, setActiveTab] = useState<'discussion' | 'messages' | 'groups'>('discussion');
+  const [showSidePanel, setShowSidePanel] = useState(false);
 
   const [newPostContent, setNewPostContent] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -534,7 +536,10 @@ const Community = () => {
                             </button>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between">
-                                <p className="font-medium text-sm truncate">{post.author_name}</p>
+                                <div>
+                                  <p className="font-medium text-sm truncate">{post.author_name}</p>
+                                  <p className="text-[10px] text-muted-foreground font-mono">@{post.user_id.slice(0, 8)}</p>
+                                </div>
                                 <span className="text-xs text-muted-foreground">{formatTimeAgo(post.created_at)}</span>
                               </div>
                               <p className="text-sm mt-1 break-words">{post.content}</p>
@@ -603,14 +608,24 @@ const Community = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl md:text-3xl font-bold">Communities</h1>
-        <Button
-          variant={showMessaging ? "default" : "outline"}
-          onClick={() => setShowMessaging(!showMessaging)}
-          className="gap-2"
-        >
-          <MessageSquare className="h-4 w-4" />
-          Messages
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant={showSidePanel ? "default" : "outline"}
+            onClick={() => setShowSidePanel(!showSidePanel)}
+            className="gap-2"
+          >
+            <Search className="h-4 w-4" />
+            Groups
+          </Button>
+          <Button
+            variant={showMessaging ? "default" : "outline"}
+            onClick={() => setShowMessaging(!showMessaging)}
+            className="gap-2"
+          >
+            <MessageSquare className="h-4 w-4" />
+            Messages
+          </Button>
+        </div>
       </div>
       
       <div className="flex gap-4 h-[calc(100vh-200px)] min-h-[500px]">
@@ -784,17 +799,20 @@ const Community = () => {
                             </button>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between mb-1">
-                                <div className="flex items-center gap-2">
+                                <div className="flex flex-col">
                                   <button 
                                     onClick={() => setViewingUser(post.user_id)}
-                                    className="font-medium text-sm truncate hover:underline"
+                                    className="font-medium text-sm truncate hover:underline text-left"
                                   >
                                     {post.author_name}
                                   </button>
-                                  <span className="text-xs text-muted-foreground shrink-0">
-                                    {formatTimeAgo(post.created_at)}
+                                  <span className="text-[10px] text-muted-foreground font-mono">
+                                    @{post.user_id.slice(0, 8)}
                                   </span>
                                 </div>
+                                <span className="text-xs text-muted-foreground shrink-0">
+                                  {formatTimeAgo(post.created_at)}
+                                </span>
                                 
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
@@ -923,8 +941,20 @@ const Community = () => {
           )}
         </div>
 
+        {/* Side Panel - Groups, Search, Requests */}
+        {showSidePanel && (
+          <div className="w-80 shrink-0 hidden lg:block border-l pl-4">
+            <CommunitySidebarPanel 
+              onStartDirectMessage={(userId) => {
+                startDirectMessage(userId);
+                setShowSidePanel(false);
+              }}
+            />
+          </div>
+        )}
+
         {/* Messaging Panel */}
-        {showMessaging && (
+        {showMessaging && !showSidePanel && (
           <div className="w-80 shrink-0 hidden lg:block">
             <CommunityMessaging 
               initialUserId={messagingUserId}
