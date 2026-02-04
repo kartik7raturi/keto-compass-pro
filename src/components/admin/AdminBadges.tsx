@@ -218,12 +218,12 @@ export const AdminBadges = () => {
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-1 block">Requirement Type</label>
-                  <Select value={requirementType} onValueChange={setRequirementType}>
+                  <Select value={requirementType || "none"} onValueChange={(val) => setRequirementType(val === "none" ? "" : val)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
                       <SelectItem value="days_completed">Days Completed</SelectItem>
                       <SelectItem value="challenges_completed">Challenges Completed</SelectItem>
                       <SelectItem value="weight_lost">Weight Lost</SelectItem>
