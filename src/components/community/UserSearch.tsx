@@ -131,8 +131,8 @@ export const UserSearch = ({ onStartChat }: UserSearchProps) => {
                     <span className="text-sm font-medium truncate block">
                       {result.display_name || 'Unknown'}
                     </span>
-                    <span className="text-xs text-muted-foreground font-mono">
-                      {result.user_id.slice(0, 8)}...
+                    <span className="text-[10px] text-muted-foreground font-mono block">
+                      @{result.user_id.slice(0, 8)}
                     </span>
                   </div>
                   <Button 
