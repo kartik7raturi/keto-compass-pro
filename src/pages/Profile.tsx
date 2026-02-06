@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Camera, Upload, User, Edit, Trophy, Star, Users, FileText, Award } from "lucide-react";
+import { Camera, Upload, User, Edit, Trophy, Star, Users, FileText, Award, MessageCircle, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { usePointsSystem } from "@/hooks/usePointsSystem";
@@ -366,6 +366,37 @@ const Profile = () => {
               </Card>
 
               <ProfileBadges />
+
+              {/* 24/7 Chat Support Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MessageCircle className="h-5 w-5 text-primary" />
+                    Support
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    Need help? Our support team is available 24/7 to assist you.
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => window.location.href = '/contact'}
+                  >
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    24/7 Chat Support
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full"
+                    onClick={() => window.location.href = '/support'}
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Help Center
+                  </Button>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>

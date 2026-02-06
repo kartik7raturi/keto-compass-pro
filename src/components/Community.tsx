@@ -398,17 +398,25 @@ const Community = () => {
       <div className="container mx-auto px-4 py-4">
         <h1 className="text-2xl font-bold mb-4">Communities</h1>
         
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'discussion' | 'messages')}>
-          <TabsList className="w-full mb-4">
-            <TabsTrigger value="discussion" className="flex-1 gap-2">
-              <Users className="h-4 w-4" />
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'discussion' | 'messages' | 'groups')}>
+          <TabsList className="w-full mb-4 grid grid-cols-3">
+            <TabsTrigger value="discussion" className="gap-1 text-xs">
+              <Users className="h-3 w-3" />
               Discussion
             </TabsTrigger>
-            <TabsTrigger value="messages" className="flex-1 gap-2">
-              <MessageSquare className="h-4 w-4" />
+            <TabsTrigger value="groups" className="gap-1 text-xs">
+              <Users className="h-3 w-3" />
+              Groups
+            </TabsTrigger>
+            <TabsTrigger value="messages" className="gap-1 text-xs">
+              <MessageSquare className="h-3 w-3" />
               Messages
             </TabsTrigger>
           </TabsList>
+          
+          <TabsContent value="groups" className="mt-0">
+            <CommunitySidebarPanel onStartDirectMessage={startDirectMessage} />
+          </TabsContent>
           
           <TabsContent value="discussion" className="mt-0">
             {/* Community Selector for Mobile */}

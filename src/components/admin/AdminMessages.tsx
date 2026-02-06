@@ -19,6 +19,7 @@ interface UserMessage {
   status: string;
   admin_response: string | null;
   created_at: string;
+  user_email?: string;
 }
 
 export const AdminMessages = () => {
@@ -35,11 +36,30 @@ export const AdminMessages = () => {
 
   const fetchMessages = async () => {
     try {
-      const { data } = await supabase
+      const { data: messagesData } = await supabase
         .from('user_messages')
         .select('*')
         .order('created_at', { ascending: false });
-      setMessages(data as UserMessage[] || []);
+      
+      if (messagesData && messagesData.length > 0) {
+        // Fetch user emails for all messages
+        const userIds = [...new Set(messagesData.map(m => m.user_id))];
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('user_id, email')
+          .in('user_id', userIds);
+        
+        const emailMap = new Map(profiles?.map(p => [p.user_id, p.email]) || []);
+        
+        const messagesWithEmail = messagesData.map(m => ({
+          ...m,
+          user_email: emailMap.get(m.user_id) || 'Unknown'
+        }));
+        
+        setMessages(messagesWithEmail as UserMessage[]);
+      } else {
+        setMessages([]);
+      }
     } catch (error) {
       console.error('Error fetching messages:', error);
     } finally {
@@ -158,6 +178,7 @@ export const AdminMessages = () => {
           <TableHeader>
             <TableRow>
               <TableHead>Date</TableHead>
+              <TableHead>Email</TableHead>
               <TableHead>Category</TableHead>
               <TableHead>Subject</TableHead>
               <TableHead>Status</TableHead>
@@ -169,6 +190,9 @@ export const AdminMessages = () => {
               <TableRow key={message.id}>
                 <TableCell className="text-sm text-muted-foreground">
                   {format(new Date(message.created_at), 'MMM d, yyyy')}
+                </TableCell>
+                <TableCell className="text-sm max-w-[150px] truncate">
+                  {message.user_email || 'Unknown'}
                 </TableCell>
                 <TableCell>
                   <Badge className={getCategoryColor(message.category)}>
@@ -203,7 +227,7 @@ export const AdminMessages = () => {
             ))}
             {messages.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                   No messages yet
                 </TableCell>
               </TableRow>
