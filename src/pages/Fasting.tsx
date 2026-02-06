@@ -12,12 +12,19 @@ import { usePointsSystem, POINT_VALUES } from "@/hooks/usePointsSystem";
 
 const SEO = () => {
   useEffect(() => {
-    const title = "Intermittent Fasting Tracker | Ketopia";
-    const description = "Start and monitor your fasting window with countdown, presets, and reminders.";
+    const title = "Free Intermittent Fasting Tracker | Ketopia - Fasting Timer";
+    const description = "Track your intermittent fasting with our free fasting tracker. Start and monitor fasting windows with countdown timer, presets, and reminders.";
+    const keywords = "free fasting tracker, intermittent fasting, fasting timer, IF tracker, 16:8 fasting, keto fasting";
+    
     document.title = title;
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
     if (!meta) { meta = document.createElement("meta"); meta.name = "description"; document.head.appendChild(meta); }
     meta.content = description;
+    
+    let keywordsMeta = document.querySelector('meta[name="keywords"]') as HTMLMetaElement | null;
+    if (!keywordsMeta) { keywordsMeta = document.createElement("meta"); keywordsMeta.name = "keywords"; document.head.appendChild(keywordsMeta); }
+    keywordsMeta.content = keywords;
+    
     let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
     if (!canonical) { canonical = document.createElement("link"); canonical.rel = "canonical"; document.head.appendChild(canonical); }
     canonical.href = window.location.href;

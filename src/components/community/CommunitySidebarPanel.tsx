@@ -39,15 +39,15 @@ export const CommunitySidebarPanel = ({ onStartDirectMessage }: CommunitySidebar
     <div className="h-full flex flex-col">
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="flex-1 flex flex-col">
         <TabsList className="grid w-full grid-cols-3 shrink-0">
-          <TabsTrigger value="groups" className="gap-1 text-xs">
+          <TabsTrigger value="groups" className="gap-1 text-xs" onClick={(e) => e.stopPropagation()}>
             <Users className="h-3 w-3" />
             Groups
           </TabsTrigger>
-          <TabsTrigger value="search" className="gap-1 text-xs">
+          <TabsTrigger value="search" className="gap-1 text-xs" onClick={(e) => e.stopPropagation()}>
             <Search className="h-3 w-3" />
             Find
           </TabsTrigger>
-          <TabsTrigger value="requests" className="gap-1 text-xs">
+          <TabsTrigger value="requests" className="gap-1 text-xs" onClick={(e) => e.stopPropagation()}>
             <MessageCircle className="h-3 w-3" />
             Requests
           </TabsTrigger>

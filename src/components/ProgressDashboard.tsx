@@ -20,6 +20,11 @@ import LeaderboardWidget from "@/components/LeaderboardWidget";
 import KetoStreakChart from "@/components/charts/KetoStreakChart";
 import WorkoutChart from "@/components/charts/WorkoutChart";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { VisualProgressCharts } from "@/components/progress/VisualProgressCharts";
+import { HealthDashboard } from "@/components/progress/HealthDashboard";
+import { GoalIndicators } from "@/components/progress/GoalIndicators";
+import { WeeklyReport } from "@/components/progress/WeeklyReport";
+import { ProgressInsights } from "@/components/progress/ProgressInsights";
 
 interface WeeklySummary {
   ketoDays: number;
@@ -228,6 +233,52 @@ const ProgressDashboard = () => {
           
           {/* Mobile Nutrition Analytics Dashboard */}
           <NutritionAnalytics />
+          
+          {/* Goal Indicators */}
+          <div className="mt-4">
+            <GoalIndicators
+              macroGoalsMet={weeklySummary.ketoDays > 0 ? Math.round((weeklySummary.ketoDays / 7) * 100) : 0}
+              weightLossGoal={10}
+              currentWeightLoss={weightLost}
+              currentStreak={weeklySummary.currentStreak}
+              bestStreak={weeklySummary.currentStreak}
+            />
+          </div>
+          
+          {/* Health Dashboard */}
+          <div className="mt-4">
+            <HealthDashboard
+              currentWeight={currentWeight}
+              height={profile?.height || 68}
+            />
+          </div>
+          
+          {/* Weekly Report */}
+          <div className="mt-4">
+            <WeeklyReport
+              avgCarbs={15}
+              avgProtein={100}
+              avgFat={120}
+              avgCalories={1800}
+              carbSuccessRate={weeklySummary.ketoDays > 0 ? Math.round((weeklySummary.ketoDays / 7) * 100) : 0}
+              weightChange={weeklySummary.weeklyWeightChange}
+              daysTracked={weeklySummary.ketoDays}
+            />
+          </div>
+          
+          {/* Insights */}
+          <div className="mt-4">
+            <ProgressInsights
+              data={{
+                carbDaysMetTarget: weeklySummary.ketoDays,
+                totalDays: 7,
+                avgCalories: 1800,
+                caloriesTrend: weeklySummary.weeklyWeightChange > 0 ? 'down' : 'stable',
+                weightTrend: weeklySummary.weeklyWeightChange > 0 ? 'down' : 'stable',
+                proteinAdherence: 85
+              }}
+            />
+          </div>
           
           {/* Streaks and Leaderboard */}
           <div className="mt-4 space-y-4">

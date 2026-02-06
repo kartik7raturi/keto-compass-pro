@@ -13,6 +13,29 @@ import { AddFoodSheet } from "@/components/tracker/AddFoodSheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { format } from "date-fns";
 
+// SEO Component
+const SEO = () => {
+  useEffect(() => {
+    const title = "Free Macro & Calorie Tracker | Ketopia - Keto Diet Tracker";
+    const description = "Track your macros, calories, and keto diet for free. Smart macro tracking with food database, barcode scanner, and ketosis monitoring.";
+    const keywords = "free macro tracker, free calorie tracker, keto tracker, carb counter, macro counting app, ketogenic diet tracker";
+    
+    document.title = title;
+    let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
+    if (!meta) { meta = document.createElement("meta"); meta.name = "description"; document.head.appendChild(meta); }
+    meta.content = description;
+    
+    let keywordsMeta = document.querySelector('meta[name="keywords"]') as HTMLMetaElement | null;
+    if (!keywordsMeta) { keywordsMeta = document.createElement("meta"); keywordsMeta.name = "keywords"; document.head.appendChild(keywordsMeta); }
+    keywordsMeta.content = keywords;
+    
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!canonical) { canonical = document.createElement("link"); canonical.rel = "canonical"; document.head.appendChild(canonical); }
+    canonical.href = window.location.href;
+  }, []);
+  return null;
+};
+
 interface MealItem {
   id: string;
   name: string;
@@ -98,6 +121,7 @@ const Tracker = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO />
       <Header />
       <main className="container mx-auto px-4 py-6">
         {/* Date Navigator */}

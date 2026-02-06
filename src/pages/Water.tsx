@@ -13,12 +13,19 @@ import { usePointsSystem, POINT_VALUES } from "@/hooks/usePointsSystem";
 
 const SEO = () => {
   useEffect(() => {
-    const title = "Water Tracker | Ketopia";
-    const description = "Stay hydrated. Track daily water intake with a simple, beautiful tracker.";
+    const title = "Free Water Tracker | Ketopia - Hydration Tracking Tool";
+    const description = "Stay hydrated with our free water tracker. Track daily water intake, set hydration goals, and maintain optimal hydration on your keto journey.";
+    const keywords = "free water tracker, hydration tracker, daily water intake, keto hydration, water tracking app";
+    
     document.title = title;
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
     if (!meta) { meta = document.createElement("meta"); meta.name = "description"; document.head.appendChild(meta); }
     meta.content = description;
+    
+    let keywordsMeta = document.querySelector('meta[name="keywords"]') as HTMLMetaElement | null;
+    if (!keywordsMeta) { keywordsMeta = document.createElement("meta"); keywordsMeta.name = "keywords"; document.head.appendChild(keywordsMeta); }
+    keywordsMeta.content = keywords;
+    
     let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
     if (!canonical) { canonical = document.createElement("link"); canonical.rel = "canonical"; document.head.appendChild(canonical); }
     canonical.href = window.location.href;
