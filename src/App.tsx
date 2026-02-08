@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ScrollToTop from "@/components/ScrollToTop";
 import { AuthProvider } from "@/components/auth/AuthContext";
 import { DietModeProvider } from "@/components/DietModeProvider";
+import { SupportChatButton } from "@/components/SupportChat";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
@@ -16,6 +17,7 @@ import Recipes from "./pages/Recipes";
 import Tracker from "./pages/Tracker";
 import Progress from "./pages/Progress";
 import Challenges from "./pages/Challenges";
+import Marketplace from "./pages/Marketplace";
 
 import Keto30 from "./pages/Keto30";
 import Fasting from "./pages/Fasting";
@@ -67,6 +69,7 @@ const App = () => (
               <Route path="/tracker/weekly-plan" element={<WeeklyPlan />} />
               <Route path="/progress" element={<Progress />} />
               <Route path="/challenges" element={<Challenges />} />
+              <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/weekly-plan" element={<WeeklyPlan />} />
               <Route path="/quick-meals" element={<QuickMeals />} />
               <Route path="/custom-plan" element={<CustomPlan />} />
@@ -99,6 +102,7 @@ const App = () => (
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <SupportChatButton />
           </BrowserRouter>
         </TooltipProvider>
       </DietModeProvider>

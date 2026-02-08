@@ -32,6 +32,7 @@ const Profile = () => {
   const [uploading, setUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string>("");
   const [displayName, setDisplayName] = useState(user?.user_metadata?.display_name || "");
+  const [username, setUsername] = useState("");
   const [stats, setStats] = useState<ProfileStats>({
     followerCount: 0,
     followingCount: 0,
@@ -52,13 +53,14 @@ const Profile = () => {
     try {
       const { data } = await supabase
         .from('profiles')
-        .select('avatar_url, display_name')
+        .select('avatar_url, display_name, username')
         .eq('user_id', user?.id)
         .maybeSingle();
 
       if (data) {
         setAvatarUrl(data.avatar_url || "");
         setDisplayName(data.display_name || user?.email?.split('@')[0] || "");
+        setUsername(data.username || "");
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -274,6 +276,60 @@ const Profile = () => {
                         Update
                       </Button>
                     </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Username Update */}
+                  <div className="space-y-3">
+                    <Label htmlFor="username">Custom Username (for easy discovery)</Label>
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">@</span>
+                        <Input
+                          id="username"
+                          value={username}
+                          onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                          placeholder="yourname"
+                          className="pl-8"
+                          maxLength={20}
+                        />
+                      </div>
+                      <Button onClick={async () => {
+                        if (!username.trim()) {
+                          toast({ title: "Username cannot be empty", variant: "destructive" });
+                          return;
+                        }
+                        if (username.length < 3) {
+                          toast({ title: "Username must be at least 3 characters", variant: "destructive" });
+                          return;
+                        }
+                        try {
+                          const { error } = await supabase
+                            .from('profiles')
+                            .update({ username: username.trim() })
+                            .eq('user_id', user?.id);
+                          
+                          if (error) {
+                            if (error.code === '23505') {
+                              toast({ title: "Username already taken", variant: "destructive" });
+                            } else {
+                              throw error;
+                            }
+                            return;
+                          }
+                          toast({ title: "Username updated!" });
+                        } catch (error: any) {
+                          toast({ title: "Error updating username", description: error.message, variant: "destructive" });
+                        }
+                      }} variant="outline">
+                        <Edit className="h-4 w-4 mr-2" />
+                        Set
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Other users can find you with @{username || 'yourname'}
+                    </p>
                   </div>
 
                   <Separator />

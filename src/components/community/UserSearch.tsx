@@ -17,6 +17,7 @@ interface SearchResult {
   user_id: string;
   display_name: string;
   avatar_url: string | null;
+  username: string | null;
 }
 
 export const UserSearch = ({ onStartChat }: UserSearchProps) => {
@@ -31,11 +32,11 @@ export const UserSearch = ({ onStartChat }: UserSearchProps) => {
 
     setLoading(true);
     try {
-      // Search by display name or user ID
+      // Search by display name, username, or user ID
       const { data } = await supabase
         .from('profiles')
-        .select('user_id, display_name, avatar_url')
-        .or(`display_name.ilike.%${query}%,user_id.eq.${query}`)
+        .select('user_id, display_name, avatar_url, username')
+        .or(`display_name.ilike.%${query}%,username.ilike.%${query}%,user_id.eq.${query}`)
         .neq('user_id', user.id)
         .limit(10);
 
@@ -107,7 +108,7 @@ export const UserSearch = ({ onStartChat }: UserSearchProps) => {
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by name or ID..."
+            placeholder="Search by name, @username, or ID..."
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
           />
           <Button onClick={handleSearch} disabled={loading}>
@@ -132,7 +133,7 @@ export const UserSearch = ({ onStartChat }: UserSearchProps) => {
                       {result.display_name || 'Unknown'}
                     </span>
                     <span className="text-[10px] text-muted-foreground font-mono block">
-                      @{result.user_id.slice(0, 8)}
+                      @{result.username || result.user_id.slice(0, 8)}
                     </span>
                   </div>
                   <Button 

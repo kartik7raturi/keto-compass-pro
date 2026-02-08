@@ -637,6 +637,84 @@ export type Database = {
         }
         Relationships: []
       }
+      food_listings: {
+        Row: {
+          calories: number | null
+          carbs: number | null
+          category: string
+          city: string | null
+          created_at: string
+          description: string | null
+          fat: number | null
+          id: string
+          image_url: string | null
+          ingredients: string[] | null
+          is_available: boolean | null
+          is_sold_out: boolean | null
+          is_vegetarian: boolean | null
+          latitude: number | null
+          longitude: number | null
+          price: number
+          protein: number | null
+          quantity: number
+          seller_id: string
+          state: string | null
+          title: string
+          town: string | null
+          updated_at: string
+        }
+        Insert: {
+          calories?: number | null
+          carbs?: number | null
+          category?: string
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          fat?: number | null
+          id?: string
+          image_url?: string | null
+          ingredients?: string[] | null
+          is_available?: boolean | null
+          is_sold_out?: boolean | null
+          is_vegetarian?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          price?: number
+          protein?: number | null
+          quantity?: number
+          seller_id: string
+          state?: string | null
+          title: string
+          town?: string | null
+          updated_at?: string
+        }
+        Update: {
+          calories?: number | null
+          carbs?: number | null
+          category?: string
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          fat?: number | null
+          id?: string
+          image_url?: string | null
+          ingredients?: string[] | null
+          is_available?: boolean | null
+          is_sold_out?: boolean | null
+          is_vegetarian?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          price?: number
+          protein?: number | null
+          quantity?: number
+          seller_id?: string
+          state?: string | null
+          title?: string
+          town?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       group_invites: {
         Row: {
           created_at: string
@@ -777,6 +855,44 @@ export type Database = {
           id?: number
         }
         Relationships: []
+      }
+      listing_reports: {
+        Row: {
+          created_at: string
+          details: string | null
+          id: string
+          listing_id: string
+          reason: string
+          reporter_id: string
+          status: string | null
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          listing_id: string
+          reason: string
+          reporter_id: string
+          status?: string | null
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          listing_id?: string
+          reason?: string
+          reporter_id?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listing_reports_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "food_listings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       macro_logs: {
         Row: {
@@ -1145,6 +1261,7 @@ export type Database = {
           id: string
           updated_at: string
           user_id: string
+          username: string | null
         }
         Insert: {
           activity_level?: string | null
@@ -1162,6 +1279,7 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id: string
+          username?: string | null
         }
         Update: {
           activity_level?: string | null
@@ -1179,6 +1297,7 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id?: string
+          username?: string | null
         }
         Relationships: []
       }
@@ -1382,6 +1501,33 @@ export type Database = {
           updated_at?: string
           user_id?: string
           weight_lost?: number | null
+        }
+        Relationships: []
+      }
+      support_chats: {
+        Row: {
+          created_at: string
+          id: string
+          is_from_support: boolean | null
+          is_read: boolean | null
+          message: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_from_support?: boolean | null
+          is_read?: boolean | null
+          message: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_from_support?: boolean | null
+          is_read?: boolean | null
+          message?: string
+          user_id?: string
         }
         Relationships: []
       }
