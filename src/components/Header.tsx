@@ -116,6 +116,12 @@ const Header = () => {
           >
             Community
           </button>
+          <button 
+            onClick={() => navigate('/marketplace')} 
+            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+          >
+            Marketplace
+          </button>
         </nav>
 
         <div className="flex items-center gap-2">
@@ -228,6 +234,12 @@ const Header = () => {
               className="block w-full text-left py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
             >
               Community
+            </button>
+            <button 
+              onClick={() => handleNavigation('/marketplace')} 
+              className="block w-full text-left py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            >
+              Marketplace
             </button>
             
             {!user && (

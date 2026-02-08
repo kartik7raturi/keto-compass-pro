@@ -6,7 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Loader2, ChefHat, FileText, BookOpen, Image, Target, MessageSquare, Award } from "lucide-react";
+import { Shield, Loader2, ChefHat, FileText, BookOpen, Image, Target, MessageSquare, Award, Headphones } from "lucide-react";
 import { AdminRecipes } from "@/components/admin/AdminRecipes";
 import { AdminArticles } from "@/components/admin/AdminArticles";
 import { AdminStories } from "@/components/admin/AdminStories";
@@ -15,6 +15,7 @@ import { AdminChallenges } from "@/components/admin/AdminChallenges";
 import { AdminMessages } from "@/components/admin/AdminMessages";
 import { AdminBadges } from "@/components/admin/AdminBadges";
 import { AdminModeration } from "@/components/admin/AdminModeration";
+import { AdminSupportChats } from "@/components/admin/AdminSupportChats";
 
 const Admin = () => {
   const { user } = useAuth();
@@ -120,6 +121,10 @@ const Admin = () => {
               <Shield className="h-4 w-4" />
               <span className="hidden sm:inline">Moderation</span>
             </TabsTrigger>
+            <TabsTrigger value="support" className="flex items-center gap-1 text-xs md:text-sm">
+              <Headphones className="h-4 w-4" />
+              <span className="hidden sm:inline">Support</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="recipes">
@@ -152,6 +157,10 @@ const Admin = () => {
 
           <TabsContent value="moderation">
             <AdminModeration />
+          </TabsContent>
+
+          <TabsContent value="support">
+            <AdminSupportChats />
           </TabsContent>
         </Tabs>
       </main>

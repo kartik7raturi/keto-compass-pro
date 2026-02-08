@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { useDietMode } from "@/components/DietModeProvider";
+import { RecipePopup } from "@/components/RecipePopup";
 
 interface Meal {
   id: string;
@@ -47,6 +48,7 @@ const WeeklyPlan = () => {
   const [draggedItem, setDraggedItem] = useState<MealPlanItem | null>(null);
   const [dragOverSlot, setDragOverSlot] = useState<{ day: number; type: string } | null>(null);
   const [copying, setCopying] = useState(false);
+  const [selectedRecipe, setSelectedRecipe] = useState<Meal | null>(null);
   const { toast } = useToast();
   const { dietMode } = useDietMode();
   const isMobile = useIsMobile();
@@ -614,7 +616,15 @@ const WeeklyPlan = () => {
                           }`}
                         >
                           <div className="flex items-start justify-between gap-1">
-                            <div className="flex-1 min-w-0">
+                            <div 
+                              className="flex-1 min-w-0 cursor-pointer hover:opacity-80"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (plannedMeal.meal) {
+                                  setSelectedRecipe(plannedMeal.meal);
+                                }
+                              }}
+                            >
                               <div className="flex items-center gap-1">
                                 <GripVertical className="h-3 w-3 text-muted-foreground shrink-0" />
                                 <p className="text-xs font-medium truncate">{plannedMeal.meal?.title}</p>
@@ -724,6 +734,13 @@ const WeeklyPlan = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Recipe Popup */}
+        <RecipePopup 
+          meal={selectedRecipe} 
+          open={!!selectedRecipe} 
+          onOpenChange={(open) => !open && setSelectedRecipe(null)} 
+        />
       </main>
       <Footer />
     </div>

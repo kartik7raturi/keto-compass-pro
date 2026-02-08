@@ -41,6 +41,7 @@ const Footer = () => {
               <li><a href="/recipes" className="hover:text-keto-green transition-colors">Recipe Library</a></li>
               <li><a href="/progress" className="hover:text-keto-green transition-colors">Progress Dashboard</a></li>
               <li><a href="/tracker/weekly-plan" className="hover:text-keto-green transition-colors">Meal Planner</a></li>
+              <li><a href="/marketplace" className="hover:text-keto-green transition-colors">Marketplace</a></li>
               <li><a href="/community" className="hover:text-keto-green transition-colors">Community</a></li>
             </ul>
           </div>

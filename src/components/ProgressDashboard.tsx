@@ -296,11 +296,11 @@ const ProgressDashboard = () => {
     );
   }
 
-  // Desktop view
+  // Desktop view - now mirrors mobile with full analytics
   return (
-    <section id="progress" className="py-20 bg-secondary/30">
+    <section id="progress" className="py-8 bg-secondary/30">
       <div className="container">
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <h2 className="text-3xl lg:text-4xl font-bold mb-4">
             Track Your Success
           </h2>
@@ -310,20 +310,66 @@ const ProgressDashboard = () => {
           </p>
         </div>
 
-        <div className="max-w-6xl mx-auto">
-          {/* User Progress Widget */}
-          <div className="mb-8">
-            <UserProgressWidget />
+        <div className="max-w-6xl mx-auto space-y-6">
+          {/* Nutrition Analytics Dashboard - Same as mobile */}
+          <NutritionAnalytics />
+
+          {/* Goal Indicators & Health Dashboard */}
+          <div className="grid lg:grid-cols-2 gap-6">
+            <GoalIndicators
+              macroGoalsMet={weeklySummary.ketoDays > 0 ? Math.round((weeklySummary.ketoDays / 7) * 100) : 0}
+              weightLossGoal={10}
+              currentWeightLoss={weightLost}
+              currentStreak={weeklySummary.currentStreak}
+              bestStreak={weeklySummary.currentStreak}
+            />
+            <HealthDashboard
+              currentWeight={currentWeight}
+              height={profile?.height || 68}
+            />
           </div>
 
+          {/* Weekly Report & Insights */}
+          <div className="grid lg:grid-cols-2 gap-6">
+            <WeeklyReport
+              avgCarbs={15}
+              avgProtein={100}
+              avgFat={120}
+              avgCalories={1800}
+              carbSuccessRate={weeklySummary.ketoDays > 0 ? Math.round((weeklySummary.ketoDays / 7) * 100) : 0}
+              weightChange={weeklySummary.weeklyWeightChange}
+              daysTracked={weeklySummary.ketoDays}
+            />
+            <ProgressInsights
+              data={{
+                carbDaysMetTarget: weeklySummary.ketoDays,
+                totalDays: 7,
+                avgCalories: 1800,
+                caloriesTrend: weeklySummary.weeklyWeightChange > 0 ? 'down' : 'stable',
+                weightTrend: weeklySummary.weeklyWeightChange > 0 ? 'down' : 'stable',
+                proteinAdherence: 85
+              }}
+            />
+          </div>
+
+          {/* Visual Progress Charts */}
+          <VisualProgressCharts 
+            weightData={weightLogs.map(w => ({ date: w.logged_at, weight: w.weight }))}
+            macroData={[]}
+            calorieData={[]}
+          />
+
+          {/* User Progress Widget */}
+          <UserProgressWidget />
+
           {/* Leaderboard and Streaks Row */}
-          <div className="grid lg:grid-cols-2 gap-6 mb-8">
+          <div className="grid lg:grid-cols-2 gap-6">
             <LeaderboardWidget />
             <StreakWidget />
           </div>
 
           {/* Keto and Workout Charts */}
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
+          <div className="grid md:grid-cols-2 gap-6">
             <KetoStreakChart />
             <WorkoutChart />
           </div>
