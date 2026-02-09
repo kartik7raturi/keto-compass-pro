@@ -643,6 +643,7 @@ export type Database = {
           carbs: number | null
           category: string
           city: string | null
+          country: string | null
           created_at: string
           description: string | null
           fat: number | null
@@ -668,6 +669,7 @@ export type Database = {
           carbs?: number | null
           category?: string
           city?: string | null
+          country?: string | null
           created_at?: string
           description?: string | null
           fat?: number | null
@@ -693,6 +695,7 @@ export type Database = {
           carbs?: number | null
           category?: string
           city?: string | null
+          country?: string | null
           created_at?: string
           description?: string | null
           fat?: number | null
