@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search, MessageCircle, UserPlus } from 'lucide-react';
+import { Search, MessageCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -32,13 +32,21 @@ export const UserSearch = ({ onStartChat }: UserSearchProps) => {
 
     setLoading(true);
     try {
-      // Search by display name, username, or user ID
-      const { data } = await supabase
+      const cleanQuery = query.trim().replace(/^@/, '');
+      
+      // Search by display name or username only (not UUID)
+      const { data, error } = await supabase
         .from('profiles')
         .select('user_id, display_name, avatar_url, username')
-        .or(`display_name.ilike.%${query}%,username.ilike.%${query}%,user_id.eq.${query}`)
+        .or(`display_name.ilike.%${cleanQuery}%,username.ilike.%${cleanQuery}%`)
         .neq('user_id', user.id)
         .limit(10);
+
+      if (error) {
+        console.error('Search error:', error);
+        toast({ title: 'Search failed', variant: 'destructive' });
+        return;
+      }
 
       setResults(data || []);
     } catch (error) {
@@ -52,7 +60,6 @@ export const UserSearch = ({ onStartChat }: UserSearchProps) => {
     if (!user) return;
 
     try {
-      // Check if request already exists
       const { data: existing } = await supabase
         .from('message_requests')
         .select('id, status')
@@ -69,7 +76,6 @@ export const UserSearch = ({ onStartChat }: UserSearchProps) => {
         return;
       }
 
-      // Check if they already sent us a request
       const { data: theirRequest } = await supabase
         .from('message_requests')
         .select('id, status')
@@ -82,7 +88,6 @@ export const UserSearch = ({ onStartChat }: UserSearchProps) => {
         return;
       }
 
-      // Send new request
       await supabase.from('message_requests').insert({
         sender_id: user.id,
         receiver_id: receiverId
@@ -108,7 +113,7 @@ export const UserSearch = ({ onStartChat }: UserSearchProps) => {
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by name, @username, or ID..."
+            placeholder="Search by name or @username..."
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
           />
           <Button onClick={handleSearch} disabled={loading}>
@@ -120,10 +125,7 @@ export const UserSearch = ({ onStartChat }: UserSearchProps) => {
           <ScrollArea className="h-[200px]">
             <div className="space-y-2">
               {results.map((result) => (
-                <div
-                  key={result.user_id}
-                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted"
-                >
+                <div key={result.user_id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={result.avatar_url || ''} />
                     <AvatarFallback>{result.display_name?.[0] || '?'}</AvatarFallback>
@@ -132,15 +134,13 @@ export const UserSearch = ({ onStartChat }: UserSearchProps) => {
                     <span className="text-sm font-medium truncate block">
                       {result.display_name || 'Unknown'}
                     </span>
-                    <span className="text-[10px] text-muted-foreground font-mono block">
-                      @{result.username || result.user_id.slice(0, 8)}
-                    </span>
+                    {result.username && (
+                      <span className="text-[10px] text-muted-foreground font-mono block">
+                        @{result.username}
+                      </span>
+                    )}
                   </div>
-                  <Button 
-                    size="sm" 
-                    variant="ghost"
-                    onClick={() => sendMessageRequest(result.user_id)}
-                  >
+                  <Button size="sm" variant="ghost" onClick={() => sendMessageRequest(result.user_id)}>
                     <MessageCircle className="h-4 w-4" />
                   </Button>
                 </div>
