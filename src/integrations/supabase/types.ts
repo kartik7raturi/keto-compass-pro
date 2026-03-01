@@ -645,8 +645,11 @@ export type Database = {
           city: string | null
           country: string | null
           created_at: string
+          delivery_type: string
           description: string | null
           fat: number | null
+          food_tag: string
+          google_maps_link: string | null
           id: string
           image_url: string | null
           ingredients: string[] | null
@@ -671,8 +674,11 @@ export type Database = {
           city?: string | null
           country?: string | null
           created_at?: string
+          delivery_type?: string
           description?: string | null
           fat?: number | null
+          food_tag?: string
+          google_maps_link?: string | null
           id?: string
           image_url?: string | null
           ingredients?: string[] | null
@@ -697,8 +703,11 @@ export type Database = {
           city?: string | null
           country?: string | null
           created_at?: string
+          delivery_type?: string
           description?: string | null
           fat?: number | null
+          food_tag?: string
+          google_maps_link?: string | null
           id?: string
           image_url?: string | null
           ingredients?: string[] | null
