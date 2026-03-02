@@ -124,6 +124,13 @@ const Marketplace = () => {
   const [buyDialogOpen, setBuyDialogOpen] = useState(false);
   const [buyListing, setBuyListing] = useState<FoodListing | null>(null);
   const [buyPickupTime, setBuyPickupTime] = useState('');
+  const [buyQuantity, setBuyQuantity] = useState(1);
+
+  // Buyer messages state
+  const [buyerMessages, setBuyerMessages] = useState<{listing: FoodListing, messages: MarketMessage[], unreadCount: number}[]>([]);
+  const [selectedBuyerChat, setSelectedBuyerChat] = useState<{listing: FoodListing, sellerId: string, sellerName: string} | null>(null);
+  const [buyerChatMessages, setBuyerChatMessages] = useState<MarketMessage[]>([]);
+  const [buyerReplyText, setBuyerReplyText] = useState('');
   
   // Messaging state
   const [messageDialogOpen, setMessageDialogOpen] = useState(false);
@@ -162,7 +169,7 @@ const Marketplace = () => {
 
   useEffect(() => {
     fetchListings();
-    if (user) fetchMyListings();
+    if (user) { fetchMyListings(); fetchBuyerMessages(); }
   }, [user]);
 
   useEffect(() => {
@@ -186,10 +193,14 @@ const Marketplace = () => {
         if (selectedSellerChat) {
           setSellerChatMessages(prev => [...prev, newMsg]);
         }
-        // Refresh seller messages count
+        if (selectedBuyerChat) {
+          setBuyerChatMessages(prev => [...prev, newMsg]);
+        }
+        // Refresh messages counts
         if (activeTab === 'my-listings') {
           fetchSellerMessages();
         }
+        fetchBuyerMessages();
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
@@ -248,6 +259,86 @@ const Marketplace = () => {
       }
     }
     setSellerListingMessages(results);
+  };
+
+  const fetchBuyerMessages = async () => {
+    if (!user) return;
+    try {
+      // Get all messages the buyer has SENT that are food-related
+      const { data: sentMsgs } = await supabase
+        .from('direct_messages').select('*')
+        .eq('sender_id', user.id)
+        .order('created_at', { ascending: false });
+      
+      const { data: receivedMsgs } = await supabase
+        .from('direct_messages').select('*')
+        .eq('receiver_id', user.id)
+        .order('created_at', { ascending: false });
+
+      const allMsgs = [...(sentMsgs || []), ...(receivedMsgs || [])];
+      
+      // Find unique listing IDs from food messages
+      const listingMap = new Map<string, MarketMessage[]>();
+      for (const msg of allMsgs) {
+        const match = msg.content.match(/\[FOOD:([^\]]+)\]/);
+        if (match) {
+          const listingId = match[1];
+          // Only include if the buyer is the sender or receiver (not the seller's own listings)
+          const otherId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
+          if (!listingMap.has(listingId)) {
+            listingMap.set(listingId, []);
+          }
+          listingMap.get(listingId)!.push(msg);
+        }
+      }
+
+      const results: {listing: FoodListing, messages: MarketMessage[], unreadCount: number}[] = [];
+      for (const [listingId, msgs] of listingMap) {
+        // Check if this is a listing the user is a buyer for (not seller)
+        const { data: listing } = await supabase
+          .from('food_listings').select('*').eq('id', listingId).maybeSingle();
+        
+        if (listing && listing.seller_id !== user.id) {
+          const unread = msgs.filter(m => m.receiver_id === user.id && !m.is_read).length;
+          results.push({ listing: listing as FoodListing, messages: msgs.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()), unreadCount: unread });
+        }
+      }
+      setBuyerMessages(results);
+    } catch (error) {
+      console.error('Error fetching buyer messages:', error);
+    }
+  };
+
+  const fetchBuyerChatMessages = async (sellerId: string, listingId: string) => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('direct_messages').select('*')
+      .or(`and(sender_id.eq.${user.id},receiver_id.eq.${sellerId}),and(sender_id.eq.${sellerId},receiver_id.eq.${user.id})`)
+      .order('created_at', { ascending: true });
+    const filtered = (data || []).filter(m => m.content.includes(`[FOOD:${listingId}]`));
+    setBuyerChatMessages(filtered);
+    // Mark as read
+    await supabase.from('direct_messages').update({ is_read: true })
+      .eq('sender_id', sellerId).eq('receiver_id', user.id);
+    // Refresh unread counts
+    fetchBuyerMessages();
+  };
+
+  const sendBuyerReply = async () => {
+    if (!user || !selectedBuyerChat || !buyerReplyText.trim()) return;
+    try {
+      const content = `[FOOD:${selectedBuyerChat.listing.id}] Re: ${selectedBuyerChat.listing.title} — ${buyerReplyText.trim()}`;
+      const { error } = await supabase.from('direct_messages').insert({
+        sender_id: user.id,
+        receiver_id: selectedBuyerChat.sellerId,
+        content
+      });
+      if (error) throw error;
+      setBuyerReplyText('');
+      fetchBuyerChatMessages(selectedBuyerChat.sellerId, selectedBuyerChat.listing.id);
+    } catch (err) {
+      toast({ title: 'Error sending reply', variant: 'destructive' });
+    }
   };
 
   const uploadFoodImage = async (file: File): Promise<string | null> => {
@@ -436,8 +527,9 @@ const Marketplace = () => {
       if (error) throw error;
       setMessageText('');
       toast({ title: 'Message sent!' });
-      // Refresh conversation
+      // Refresh conversation and buyer messages
       fetchConversation(messageListing.seller_id, messageListing.id);
+      fetchBuyerMessages();
     } catch (err: any) {
       toast({ title: 'Error sending message', variant: 'destructive' });
     }
@@ -456,6 +548,8 @@ const Marketplace = () => {
     // Mark as read
     await supabase.from('direct_messages').update({ is_read: true })
       .eq('sender_id', otherUserId).eq('receiver_id', user.id);
+    // Refresh unread counts
+    fetchBuyerMessages();
   };
 
   const openMessageDialog = (listing: FoodListing) => {
@@ -492,19 +586,22 @@ const Marketplace = () => {
     setSellerChatMessages(filtered);
     await supabase.from('direct_messages').update({ is_read: true })
       .eq('sender_id', buyerId).eq('receiver_id', user.id);
+    // Refresh unread counts
+    fetchSellerMessages();
   };
 
   // Buy now
   const handleBuyNow = (listing: FoodListing, e?: React.MouseEvent) => {
     e?.stopPropagation();
     setBuyListing(listing);
+    setBuyQuantity(1);
     setBuyDialogOpen(true);
   };
 
   const confirmBuy = async () => {
     if (!user || !buyListing) return;
     try {
-      const content = `[FOOD:${buyListing.id}] 🛒 ORDER: I want to buy "${buyListing.title}"${buyListing.delivery_type === 'takeaway' ? ` — Pickup time: ${buyPickupTime || 'ASAP'}` : ' — Home Delivery requested'}`;
+      const content = `[FOOD:${buyListing.id}] 🛒 ORDER: I want to buy ${buyQuantity}x "${buyListing.title}"${buyListing.delivery_type === 'takeaway' ? ` — Pickup time: ${buyPickupTime || 'ASAP'}` : ' — Home Delivery requested'}`;
       const { error } = await supabase.from('direct_messages').insert({
         sender_id: user.id,
         receiver_id: buyListing.seller_id,
@@ -515,6 +612,8 @@ const Marketplace = () => {
       setBuyDialogOpen(false);
       setBuyListing(null);
       setBuyPickupTime('');
+      setBuyQuantity(1);
+      fetchBuyerMessages();
     } catch (err) {
       toast({ title: 'Error placing order', variant: 'destructive' });
     }
@@ -544,6 +643,7 @@ const Marketplace = () => {
   };
 
   const totalUnreadSeller = sellerListingMessages.reduce((sum, s) => sum + s.unreadCount, 0);
+  const totalUnreadBuyer = buyerMessages.reduce((sum, s) => sum + s.unreadCount, 0);
 
   const renderLocationFields = (data: typeof formData, setData: (d: any) => void) => {
     const cities = data.state ? (STATE_CITIES[data.state] || []) : [];
@@ -700,10 +800,16 @@ const Marketplace = () => {
           <p className="text-muted-foreground max-w-2xl mx-auto">Buy, sell, or share keto-friendly foods with your local community.</p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); if (v === 'my-listings' && user) { fetchMyListings(); fetchSellerMessages(); } }} className="space-y-6">
+        <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); if (v === 'my-listings' && user) { fetchMyListings(); fetchSellerMessages(); } if (v === 'my-messages' && user) { fetchBuyerMessages(); } }} className="space-y-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
              <TabsList className="w-full sm:w-auto">
               <TabsTrigger value="browse" className="flex-1 sm:flex-none">Browse</TabsTrigger>
+              <TabsTrigger value="my-messages" className="relative flex-1 sm:flex-none">
+                My Messages
+                {totalUnreadBuyer > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] rounded-full h-4 w-4 flex items-center justify-center">{totalUnreadBuyer}</span>
+                )}
+              </TabsTrigger>
               <TabsTrigger value="my-listings" className="relative flex-1 sm:flex-none">
                 My Listings
                 {totalUnreadSeller > 0 && (
@@ -844,7 +950,85 @@ const Marketplace = () => {
             )}
           </TabsContent>
 
-          {/* MY LISTINGS TAB */}
+          {/* MY MESSAGES TAB (Buyer) */}
+          <TabsContent value="my-messages">
+            {!user ? (
+              <div className="text-center py-12 text-muted-foreground">Please sign in</div>
+            ) : (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <MessageCircle className="h-4 w-4" /> My Messages
+                    {totalUnreadBuyer > 0 && <Badge variant="destructive" className="text-xs">{totalUnreadBuyer} unread</Badge>}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {!selectedBuyerChat ? (
+                    buyerMessages.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <MessageCircle className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                        <p>No messages yet. Browse listings and message sellers!</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {buyerMessages.map(({ listing, messages: msgs, unreadCount }) => (
+                          <button key={listing.id}
+                            className="w-full p-3 flex items-center gap-3 hover:bg-muted/50 rounded-lg text-left transition-colors border"
+                            onClick={async () => {
+                              const { data: profile } = await supabase.from('profiles').select('display_name').eq('user_id', listing.seller_id).maybeSingle();
+                              setSelectedBuyerChat({ listing, sellerId: listing.seller_id, sellerName: profile?.display_name || 'Seller' });
+                              fetchBuyerChatMessages(listing.seller_id, listing.id);
+                            }}
+                          >
+                            <div className="w-10 h-10 rounded-lg bg-muted overflow-hidden shrink-0">
+                              {listing.image_url ? (
+                                <img src={listing.image_url} alt={listing.title} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="flex items-center justify-center h-full"><ShoppingBag className="h-4 w-4 text-muted-foreground" /></div>
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-sm truncate">{listing.title}</span>
+                                {unreadCount > 0 && <Badge variant="destructive" className="text-[10px] h-4 px-1">{unreadCount} new</Badge>}
+                              </div>
+                              <p className="text-xs text-muted-foreground truncate">{extractMessageText(msgs[0].content)}</p>
+                            </div>
+                            <ArrowLeft className="h-4 w-4 rotate-180 text-muted-foreground" />
+                          </button>
+                        ))}
+                      </div>
+                    )
+                  ) : (
+                    <div>
+                      <Button variant="ghost" size="sm" onClick={() => setSelectedBuyerChat(null)} className="mb-2">
+                        <ArrowLeft className="h-4 w-4 mr-1" /> Back
+                      </Button>
+                      <p className="text-sm font-medium mb-2">Chat with {selectedBuyerChat.sellerName} about "{selectedBuyerChat.listing.title}"</p>
+                      <ScrollArea className="h-60 border rounded-lg p-3 mb-2">
+                        <div className="space-y-2">
+                          {buyerChatMessages.map(msg => (
+                            <div key={msg.id} className={`flex ${msg.sender_id === user.id ? 'justify-end' : 'justify-start'}`}>
+                              <div className={`max-w-[80%] p-2 rounded-lg text-sm ${msg.sender_id === user.id ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                                <p>{extractMessageText(msg.content)}</p>
+                                <p className={`text-[10px] mt-0.5 ${msg.sender_id === user.id ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>{formatTime(msg.created_at)}</p>
+                              </div>
+                            </div>
+                          ))}
+                          <div ref={messagesEndRef} />
+                        </div>
+                      </ScrollArea>
+                      <div className="flex gap-2">
+                        <Input value={buyerReplyText} onChange={(e) => setBuyerReplyText(e.target.value)} placeholder="Reply..." onKeyDown={(e) => e.key === 'Enter' && sendBuyerReply()} />
+                        <Button onClick={sendBuyerReply} disabled={!buyerReplyText.trim()} size="sm"><Send className="h-4 w-4" /></Button>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
           <TabsContent value="my-listings">
             {!user ? (
               <div className="text-center py-12 text-muted-foreground">Please sign in</div>
@@ -1085,6 +1269,14 @@ const Marketplace = () => {
               <div className="space-y-4">
                 <div className="text-center">
                   <p className="text-2xl font-bold">{buyListing.price === 0 ? 'FREE' : `$${buyListing.price.toFixed(2)}`}</p>
+                  <p className="text-xs text-muted-foreground">Available: {buyListing.quantity}</p>
+                </div>
+                <div>
+                  <Label>Quantity</Label>
+                  <Input type="number" min={1} max={buyListing.quantity} value={buyQuantity} onChange={(e) => setBuyQuantity(Math.min(parseInt(e.target.value) || 1, buyListing.quantity))} />
+                  {buyListing.price > 0 && (
+                    <p className="text-sm font-medium mt-1 text-right">Total: ${(buyListing.price * buyQuantity).toFixed(2)}</p>
+                  )}
                 </div>
                 {(buyListing.delivery_type === 'takeaway' || buyListing.delivery_type === 'both') && (
                   <div>
