@@ -701,10 +701,10 @@ const Marketplace = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); if (v === 'my-listings' && user) { fetchMyListings(); fetchSellerMessages(); } }} className="space-y-6">
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <TabsList>
-              <TabsTrigger value="browse">Browse</TabsTrigger>
-              <TabsTrigger value="my-listings" className="relative">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+             <TabsList className="w-full sm:w-auto">
+              <TabsTrigger value="browse" className="flex-1 sm:flex-none">Browse</TabsTrigger>
+              <TabsTrigger value="my-listings" className="relative flex-1 sm:flex-none">
                 My Listings
                 {totalUnreadSeller > 0 && (
                   <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] rounded-full h-4 w-4 flex items-center justify-center">{totalUnreadSeller}</span>
@@ -716,7 +716,7 @@ const Marketplace = () => {
                 <DialogTrigger asChild>
                   <Button className="gap-2"><Plus className="h-4 w-4" />Create Listing</Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-auto">
                   <DialogHeader><DialogTitle>Create Food Listing</DialogTitle></DialogHeader>
                   {renderFormFields(formData, setFormData as any, imageFile, setImageFile, imagePreview, setImagePreview)}
                   <Button onClick={createListing} className="w-full">Create Listing</Button>
@@ -729,7 +729,7 @@ const Marketplace = () => {
           <TabsContent value="browse">
             <Card className="mb-6">
               <CardContent className="pt-4">
-                <div className="grid grid-cols-2 md:grid-cols-7 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
                   <div className="col-span-2">
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -778,7 +778,7 @@ const Marketplace = () => {
                 {user && <Button onClick={() => setCreateDialogOpen(true)}><Plus className="h-4 w-4 mr-2" />Create First Listing</Button>}
               </div>
             ) : (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {filteredListings.map((listing) => {
                   const tag = getTagInfo(listing.food_tag);
                   return (
@@ -927,8 +927,8 @@ const Marketplace = () => {
                       const tag = getTagInfo(listing.food_tag);
                       return (
                         <Card key={listing.id}>
-                          <CardContent className="p-4 flex items-center gap-4">
-                            <div className="w-20 h-20 bg-muted rounded-lg shrink-0 overflow-hidden">
+                          <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                            <div className="w-full sm:w-20 h-32 sm:h-20 bg-muted rounded-lg shrink-0 overflow-hidden">
                               {listing.image_url ? (
                                 <img src={listing.image_url} alt={listing.title} className="w-full h-full object-cover" />
                               ) : (
@@ -948,7 +948,7 @@ const Marketplace = () => {
                               </p>
                               <p className="text-xs text-muted-foreground"><Clock className="h-3 w-3 inline mr-1" />{formatTime(listing.created_at)}</p>
                             </div>
-                            <div className="flex gap-2 flex-wrap">
+                            <div className="flex gap-2 flex-wrap w-full sm:w-auto justify-end">
                               {listing.is_sold_out && <Badge variant="destructive">Sold Out</Badge>}
                               <Button size="sm" variant="outline" onClick={() => openEditDialog(listing)}><Edit className="h-4 w-4" /></Button>
                               <Button size="sm" variant="outline" onClick={() => toggleSoldOut(listing.id, listing.is_sold_out)}>
@@ -969,7 +969,7 @@ const Marketplace = () => {
 
         {/* Edit Dialog */}
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-auto">
             <DialogHeader><DialogTitle>Edit Listing</DialogTitle></DialogHeader>
             {renderFormFields(editFormData, setEditFormData as any, editImageFile, setEditImageFile, editImagePreview, setEditImagePreview)}
             <Button onClick={updateListing} className="w-full">Update Listing</Button>
@@ -1004,10 +1004,11 @@ const Marketplace = () => {
                   <p className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" />Listed {formatTime(selectedListing.created_at)}</p>
                   
                   {selectedListing.google_maps_link && (
-                    <a href={selectedListing.google_maps_link} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-primary hover:underline">
-                      <MapPin className="h-4 w-4" /> View on Google Maps <ExternalLink className="h-3 w-3" />
-                    </a>
+                    <Button variant="outline" size="sm" className="gap-2" asChild>
+                      <a href={selectedListing.google_maps_link.startsWith('http') ? selectedListing.google_maps_link : `https://${selectedListing.google_maps_link}`} target="_blank" rel="noopener noreferrer">
+                        <MapPin className="h-4 w-4" /> View on Google Maps <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </Button>
                   )}
 
                   {selectedListing.carbs !== null && (
@@ -1090,7 +1091,7 @@ const Marketplace = () => {
                     <Label>Pickup Time</Label>
                     <Input type="datetime-local" value={buyPickupTime} onChange={(e) => setBuyPickupTime(e.target.value)} />
                     {buyListing.google_maps_link && (
-                      <a href={buyListing.google_maps_link} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1 mt-1">
+                      <a href={buyListing.google_maps_link.startsWith('http') ? buyListing.google_maps_link : `https://${buyListing.google_maps_link}`} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1 mt-1">
                         <MapPin className="h-3 w-3" /> Get directions <ExternalLink className="h-3 w-3" />
                       </a>
                     )}
