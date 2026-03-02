@@ -192,6 +192,9 @@ export const CommunityMessaging = ({ initialUserId, onClose }: CommunityMessagin
         .eq('sender_id', otherUserId)
         .eq('receiver_id', user.id);
 
+      // Refresh conversations to update unread counts
+      fetchConversations();
+
     } catch (error) {
       console.error('Error fetching messages:', error);
     }
