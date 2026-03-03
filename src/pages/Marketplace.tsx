@@ -12,10 +12,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Progress } from '@/components/ui/progress';
 import { 
   MapPin, Search, Plus, ShoppingBag, Leaf, Drumstick, 
   MessageCircle, Edit, Trash2, AlertTriangle, Clock, DollarSign, Upload, Image,
-  Send, ArrowLeft, Truck, Store, Heart, ExternalLink
+  Send, ArrowLeft, Truck, Store, Heart, ExternalLink, Star, Package, BarChart3, Home
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthContext';
@@ -60,6 +61,18 @@ interface MarketMessage {
   sender_name?: string;
 }
 
+interface FoodReview {
+  id: string;
+  listing_id: string;
+  seller_id: string;
+  reviewer_id: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+  reviewer_name?: string;
+  reviewer_avatar?: string;
+}
+
 const COUNTRIES = ['USA', 'Canada', 'UK', 'Australia', 'New Zealand'];
 
 const COUNTRY_STATES: Record<string, string[]> = {
@@ -97,6 +110,23 @@ const STATE_CITIES: Record<string, string[]> = {
   'Canterbury': ['Christchurch','Timaru','Ashburton'],
 };
 
+const CITY_TOWNS: Record<string, string[]> = {
+  'Los Angeles': ['Hollywood','Santa Monica','Beverly Hills','Downtown LA','Venice','Westwood','Pasadena','Burbank'],
+  'San Francisco': ['Mission District','SoMa','Financial District','Chinatown','Nob Hill','Sunset District'],
+  'New York City': ['Manhattan','Brooklyn','Queens','Bronx','Staten Island','Harlem','Williamsburg'],
+  'Houston': ['Downtown','Midtown','The Heights','Montrose','Katy','Sugar Land'],
+  'Dallas': ['Downtown','Uptown','Deep Ellum','Oak Lawn','Bishop Arts','Plano'],
+  'Chicago': ['Loop','Lincoln Park','Wicker Park','Hyde Park','Lakeview','Logan Square'],
+  'Miami': ['Downtown','South Beach','Brickell','Wynwood','Coconut Grove','Little Havana'],
+  'London': ['Westminster','Camden','Greenwich','Hackney','Islington','Kensington','Shoreditch','Soho'],
+  'Manchester': ['City Centre','Salford','Didsbury','Chorlton','Ancoats'],
+  'Toronto': ['Downtown','Scarborough','North York','Etobicoke','Mississauga'],
+  'Sydney': ['CBD','Bondi','Surry Hills','Newtown','Parramatta','Manly'],
+  'Melbourne': ['CBD','St Kilda','Fitzroy','South Yarra','Richmond','Carlton'],
+  'Brisbane': ['CBD','South Bank','Fortitude Valley','West End','New Farm'],
+  'Auckland CBD': ['Ponsonby','Parnell','Newmarket','Grey Lynn','Mt Eden'],
+};
+
 const FOOD_TAGS = [
   { value: 'vegan', label: 'Vegan', icon: '🌱', color: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
   { value: 'veg', label: 'Vegetarian', icon: '🥬', color: 'bg-green-100 text-green-800 border-green-300' },
@@ -125,30 +155,34 @@ const Marketplace = () => {
   const [buyListing, setBuyListing] = useState<FoodListing | null>(null);
   const [buyPickupTime, setBuyPickupTime] = useState('');
   const [buyQuantity, setBuyQuantity] = useState(1);
+  const [buyAddress, setBuyAddress] = useState('');
 
-  // Buyer messages state
-  const [buyerMessages, setBuyerMessages] = useState<{listing: FoodListing, messages: MarketMessage[], unreadCount: number}[]>([]);
-  const [selectedBuyerChat, setSelectedBuyerChat] = useState<{listing: FoodListing, sellerId: string, sellerName: string} | null>(null);
-  const [buyerChatMessages, setBuyerChatMessages] = useState<MarketMessage[]>([]);
-  const [buyerReplyText, setBuyerReplyText] = useState('');
+  // Unified messages state (both buyer and seller messages)
+  const [allConversations, setAllConversations] = useState<{listing: FoodListing, otherUserId: string, otherUserName: string, messages: MarketMessage[], unreadCount: number, isSeller: boolean}[]>([]);
+  const [selectedChat, setSelectedChat] = useState<{listing: FoodListing, otherUserId: string, otherUserName: string, isSeller: boolean} | null>(null);
+  const [chatMessages, setChatMessages] = useState<MarketMessage[]>([]);
+  const [replyText, setReplyText] = useState('');
   
-  // Messaging state
+  // Message dialog (from browse)
   const [messageDialogOpen, setMessageDialogOpen] = useState(false);
   const [messageListing, setMessageListing] = useState<FoodListing | null>(null);
   const [messageText, setMessageText] = useState('');
   const [conversationMessages, setConversationMessages] = useState<MarketMessage[]>([]);
-  const [sellerMessagesOpen, setSellerMessagesOpen] = useState(false);
-  const [sellerListingMessages, setSellerListingMessages] = useState<{listing: FoodListing, messages: MarketMessage[], unreadCount: number}[]>([]);
-  const [selectedSellerChat, setSelectedSellerChat] = useState<{listing: FoodListing, buyerId: string, buyerName: string} | null>(null);
-  const [sellerReplyText, setSellerReplyText] = useState('');
-  const [sellerChatMessages, setSellerChatMessages] = useState<MarketMessage[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Reviews
+  const [reviews, setReviews] = useState<FoodReview[]>([]);
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [reviewListing, setReviewListing] = useState<FoodListing | null>(null);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [countryFilter, setCountryFilter] = useState('');
   const [stateFilter, setStateFilter] = useState('');
   const [cityFilter, setCityFilter] = useState('');
+  const [townFilter, setTownFilter] = useState('');
   const [priceFilter, setPriceFilter] = useState<'all' | 'free' | 'paid'>('all');
   const [tagFilter, setTagFilter] = useState('all');
 
@@ -169,14 +203,14 @@ const Marketplace = () => {
 
   useEffect(() => {
     fetchListings();
-    if (user) { fetchMyListings(); fetchBuyerMessages(); }
+    if (user) { fetchMyListings(); fetchAllMessages(); }
   }, [user]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [conversationMessages, sellerChatMessages]);
+  }, [conversationMessages, chatMessages]);
 
-  // Real-time message subscription
+  // Real-time message subscription - listen for BOTH sent and received
   useEffect(() => {
     if (!user) return;
     const channel = supabase
@@ -186,25 +220,40 @@ const Marketplace = () => {
         filter: `receiver_id=eq.${user.id}`
       }, (payload) => {
         const newMsg = payload.new as any;
-        // Update conversation if open
-        if (messageListing && selectedListing) {
-          setConversationMessages(prev => [...prev, newMsg]);
+        if (newMsg.content?.includes('[FOOD:')) {
+          // Update active chat
+          if (selectedChat) {
+            setChatMessages(prev => [...prev, newMsg]);
+          }
+          if (messageListing) {
+            setConversationMessages(prev => [...prev, newMsg]);
+          }
+          fetchAllMessages();
         }
-        if (selectedSellerChat) {
-          setSellerChatMessages(prev => [...prev, newMsg]);
+      })
+      .on('postgres_changes', {
+        event: 'INSERT', schema: 'public', table: 'direct_messages',
+        filter: `sender_id=eq.${user.id}`
+      }, (payload) => {
+        const newMsg = payload.new as any;
+        if (newMsg.content?.includes('[FOOD:')) {
+          if (selectedChat) {
+            setChatMessages(prev => {
+              if (prev.find(m => m.id === newMsg.id)) return prev;
+              return [...prev, newMsg];
+            });
+          }
+          if (messageListing) {
+            setConversationMessages(prev => {
+              if (prev.find(m => m.id === newMsg.id)) return prev;
+              return [...prev, newMsg];
+            });
+          }
         }
-        if (selectedBuyerChat) {
-          setBuyerChatMessages(prev => [...prev, newMsg]);
-        }
-        // Refresh messages counts
-        if (activeTab === 'my-listings') {
-          fetchSellerMessages();
-        }
-        fetchBuyerMessages();
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [user, messageListing, selectedSellerChat, activeTab]);
+  }, [user, selectedChat, messageListing]);
 
   const fetchListings = async () => {
     try {
@@ -241,101 +290,82 @@ const Marketplace = () => {
     setMyListings(data || []);
   };
 
-  const fetchSellerMessages = async () => {
-    if (!user) return;
-    const myL = myListings.length > 0 ? myListings : (await supabase.from('food_listings').select('*').eq('seller_id', user.id)).data || [];
-    
-    const results: {listing: FoodListing, messages: MarketMessage[], unreadCount: number}[] = [];
-    for (const listing of myL) {
-      const { data: msgs } = await supabase
-        .from('direct_messages').select('*')
-        .eq('receiver_id', user.id)
-        .order('created_at', { ascending: false });
-      
-      const listingMsgs = (msgs || []).filter(m => m.content.includes(`[FOOD:${listing.id}]`));
-      const unread = listingMsgs.filter(m => !m.is_read).length;
-      if (listingMsgs.length > 0) {
-        results.push({ listing: listing as FoodListing, messages: listingMsgs, unreadCount: unread });
-      }
-    }
-    setSellerListingMessages(results);
-  };
-
-  const fetchBuyerMessages = async () => {
+  // Unified fetch: all marketplace conversations (buyer + seller)
+  const fetchAllMessages = async () => {
     if (!user) return;
     try {
-      // Get all messages the buyer has SENT that are food-related
-      const { data: sentMsgs } = await supabase
-        .from('direct_messages').select('*')
-        .eq('sender_id', user.id)
-        .order('created_at', { ascending: false });
-      
-      const { data: receivedMsgs } = await supabase
-        .from('direct_messages').select('*')
-        .eq('receiver_id', user.id)
-        .order('created_at', { ascending: false });
+      const { data: sentMsgs } = await supabase.from('direct_messages').select('*').eq('sender_id', user.id).order('created_at', { ascending: false });
+      const { data: receivedMsgs } = await supabase.from('direct_messages').select('*').eq('receiver_id', user.id).order('created_at', { ascending: false });
 
       const allMsgs = [...(sentMsgs || []), ...(receivedMsgs || [])];
       
-      // Find unique listing IDs from food messages
-      const listingMap = new Map<string, MarketMessage[]>();
+      // Group by listing + other user
+      const convMap = new Map<string, { listingId: string, otherUserId: string, messages: MarketMessage[] }>();
       for (const msg of allMsgs) {
         const match = msg.content.match(/\[FOOD:([^\]]+)\]/);
-        if (match) {
-          const listingId = match[1];
-          // Only include if the buyer is the sender or receiver (not the seller's own listings)
-          const otherId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
-          if (!listingMap.has(listingId)) {
-            listingMap.set(listingId, []);
-          }
-          listingMap.get(listingId)!.push(msg);
+        if (!match) continue;
+        const listingId = match[1];
+        const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
+        const key = `${listingId}-${otherUserId}`;
+        if (!convMap.has(key)) {
+          convMap.set(key, { listingId, otherUserId, messages: [] });
         }
+        convMap.get(key)!.messages.push(msg);
       }
 
-      const results: {listing: FoodListing, messages: MarketMessage[], unreadCount: number}[] = [];
-      for (const [listingId, msgs] of listingMap) {
-        // Check if this is a listing the user is a buyer for (not seller)
-        const { data: listing } = await supabase
-          .from('food_listings').select('*').eq('id', listingId).maybeSingle();
-        
-        if (listing && listing.seller_id !== user.id) {
-          const unread = msgs.filter(m => m.receiver_id === user.id && !m.is_read).length;
-          results.push({ listing: listing as FoodListing, messages: msgs.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()), unreadCount: unread });
-        }
+      const results: typeof allConversations = [];
+      for (const [, conv] of convMap) {
+        const { data: listing } = await supabase.from('food_listings').select('*').eq('id', conv.listingId).maybeSingle();
+        if (!listing) continue;
+        const { data: profile } = await supabase.from('profiles').select('display_name, avatar_url').eq('user_id', conv.otherUserId).maybeSingle();
+        const isSeller = listing.seller_id === user.id;
+        const unread = conv.messages.filter(m => m.receiver_id === user.id && !m.is_read).length;
+        const sorted = conv.messages.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        results.push({
+          listing: listing as FoodListing,
+          otherUserId: conv.otherUserId,
+          otherUserName: profile?.display_name || (isSeller ? 'Buyer' : 'Seller'),
+          messages: sorted,
+          unreadCount: unread,
+          isSeller
+        });
       }
-      setBuyerMessages(results);
+      // Sort by most recent message
+      results.sort((a, b) => new Date(b.messages[0]?.created_at).getTime() - new Date(a.messages[0]?.created_at).getTime());
+      setAllConversations(results);
     } catch (error) {
-      console.error('Error fetching buyer messages:', error);
+      console.error('Error fetching messages:', error);
     }
   };
 
-  const fetchBuyerChatMessages = async (sellerId: string, listingId: string) => {
+  const fetchChatMessages = async (otherUserId: string, listingId: string) => {
     if (!user) return;
     const { data } = await supabase
       .from('direct_messages').select('*')
-      .or(`and(sender_id.eq.${user.id},receiver_id.eq.${sellerId}),and(sender_id.eq.${sellerId},receiver_id.eq.${user.id})`)
+      .or(`and(sender_id.eq.${user.id},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${user.id})`)
       .order('created_at', { ascending: true });
     const filtered = (data || []).filter(m => m.content.includes(`[FOOD:${listingId}]`));
-    setBuyerChatMessages(filtered);
+    setChatMessages(filtered);
     // Mark as read
-    await supabase.from('direct_messages').update({ is_read: true })
-      .eq('sender_id', sellerId).eq('receiver_id', user.id);
-    // Refresh unread counts
-    fetchBuyerMessages();
+    const unreadIds = filtered.filter(m => m.receiver_id === user.id && !m.is_read).map(m => m.id);
+    if (unreadIds.length > 0) {
+      await supabase.from('direct_messages').update({ is_read: true }).in('id', unreadIds);
+      fetchAllMessages();
+    }
   };
 
-  const sendBuyerReply = async () => {
-    if (!user || !selectedBuyerChat || !buyerReplyText.trim()) return;
+  const sendChatReply = async () => {
+    if (!user || !selectedChat || !replyText.trim()) return;
     try {
-      const content = `[FOOD:${selectedBuyerChat.listing.id}] Re: ${selectedBuyerChat.listing.title} — ${buyerReplyText.trim()}`;
+      const content = `[FOOD:${selectedChat.listing.id}] Re: ${selectedChat.listing.title} — ${replyText.trim()}`;
       const { error } = await supabase.from('direct_messages').insert({
         sender_id: user.id,
-        receiver_id: selectedBuyerChat.sellerId,
+        receiver_id: selectedChat.otherUserId,
         content
       });
       if (error) throw error;
-      setBuyerReplyText('');
-      fetchBuyerChatMessages(selectedBuyerChat.sellerId, selectedBuyerChat.listing.id);
+      setReplyText('');
+      fetchChatMessages(selectedChat.otherUserId, selectedChat.listing.id);
     } catch (err) {
       toast({ title: 'Error sending reply', variant: 'destructive' });
     }
@@ -346,19 +376,11 @@ const Marketplace = () => {
     try {
       const ext = file.name.split('.').pop();
       const path = `food/${user.id}/${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from('recipe-media').upload(path, file, {
-        cacheControl: '3600',
-        upsert: false
-      });
-      if (error) {
-        console.error('Upload error:', error);
-        toast({ title: 'Image upload failed', description: error.message, variant: 'destructive' });
-        return null;
-      }
+      const { error } = await supabase.storage.from('recipe-media').upload(path, file, { cacheControl: '3600', upsert: false });
+      if (error) { toast({ title: 'Image upload failed', description: error.message, variant: 'destructive' }); return null; }
       const { data } = supabase.storage.from('recipe-media').getPublicUrl(path);
       return data.publicUrl;
     } catch (err: any) {
-      console.error('Upload exception:', err);
       toast({ title: 'Image upload failed', variant: 'destructive' });
       return null;
     }
@@ -381,37 +403,27 @@ const Marketplace = () => {
     try {
       let imageUrl: string | null = null;
       if (imageFile) imageUrl = await uploadFoodImage(imageFile);
-
       const { error } = await supabase.from('food_listings').insert({
-        seller_id: user.id,
-        title: formData.title.trim(),
+        seller_id: user.id, title: formData.title.trim(),
         description: formData.description.trim() || null,
-        price: parseFloat(formData.price) || 0,
-        quantity: parseInt(formData.quantity) || 1,
-        category: formData.category,
-        is_vegetarian: formData.food_tag === 'veg' || formData.food_tag === 'vegan',
+        price: parseFloat(formData.price) || 0, quantity: parseInt(formData.quantity) || 1,
+        category: formData.category, is_vegetarian: formData.food_tag === 'veg' || formData.food_tag === 'vegan',
         calories: formData.calories ? parseInt(formData.calories) : null,
         carbs: formData.carbs ? parseInt(formData.carbs) : null,
         protein: formData.protein ? parseInt(formData.protein) : null,
         fat: formData.fat ? parseInt(formData.fat) : null,
         ingredients: formData.ingredients ? formData.ingredients.split(',').map(i => i.trim()) : null,
-        image_url: imageUrl,
-        country: formData.country || 'USA',
-        state: formData.state.trim() || null,
-        city: formData.city || null,
-        town: formData.town || null,
+        image_url: imageUrl, country: formData.country || 'USA',
+        state: formData.state.trim() || null, city: formData.city || null, town: formData.town || null,
         delivery_type: formData.delivery_type,
-        google_maps_link: formData.delivery_type === 'takeaway' ? (formData.google_maps_link.trim() || null) : null,
+        google_maps_link: (formData.delivery_type === 'takeaway' || formData.delivery_type === 'both') ? (formData.google_maps_link.trim() || null) : null,
         food_tag: formData.food_tag
       });
       if (error) throw error;
       toast({ title: 'Listing created successfully!' });
       setCreateDialogOpen(false);
-      resetForm();
-      setImageFile(null);
-      setImagePreview(null);
-      fetchListings();
-      fetchMyListings();
+      resetForm(); setImageFile(null); setImagePreview(null);
+      fetchListings(); fetchMyListings();
     } catch (error: any) {
       toast({ title: 'Error creating listing', description: error.message, variant: 'destructive' });
     }
@@ -421,39 +433,26 @@ const Marketplace = () => {
     if (!user || !editingListing) return;
     try {
       let imageUrl = editingListing.image_url;
-      if (editImageFile) {
-        const newUrl = await uploadFoodImage(editImageFile);
-        if (newUrl) imageUrl = newUrl;
-      }
+      if (editImageFile) { const newUrl = await uploadFoodImage(editImageFile); if (newUrl) imageUrl = newUrl; }
       const { error } = await supabase.from('food_listings').update({
-        title: editFormData.title.trim(),
-        description: editFormData.description.trim() || null,
-        price: parseFloat(editFormData.price) || 0,
-        quantity: parseInt(editFormData.quantity) || 1,
-        category: editFormData.category,
-        is_vegetarian: editFormData.food_tag === 'veg' || editFormData.food_tag === 'vegan',
+        title: editFormData.title.trim(), description: editFormData.description.trim() || null,
+        price: parseFloat(editFormData.price) || 0, quantity: parseInt(editFormData.quantity) || 1,
+        category: editFormData.category, is_vegetarian: editFormData.food_tag === 'veg' || editFormData.food_tag === 'vegan',
         calories: editFormData.calories ? parseInt(editFormData.calories) : null,
         carbs: editFormData.carbs ? parseInt(editFormData.carbs) : null,
         protein: editFormData.protein ? parseInt(editFormData.protein) : null,
         fat: editFormData.fat ? parseInt(editFormData.fat) : null,
         ingredients: editFormData.ingredients ? editFormData.ingredients.split(',').map(i => i.trim()) : null,
-        image_url: imageUrl,
-        country: editFormData.country || 'USA',
-        state: editFormData.state.trim() || null,
-        city: editFormData.city || null,
-        town: editFormData.town || null,
+        image_url: imageUrl, country: editFormData.country || 'USA',
+        state: editFormData.state.trim() || null, city: editFormData.city || null, town: editFormData.town || null,
         delivery_type: editFormData.delivery_type,
-        google_maps_link: editFormData.delivery_type === 'takeaway' ? (editFormData.google_maps_link.trim() || null) : null,
+        google_maps_link: (editFormData.delivery_type === 'takeaway' || editFormData.delivery_type === 'both') ? (editFormData.google_maps_link.trim() || null) : null,
         food_tag: editFormData.food_tag
       }).eq('id', editingListing.id);
       if (error) throw error;
       toast({ title: 'Listing updated!' });
-      setEditDialogOpen(false);
-      setEditingListing(null);
-      setEditImageFile(null);
-      setEditImagePreview(null);
-      fetchListings();
-      fetchMyListings();
+      setEditDialogOpen(false); setEditingListing(null); setEditImageFile(null); setEditImagePreview(null);
+      fetchListings(); fetchMyListings();
     } catch (error: any) {
       toast({ title: 'Error updating listing', description: error.message, variant: 'destructive' });
     }
@@ -462,24 +461,15 @@ const Marketplace = () => {
   const openEditDialog = (listing: FoodListing) => {
     setEditingListing(listing);
     setEditFormData({
-      title: listing.title,
-      description: listing.description || '',
-      price: listing.price.toString(),
-      quantity: listing.quantity.toString(),
-      category: listing.category,
-      is_vegetarian: listing.is_vegetarian || false,
-      calories: listing.calories?.toString() || '',
-      carbs: listing.carbs?.toString() || '',
-      protein: listing.protein?.toString() || '',
-      fat: listing.fat?.toString() || '',
-      ingredients: listing.ingredients?.join(', ') || '',
-      country: listing.country || 'USA',
-      state: listing.state || '',
-      city: listing.city || '',
-      town: listing.town || '',
+      title: listing.title, description: listing.description || '',
+      price: listing.price.toString(), quantity: listing.quantity.toString(),
+      category: listing.category, is_vegetarian: listing.is_vegetarian || false,
+      calories: listing.calories?.toString() || '', carbs: listing.carbs?.toString() || '',
+      protein: listing.protein?.toString() || '', fat: listing.fat?.toString() || '',
+      ingredients: listing.ingredients?.join(', ') || '', country: listing.country || 'USA',
+      state: listing.state || '', city: listing.city || '', town: listing.town || '',
       delivery_type: listing.delivery_type || 'takeaway',
-      google_maps_link: listing.google_maps_link || '',
-      food_tag: listing.food_tag || 'non-veg'
+      google_maps_link: listing.google_maps_link || '', food_tag: listing.food_tag || 'non-veg'
     });
     setEditImagePreview(listing.image_url);
     setEditDialogOpen(true);
@@ -489,8 +479,7 @@ const Marketplace = () => {
     try {
       await supabase.from('food_listings').delete().eq('id', id);
       toast({ title: 'Listing deleted' });
-      fetchMyListings();
-      fetchListings();
+      fetchMyListings(); fetchListings();
     } catch (error) {
       toast({ title: 'Error deleting listing', variant: 'destructive' });
     }
@@ -500,8 +489,7 @@ const Marketplace = () => {
     try {
       await supabase.from('food_listings').update({ is_sold_out: !currentStatus }).eq('id', id);
       toast({ title: currentStatus ? 'Marked as available' : 'Marked as sold out' });
-      fetchMyListings();
-      fetchListings();
+      fetchMyListings(); fetchListings();
     } catch (error) {
       toast({ title: 'Error updating listing', variant: 'destructive' });
     }
@@ -514,22 +502,18 @@ const Marketplace = () => {
       delivery_type: 'takeaway', google_maps_link: '', food_tag: 'non-veg' });
   };
 
-  // Send message to seller about a listing
   const sendListingMessage = async () => {
     if (!user || !messageListing || !messageText.trim()) return;
     try {
       const content = `[FOOD:${messageListing.id}] Re: ${messageListing.title} — ${messageText.trim()}`;
       const { error } = await supabase.from('direct_messages').insert({
-        sender_id: user.id,
-        receiver_id: messageListing.seller_id,
-        content
+        sender_id: user.id, receiver_id: messageListing.seller_id, content
       });
       if (error) throw error;
       setMessageText('');
       toast({ title: 'Message sent!' });
-      // Refresh conversation and buyer messages
       fetchConversation(messageListing.seller_id, messageListing.id);
-      fetchBuyerMessages();
+      fetchAllMessages();
     } catch (err: any) {
       toast({ title: 'Error sending message', variant: 'destructive' });
     }
@@ -541,15 +525,13 @@ const Marketplace = () => {
       .from('direct_messages').select('*')
       .or(`and(sender_id.eq.${user.id},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${user.id})`)
       .order('created_at', { ascending: true });
-    
     const filtered = (data || []).filter(m => m.content.includes(`[FOOD:${listingId}]`));
     setConversationMessages(filtered);
-    
-    // Mark as read
-    await supabase.from('direct_messages').update({ is_read: true })
-      .eq('sender_id', otherUserId).eq('receiver_id', user.id);
-    // Refresh unread counts
-    fetchBuyerMessages();
+    const unreadIds = filtered.filter(m => m.receiver_id === user.id && !m.is_read).map(m => m.id);
+    if (unreadIds.length > 0) {
+      await supabase.from('direct_messages').update({ is_read: true }).in('id', unreadIds);
+      fetchAllMessages();
+    }
   };
 
   const openMessageDialog = (listing: FoodListing) => {
@@ -558,64 +540,61 @@ const Marketplace = () => {
     if (user) fetchConversation(listing.seller_id, listing.id);
   };
 
-  // Seller reply
-  const sendSellerReply = async () => {
-    if (!user || !selectedSellerChat || !sellerReplyText.trim()) return;
-    try {
-      const content = `[FOOD:${selectedSellerChat.listing.id}] Re: ${selectedSellerChat.listing.title} — ${sellerReplyText.trim()}`;
-      const { error } = await supabase.from('direct_messages').insert({
-        sender_id: user.id,
-        receiver_id: selectedSellerChat.buyerId,
-        content
-      });
-      if (error) throw error;
-      setSellerReplyText('');
-      fetchSellerChatMessages(selectedSellerChat.buyerId, selectedSellerChat.listing.id);
-    } catch (err) {
-      toast({ title: 'Error sending reply', variant: 'destructive' });
-    }
-  };
-
-  const fetchSellerChatMessages = async (buyerId: string, listingId: string) => {
-    if (!user) return;
-    const { data } = await supabase
-      .from('direct_messages').select('*')
-      .or(`and(sender_id.eq.${user.id},receiver_id.eq.${buyerId}),and(sender_id.eq.${buyerId},receiver_id.eq.${user.id})`)
-      .order('created_at', { ascending: true });
-    const filtered = (data || []).filter(m => m.content.includes(`[FOOD:${listingId}]`));
-    setSellerChatMessages(filtered);
-    await supabase.from('direct_messages').update({ is_read: true })
-      .eq('sender_id', buyerId).eq('receiver_id', user.id);
-    // Refresh unread counts
-    fetchSellerMessages();
-  };
-
   // Buy now
   const handleBuyNow = (listing: FoodListing, e?: React.MouseEvent) => {
     e?.stopPropagation();
     setBuyListing(listing);
     setBuyQuantity(1);
+    setBuyAddress('');
     setBuyDialogOpen(true);
   };
 
   const confirmBuy = async () => {
     if (!user || !buyListing) return;
     try {
-      const content = `[FOOD:${buyListing.id}] 🛒 ORDER: I want to buy ${buyQuantity}x "${buyListing.title}"${buyListing.delivery_type === 'takeaway' ? ` — Pickup time: ${buyPickupTime || 'ASAP'}` : ' — Home Delivery requested'}`;
+      const addressPart = (buyListing.delivery_type === 'delivery' || buyListing.delivery_type === 'both') && buyAddress.trim()
+        ? ` — 📍 Delivery Address: ${buyAddress.trim()}`
+        : '';
+      const content = `[FOOD:${buyListing.id}] 🛒 ORDER: I want to buy ${buyQuantity}x "${buyListing.title}"${buyListing.delivery_type === 'takeaway' ? ` — Pickup time: ${buyPickupTime || 'ASAP'}` : ` — Home Delivery requested${addressPart}`}`;
       const { error } = await supabase.from('direct_messages').insert({
-        sender_id: user.id,
-        receiver_id: buyListing.seller_id,
-        content
+        sender_id: user.id, receiver_id: buyListing.seller_id, content
       });
       if (error) throw error;
       toast({ title: 'Order placed!', description: 'The seller has been notified.' });
-      setBuyDialogOpen(false);
-      setBuyListing(null);
-      setBuyPickupTime('');
-      setBuyQuantity(1);
-      fetchBuyerMessages();
+      setBuyDialogOpen(false); setBuyListing(null); setBuyPickupTime(''); setBuyQuantity(1); setBuyAddress('');
+      fetchAllMessages();
     } catch (err) {
       toast({ title: 'Error placing order', variant: 'destructive' });
+    }
+  };
+
+  // Reviews
+  const fetchReviews = async (listingId: string) => {
+    const { data } = await supabase.from('food_listing_reviews').select('*').eq('listing_id', listingId).order('created_at', { ascending: false });
+    if (data) {
+      const reviewerIds = [...new Set(data.map(r => r.reviewer_id))];
+      const { data: profiles } = await supabase.from('profiles').select('user_id, display_name, avatar_url').in('user_id', reviewerIds);
+      const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+      setReviews(data.map(r => ({
+        ...r, reviewer_name: profileMap.get(r.reviewer_id)?.display_name || 'User',
+        reviewer_avatar: profileMap.get(r.reviewer_id)?.avatar_url || null
+      })));
+    }
+  };
+
+  const submitReview = async () => {
+    if (!user || !reviewListing) return;
+    try {
+      const { error } = await supabase.from('food_listing_reviews').upsert({
+        listing_id: reviewListing.id, seller_id: reviewListing.seller_id,
+        reviewer_id: user.id, rating: reviewRating, comment: reviewComment.trim() || null
+      }, { onConflict: 'listing_id,reviewer_id' });
+      if (error) throw error;
+      toast({ title: 'Review submitted!' });
+      setReviewDialogOpen(false); setReviewComment(''); setReviewRating(5);
+      if (selectedListing) fetchReviews(selectedListing.id);
+    } catch (err: any) {
+      toast({ title: 'Error submitting review', description: err.message, variant: 'destructive' });
     }
   };
 
@@ -624,6 +603,7 @@ const Marketplace = () => {
     if (countryFilter && listing.country?.toLowerCase() !== countryFilter.toLowerCase()) return false;
     if (stateFilter && listing.state?.toLowerCase() !== stateFilter.toLowerCase()) return false;
     if (cityFilter && listing.city?.toLowerCase() !== cityFilter.toLowerCase()) return false;
+    if (townFilter && listing.town?.toLowerCase() !== townFilter.toLowerCase()) return false;
     if (priceFilter === 'free' && listing.price > 0) return false;
     if (priceFilter === 'paid' && listing.price === 0) return false;
     if (tagFilter !== 'all' && listing.food_tag !== tagFilter) return false;
@@ -642,11 +622,21 @@ const Marketplace = () => {
     return match ? match[1] : content;
   };
 
-  const totalUnreadSeller = sellerListingMessages.reduce((sum, s) => sum + s.unreadCount, 0);
-  const totalUnreadBuyer = buyerMessages.reduce((sum, s) => sum + s.unreadCount, 0);
+  const totalUnread = allConversations.reduce((sum, c) => sum + c.unreadCount, 0);
+
+  // Seller Dashboard stats
+  const totalOrders = allConversations.filter(c => c.isSeller && c.messages.some(m => m.content.includes('🛒 ORDER'))).length;
+  const totalQuantityLeft = myListings.reduce((sum, l) => sum + (l.is_sold_out ? 0 : l.quantity), 0);
+  const activeLCount = myListings.filter(l => !l.is_sold_out).length;
+  const soldOutCount = myListings.filter(l => l.is_sold_out).length;
+
+  // Get unique cities/towns from browse filter context
+  const filterCities = stateFilter ? (STATE_CITIES[stateFilter] || []) : [];
+  const filterTowns = cityFilter ? (CITY_TOWNS[cityFilter] || []) : [];
 
   const renderLocationFields = (data: typeof formData, setData: (d: any) => void) => {
     const cities = data.state ? (STATE_CITIES[data.state] || []) : [];
+    const towns = data.city ? (CITY_TOWNS[data.city] || []) : [];
     return (
       <div className="grid grid-cols-2 gap-3">
         <div>
@@ -682,7 +672,16 @@ const Marketplace = () => {
         </div>
         <div>
           <Label className="text-xs">Town/Area</Label>
-          <Input value={data.town} onChange={(e) => setData({ ...data, town: e.target.value })} placeholder="Town" />
+          {towns.length > 0 ? (
+            <Select value={data.town} onValueChange={(v) => setData({ ...data, town: v })}>
+              <SelectTrigger><SelectValue placeholder="Select town" /></SelectTrigger>
+              <SelectContent><ScrollArea className="h-48">
+                {towns.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+              </ScrollArea></SelectContent>
+            </Select>
+          ) : (
+            <Input value={data.town} onChange={(e) => setData({ ...data, town: e.target.value })} placeholder="Town" />
+          )}
         </div>
       </div>
     );
@@ -690,7 +689,6 @@ const Marketplace = () => {
 
   const renderFormFields = (data: typeof formData, setData: (d: any) => void, imgFile: File | null, setImgFile: (f: File | null) => void, preview: string | null, setPreview: (s: string | null) => void) => (
     <div className="grid gap-4 py-4 max-h-[70vh] overflow-y-auto pr-2">
-      {/* Image Upload */}
       <div>
         <Label>Food Photo</Label>
         <div className="mt-1">
@@ -708,7 +706,6 @@ const Marketplace = () => {
           {imgFile && <Badge variant="secondary" className="mt-2 text-xs">{imgFile.name}</Badge>}
         </div>
       </div>
-
       <div className="grid grid-cols-2 gap-4">
         <div className="col-span-2">
           <Label>Food Title *</Label>
@@ -748,8 +745,6 @@ const Marketplace = () => {
           </Select>
         </div>
       </div>
-
-      {/* Delivery Type */}
       <div className="border-t pt-4">
         <Label className="text-base font-semibold mb-2 block flex items-center gap-2"><Truck className="h-4 w-4" /> Delivery Option</Label>
         <Select value={data.delivery_type} onValueChange={(v) => setData({ ...data, delivery_type: v })}>
@@ -767,8 +762,6 @@ const Marketplace = () => {
           </div>
         )}
       </div>
-
-      {/* Nutrition */}
       <div className="border-t pt-4">
         <Label className="text-base font-semibold mb-2 block">Nutrition (per serving)</Label>
         <div className="grid grid-cols-4 gap-3">
@@ -779,8 +772,8 @@ const Marketplace = () => {
         </div>
       </div>
       <div>
-        <Label>Ingredients (comma separated)</Label>
-        <Textarea value={data.ingredients} onChange={(e) => setData({ ...data, ingredients: e.target.value })} placeholder="chicken, cream, butter..." />
+        <Label>Ingredients (comma-separated)</Label>
+        <Input value={data.ingredients} onChange={(e) => setData({ ...data, ingredients: e.target.value })} placeholder="chicken, butter, cream..." />
       </div>
       <div className="border-t pt-4">
         <Label className="text-base font-semibold mb-2 block flex items-center gap-2"><MapPin className="h-4 w-4" /> Location</Label>
@@ -789,33 +782,49 @@ const Marketplace = () => {
     </div>
   );
 
+  const renderDeliveryIcon = (deliveryType: string) => {
+    switch (deliveryType) {
+      case 'delivery':
+        return <Badge className="bg-blue-500/90 text-white text-[10px] gap-1 px-1.5"><Truck className="h-3 w-3" />Delivery</Badge>;
+      case 'takeaway':
+        return <Badge variant="outline" className="text-[10px] gap-1 px-1.5 border-amber-400 text-amber-700 bg-amber-50"><Store className="h-3 w-3" />Pickup</Badge>;
+      case 'both':
+        return <Badge variant="outline" className="text-[10px] gap-1 px-1.5 border-purple-400 text-purple-700 bg-purple-50"><Truck className="h-3 w-3" /><Store className="h-3 w-3" /></Badge>;
+      default:
+        return null;
+    }
+  };
+
+  const renderStars = (rating: number, interactive = false, onChange?: (r: number) => void) => (
+    <div className="flex gap-0.5">
+      {[1,2,3,4,5].map(i => (
+        <Star key={i} className={`h-4 w-4 ${i <= rating ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/30'} ${interactive ? 'cursor-pointer' : ''}`}
+          onClick={() => interactive && onChange?.(i)} />
+      ))}
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2 flex items-center justify-center gap-3">
-            <ShoppingBag className="h-8 w-8 text-primary" />Ketopia Marketplace
-          </h1>
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">🥑 Ketopia Marketplace</h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">Buy, sell, or share keto-friendly foods with your local community.</p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); if (v === 'my-listings' && user) { fetchMyListings(); fetchSellerMessages(); } if (v === 'my-messages' && user) { fetchBuyerMessages(); } }} className="space-y-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-             <TabsList className="w-full sm:w-auto">
+        <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); if (v === 'my-messages' && user) fetchAllMessages(); if (v === 'dashboard' && user) { fetchMyListings(); fetchAllMessages(); } }} className="space-y-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <TabsList className="w-full sm:w-auto flex-wrap h-auto">
               <TabsTrigger value="browse" className="flex-1 sm:flex-none">Browse</TabsTrigger>
               <TabsTrigger value="my-messages" className="relative flex-1 sm:flex-none">
-                My Messages
-                {totalUnreadBuyer > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] rounded-full h-4 w-4 flex items-center justify-center">{totalUnreadBuyer}</span>
+                Messages
+                {totalUnread > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] rounded-full h-4 w-4 flex items-center justify-center">{totalUnread}</span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="my-listings" className="relative flex-1 sm:flex-none">
-                My Listings
-                {totalUnreadSeller > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] rounded-full h-4 w-4 flex items-center justify-center">{totalUnreadSeller}</span>
-                )}
-              </TabsTrigger>
+              <TabsTrigger value="my-listings" className="flex-1 sm:flex-none">My Listings</TabsTrigger>
+              {user && <TabsTrigger value="dashboard" className="flex-1 sm:flex-none gap-1"><BarChart3 className="h-3 w-3" />Dashboard</TabsTrigger>}
             </TabsList>
             {user && (
               <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
@@ -835,25 +844,39 @@ const Marketplace = () => {
           <TabsContent value="browse">
             <Card className="mb-6">
               <CardContent className="pt-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-                  <div className="col-span-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+                  <div className="col-span-1 sm:col-span-2">
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search food..." className="pl-9" />
                     </div>
                   </div>
-                  <Select value={countryFilter || 'all'} onValueChange={(v) => { setCountryFilter(v === 'all' ? '' : v); setStateFilter(''); setCityFilter(''); }}>
+                  <Select value={countryFilter || 'all'} onValueChange={(v) => { setCountryFilter(v === 'all' ? '' : v); setStateFilter(''); setCityFilter(''); setTownFilter(''); }}>
                     <SelectTrigger><SelectValue placeholder="Country" /></SelectTrigger>
                     <SelectContent><ScrollArea className="h-48">
                       <SelectItem value="all">All Countries</SelectItem>
                       {COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                     </ScrollArea></SelectContent>
                   </Select>
-                  <Select value={stateFilter || 'all'} onValueChange={(v) => { setStateFilter(v === 'all' ? '' : v); setCityFilter(''); }}>
+                  <Select value={stateFilter || 'all'} onValueChange={(v) => { setStateFilter(v === 'all' ? '' : v); setCityFilter(''); setTownFilter(''); }}>
                     <SelectTrigger><SelectValue placeholder="State" /></SelectTrigger>
                     <SelectContent><ScrollArea className="h-48">
                       <SelectItem value="all">All States</SelectItem>
                       {(countryFilter ? COUNTRY_STATES[countryFilter] || [] : []).map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                    </ScrollArea></SelectContent>
+                  </Select>
+                  <Select value={cityFilter || 'all'} onValueChange={(v) => { setCityFilter(v === 'all' ? '' : v); setTownFilter(''); }}>
+                    <SelectTrigger><SelectValue placeholder="City" /></SelectTrigger>
+                    <SelectContent><ScrollArea className="h-48">
+                      <SelectItem value="all">All Cities</SelectItem>
+                      {filterCities.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                    </ScrollArea></SelectContent>
+                  </Select>
+                  <Select value={townFilter || 'all'} onValueChange={(v) => setTownFilter(v === 'all' ? '' : v)}>
+                    <SelectTrigger><SelectValue placeholder="Town" /></SelectTrigger>
+                    <SelectContent><ScrollArea className="h-48">
+                      <SelectItem value="all">All Towns</SelectItem>
+                      {filterTowns.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
                     </ScrollArea></SelectContent>
                   </Select>
                   <Select value={priceFilter} onValueChange={(v: any) => setPriceFilter(v)}>
@@ -888,7 +911,7 @@ const Marketplace = () => {
                 {filteredListings.map((listing) => {
                   const tag = getTagInfo(listing.food_tag);
                   return (
-                    <Card key={listing.id} className={`overflow-hidden hover:shadow-lg transition-shadow cursor-pointer ${listing.is_sold_out ? 'opacity-60' : ''}`} onClick={() => setSelectedListing(listing)}>
+                    <Card key={listing.id} className={`overflow-hidden hover:shadow-lg transition-shadow cursor-pointer ${listing.is_sold_out ? 'opacity-60' : ''}`} onClick={() => { setSelectedListing(listing); fetchReviews(listing.id); }}>
                       <div className="aspect-video bg-muted relative overflow-hidden">
                         {listing.image_url ? (
                           <img src={listing.image_url} alt={listing.title} className="w-full h-full object-cover" loading="lazy" />
@@ -903,9 +926,9 @@ const Marketplace = () => {
                           )}
                           <Badge variant="outline" className={tag.color}>{tag.icon} {tag.label}</Badge>
                         </div>
-                        {listing.delivery_type === 'delivery' && (
-                          <Badge className="absolute top-2 right-2 bg-blue-500 text-white"><Truck className="h-3 w-3 mr-1" />Delivery</Badge>
-                        )}
+                        <div className="absolute top-2 right-2">
+                          {renderDeliveryIcon(listing.delivery_type)}
+                        </div>
                         {listing.is_sold_out && (
                           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                             <Badge variant="destructive" className="text-lg">SOLD OUT</Badge>
@@ -914,10 +937,15 @@ const Marketplace = () => {
                       </div>
                       <CardContent className="p-3">
                         <h3 className="font-semibold truncate">{listing.title}</h3>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                          <MapPin className="h-3 w-3" />
-                          {[listing.city, listing.state, listing.country].filter(Boolean).join(', ') || 'Location not set'}
-                        </p>
+                        <div className="flex items-center justify-between mt-1">
+                          <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            {[listing.town, listing.city, listing.state].filter(Boolean).join(', ') || 'Location not set'}
+                          </p>
+                          <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Package className="h-3 w-3" /> Qty: {listing.quantity}
+                          </p>
+                        </div>
                         <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                           <Clock className="h-3 w-3" />{formatTime(listing.created_at)}
                         </p>
@@ -950,7 +978,7 @@ const Marketplace = () => {
             )}
           </TabsContent>
 
-          {/* MY MESSAGES TAB (Buyer) */}
+          {/* MY MESSAGES TAB (unified buyer + seller) */}
           <TabsContent value="my-messages">
             {!user ? (
               <div className="text-center py-12 text-muted-foreground">Please sign in</div>
@@ -958,56 +986,58 @@ const Marketplace = () => {
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base flex items-center gap-2">
-                    <MessageCircle className="h-4 w-4" /> My Messages
-                    {totalUnreadBuyer > 0 && <Badge variant="destructive" className="text-xs">{totalUnreadBuyer} unread</Badge>}
+                    <MessageCircle className="h-4 w-4" /> All Messages
+                    {totalUnread > 0 && <Badge variant="destructive" className="text-xs">{totalUnread} unread</Badge>}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {!selectedBuyerChat ? (
-                    buyerMessages.length === 0 ? (
+                  {!selectedChat ? (
+                    allConversations.length === 0 ? (
                       <div className="text-center py-8 text-muted-foreground">
                         <MessageCircle className="h-12 w-12 mx-auto mb-2 opacity-50" />
                         <p>No messages yet. Browse listings and message sellers!</p>
                       </div>
                     ) : (
                       <div className="space-y-2">
-                        {buyerMessages.map(({ listing, messages: msgs, unreadCount }) => (
-                          <button key={listing.id}
+                        {allConversations.map((conv) => (
+                          <button key={`${conv.listing.id}-${conv.otherUserId}`}
                             className="w-full p-3 flex items-center gap-3 hover:bg-muted/50 rounded-lg text-left transition-colors border"
-                            onClick={async () => {
-                              const { data: profile } = await supabase.from('profiles').select('display_name').eq('user_id', listing.seller_id).maybeSingle();
-                              setSelectedBuyerChat({ listing, sellerId: listing.seller_id, sellerName: profile?.display_name || 'Seller' });
-                              fetchBuyerChatMessages(listing.seller_id, listing.id);
+                            onClick={() => {
+                              setSelectedChat({ listing: conv.listing, otherUserId: conv.otherUserId, otherUserName: conv.otherUserName, isSeller: conv.isSeller });
+                              fetchChatMessages(conv.otherUserId, conv.listing.id);
                             }}
                           >
                             <div className="w-10 h-10 rounded-lg bg-muted overflow-hidden shrink-0">
-                              {listing.image_url ? (
-                                <img src={listing.image_url} alt={listing.title} className="w-full h-full object-cover" />
+                              {conv.listing.image_url ? (
+                                <img src={conv.listing.image_url} alt={conv.listing.title} className="w-full h-full object-cover" />
                               ) : (
                                 <div className="flex items-center justify-center h-full"><ShoppingBag className="h-4 w-4 text-muted-foreground" /></div>
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
-                                <span className="font-medium text-sm truncate">{listing.title}</span>
-                                {unreadCount > 0 && <Badge variant="destructive" className="text-[10px] h-4 px-1">{unreadCount} new</Badge>}
+                                <span className="font-medium text-sm truncate">{conv.listing.title}</span>
+                                <Badge variant="outline" className="text-[10px] shrink-0">{conv.isSeller ? 'Seller' : 'Buyer'}</Badge>
+                                {conv.unreadCount > 0 && <Badge variant="destructive" className="text-[10px] h-4 px-1">{conv.unreadCount} new</Badge>}
                               </div>
-                              <p className="text-xs text-muted-foreground truncate">{extractMessageText(msgs[0].content)}</p>
+                              <p className="text-xs text-muted-foreground truncate">
+                                {conv.otherUserName}: {extractMessageText(conv.messages[0].content)}
+                              </p>
                             </div>
-                            <ArrowLeft className="h-4 w-4 rotate-180 text-muted-foreground" />
+                            <ArrowLeft className="h-4 w-4 rotate-180 text-muted-foreground shrink-0" />
                           </button>
                         ))}
                       </div>
                     )
                   ) : (
                     <div>
-                      <Button variant="ghost" size="sm" onClick={() => setSelectedBuyerChat(null)} className="mb-2">
+                      <Button variant="ghost" size="sm" onClick={() => { setSelectedChat(null); fetchAllMessages(); }} className="mb-2">
                         <ArrowLeft className="h-4 w-4 mr-1" /> Back
                       </Button>
-                      <p className="text-sm font-medium mb-2">Chat with {selectedBuyerChat.sellerName} about "{selectedBuyerChat.listing.title}"</p>
+                      <p className="text-sm font-medium mb-2">Chat with {selectedChat.otherUserName} about "{selectedChat.listing.title}"</p>
                       <ScrollArea className="h-60 border rounded-lg p-3 mb-2">
                         <div className="space-y-2">
-                          {buyerChatMessages.map(msg => (
+                          {chatMessages.map(msg => (
                             <div key={msg.id} className={`flex ${msg.sender_id === user.id ? 'justify-end' : 'justify-start'}`}>
                               <div className={`max-w-[80%] p-2 rounded-lg text-sm ${msg.sender_id === user.id ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                                 <p>{extractMessageText(msg.content)}</p>
@@ -1019,8 +1049,8 @@ const Marketplace = () => {
                         </div>
                       </ScrollArea>
                       <div className="flex gap-2">
-                        <Input value={buyerReplyText} onChange={(e) => setBuyerReplyText(e.target.value)} placeholder="Reply..." onKeyDown={(e) => e.key === 'Enter' && sendBuyerReply()} />
-                        <Button onClick={sendBuyerReply} disabled={!buyerReplyText.trim()} size="sm"><Send className="h-4 w-4" /></Button>
+                        <Input value={replyText} onChange={(e) => setReplyText(e.target.value)} placeholder="Reply..." onKeyDown={(e) => e.key === 'Enter' && sendChatReply()} />
+                        <Button onClick={sendChatReply} disabled={!replyText.trim()} size="sm"><Send className="h-4 w-4" /></Button>
                       </div>
                     </div>
                   )}
@@ -1029,123 +1059,131 @@ const Marketplace = () => {
             )}
           </TabsContent>
 
+          {/* MY LISTINGS TAB */}
           <TabsContent value="my-listings">
+            {!user ? (
+              <div className="text-center py-12 text-muted-foreground">Please sign in</div>
+            ) : myListings.length === 0 ? (
+              <div className="text-center py-12">
+                <ShoppingBag className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No listings yet</h3>
+                <Button onClick={() => setCreateDialogOpen(true)}><Plus className="h-4 w-4 mr-2" />Create Listing</Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {myListings.map((listing) => {
+                  const tag = getTagInfo(listing.food_tag);
+                  return (
+                    <Card key={listing.id}>
+                      <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                        <div className="w-full sm:w-20 h-32 sm:h-20 bg-muted rounded-lg shrink-0 overflow-hidden">
+                          {listing.image_url ? (
+                            <img src={listing.image_url} alt={listing.title} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="flex items-center justify-center h-full"><Image className="h-8 w-8 text-muted-foreground" /></div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h3 className="font-semibold">{listing.title}</h3>
+                            <Badge variant="outline" className={`text-xs ${tag.color}`}>{tag.icon} {tag.label}</Badge>
+                            {renderDeliveryIcon(listing.delivery_type)}
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {listing.price === 0 ? 'Free' : `$${listing.price.toFixed(2)}`} • Qty: {listing.quantity}
+                          </p>
+                          <p className="text-xs text-muted-foreground"><Clock className="h-3 w-3 inline mr-1" />{formatTime(listing.created_at)}</p>
+                        </div>
+                        <div className="flex gap-2 flex-wrap w-full sm:w-auto justify-end">
+                          {listing.is_sold_out && <Badge variant="destructive">Sold Out</Badge>}
+                          <Button size="sm" variant="outline" onClick={() => openEditDialog(listing)}><Edit className="h-4 w-4" /></Button>
+                          <Button size="sm" variant="outline" onClick={() => toggleSoldOut(listing.id, listing.is_sold_out)}>
+                            {listing.is_sold_out ? 'Available' : 'Sold'}
+                          </Button>
+                          <Button size="sm" variant="destructive" onClick={() => deleteListing(listing.id)}><Trash2 className="h-4 w-4" /></Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* SELLER DASHBOARD TAB */}
+          <TabsContent value="dashboard">
             {!user ? (
               <div className="text-center py-12 text-muted-foreground">Please sign in</div>
             ) : (
               <div className="space-y-6">
-                {/* Seller Messages Section */}
-                {sellerListingMessages.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <MessageCircle className="h-4 w-4" /> Buyer Messages
-                        {totalUnreadSeller > 0 && <Badge variant="destructive" className="text-xs">{totalUnreadSeller} unread</Badge>}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {!selectedSellerChat ? (
-                        <div className="space-y-2">
-                          {sellerListingMessages.map(({ listing, messages, unreadCount }) => {
-                            const uniqueBuyers = [...new Set(messages.map(m => m.sender_id))];
-                            return uniqueBuyers.map(buyerId => (
-                              <button key={`${listing.id}-${buyerId}`}
-                                className="w-full p-3 flex items-center gap-3 hover:bg-muted/50 rounded-lg text-left transition-colors border"
-                                onClick={async () => {
-                                  const { data: profile } = await supabase.from('profiles').select('display_name').eq('user_id', buyerId).maybeSingle();
-                                  setSelectedSellerChat({ listing: listing, buyerId, buyerName: profile?.display_name || 'Buyer' });
-                                  fetchSellerChatMessages(buyerId, listing.id);
-                                }}
-                              >
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-medium text-sm truncate">{listing.title}</span>
-                                    {unreadCount > 0 && <span className="bg-destructive text-destructive-foreground text-[10px] rounded-full h-4 w-4 flex items-center justify-center">{unreadCount}</span>}
-                                  </div>
-                                  <p className="text-xs text-muted-foreground truncate">{extractMessageText(messages[0].content)}</p>
-                                </div>
-                                <ArrowLeft className="h-4 w-4 rotate-180 text-muted-foreground" />
-                              </button>
-                            ));
-                          })}
-                        </div>
-                      ) : (
-                        <div>
-                          <Button variant="ghost" size="sm" onClick={() => setSelectedSellerChat(null)} className="mb-2">
-                            <ArrowLeft className="h-4 w-4 mr-1" /> Back
-                          </Button>
-                          <p className="text-sm font-medium mb-2">Chat with {selectedSellerChat.buyerName} about "{selectedSellerChat.listing.title}"</p>
-                          <ScrollArea className="h-60 border rounded-lg p-3 mb-2">
-                            <div className="space-y-2">
-                              {sellerChatMessages.map(msg => (
-                                <div key={msg.id} className={`flex ${msg.sender_id === user.id ? 'justify-end' : 'justify-start'}`}>
-                                  <div className={`max-w-[80%] p-2 rounded-lg text-sm ${msg.sender_id === user.id ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-                                    <p>{extractMessageText(msg.content)}</p>
-                                    <p className={`text-[10px] mt-0.5 ${msg.sender_id === user.id ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>{formatTime(msg.created_at)}</p>
-                                  </div>
-                                </div>
-                              ))}
-                              <div ref={messagesEndRef} />
-                            </div>
-                          </ScrollArea>
-                          <div className="flex gap-2">
-                            <Input value={sellerReplyText} onChange={(e) => setSellerReplyText(e.target.value)} placeholder="Reply..." onKeyDown={(e) => e.key === 'Enter' && sendSellerReply()} />
-                            <Button onClick={sendSellerReply} disabled={!sellerReplyText.trim()} size="sm"><Send className="h-4 w-4" /></Button>
-                          </div>
-                        </div>
-                      )}
+                    <CardContent className="p-4 text-center">
+                      <Package className="h-8 w-8 mx-auto text-primary mb-2" />
+                      <p className="text-2xl font-bold">{myListings.length}</p>
+                      <p className="text-xs text-muted-foreground">Total Listings</p>
                     </CardContent>
                   </Card>
-                )}
+                  <Card>
+                    <CardContent className="p-4 text-center">
+                      <ShoppingBag className="h-8 w-8 mx-auto text-green-500 mb-2" />
+                      <p className="text-2xl font-bold">{totalOrders}</p>
+                      <p className="text-xs text-muted-foreground">Orders Received</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4 text-center">
+                      <BarChart3 className="h-8 w-8 mx-auto text-blue-500 mb-2" />
+                      <p className="text-2xl font-bold">{totalQuantityLeft}</p>
+                      <p className="text-xs text-muted-foreground">Total Qty Left</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4 text-center">
+                      <MessageCircle className="h-8 w-8 mx-auto text-orange-500 mb-2" />
+                      <p className="text-2xl font-bold">{allConversations.filter(c => c.isSeller).length}</p>
+                      <p className="text-xs text-muted-foreground">Buyer Chats</p>
+                    </CardContent>
+                  </Card>
+                </div>
 
-                {/* My listings */}
-                {myListings.length === 0 ? (
-                  <div className="text-center py-12">
-                    <ShoppingBag className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">No listings yet</h3>
-                    <Button onClick={() => setCreateDialogOpen(true)}><Plus className="h-4 w-4 mr-2" />Create Listing</Button>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {myListings.map((listing) => {
-                      const tag = getTagInfo(listing.food_tag);
-                      return (
-                        <Card key={listing.id}>
-                          <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                            <div className="w-full sm:w-20 h-32 sm:h-20 bg-muted rounded-lg shrink-0 overflow-hidden">
-                              {listing.image_url ? (
-                                <img src={listing.image_url} alt={listing.title} className="w-full h-full object-cover" />
-                              ) : (
-                                <div className="flex items-center justify-center h-full"><Image className="h-8 w-8 text-muted-foreground" /></div>
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
-                                <h3 className="font-semibold">{listing.title}</h3>
-                                <Badge variant="outline" className={`text-xs ${tag.color}`}>{tag.icon} {tag.label}</Badge>
+                <Card>
+                  <CardHeader><CardTitle className="text-base">Listing Overview</CardTitle></CardHeader>
+                  <CardContent>
+                    <div className="flex gap-4 mb-4">
+                      <Badge className="bg-green-500 text-white">{activeLCount} Active</Badge>
+                      <Badge variant="destructive">{soldOutCount} Sold Out</Badge>
+                    </div>
+                    {myListings.length > 0 ? (
+                      <div className="space-y-3">
+                        {myListings.map(listing => {
+                          const listingOrders = allConversations.filter(c => c.isSeller && c.listing.id === listing.id && c.messages.some(m => m.content.includes('🛒 ORDER')));
+                          return (
+                            <div key={listing.id} className="flex items-center gap-3 p-3 border rounded-lg">
+                              <div className="w-12 h-12 rounded-lg bg-muted overflow-hidden shrink-0">
+                                {listing.image_url ? <img src={listing.image_url} alt="" className="w-full h-full object-cover" /> : <div className="flex items-center justify-center h-full"><Image className="h-5 w-5 text-muted-foreground" /></div>}
                               </div>
-                              <p className="text-sm text-muted-foreground">
-                                {listing.price === 0 ? 'Free' : `$${listing.price.toFixed(2)}`} • Qty: {listing.quantity}
-                                {listing.delivery_type === 'delivery' && ' • 🚚 Delivery'}
-                                {listing.delivery_type === 'takeaway' && ' • 🏪 Takeaway'}
-                                {listing.delivery_type === 'both' && ' • 🚚+🏪'}
-                              </p>
-                              <p className="text-xs text-muted-foreground"><Clock className="h-3 w-3 inline mr-1" />{formatTime(listing.created_at)}</p>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium text-sm truncate">{listing.title}</span>
+                                  {listing.is_sold_out && <Badge variant="destructive" className="text-[10px]">Sold</Badge>}
+                                  {renderDeliveryIcon(listing.delivery_type)}
+                                </div>
+                                <div className="flex gap-3 text-xs text-muted-foreground mt-1">
+                                  <span>💰 {listing.price === 0 ? 'Free' : `$${listing.price.toFixed(2)}`}</span>
+                                  <span>📦 Qty: {listing.quantity}</span>
+                                  <span>🛒 {listingOrders.length} orders</span>
+                                </div>
+                              </div>
                             </div>
-                            <div className="flex gap-2 flex-wrap w-full sm:w-auto justify-end">
-                              {listing.is_sold_out && <Badge variant="destructive">Sold Out</Badge>}
-                              <Button size="sm" variant="outline" onClick={() => openEditDialog(listing)}><Edit className="h-4 w-4" /></Button>
-                              <Button size="sm" variant="outline" onClick={() => toggleSoldOut(listing.id, listing.is_sold_out)}>
-                                {listing.is_sold_out ? 'Available' : 'Sold'}
-                              </Button>
-                              <Button size="sm" variant="destructive" onClick={() => deleteListing(listing.id)}><Trash2 className="h-4 w-4" /></Button>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                )}
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p className="text-muted-foreground text-center py-4">No listings yet</p>
+                    )}
+                  </CardContent>
+                </Card>
               </div>
             )}
           </TabsContent>
@@ -1176,9 +1214,8 @@ const Marketplace = () => {
                         <Badge variant="secondary" className="text-lg"><DollarSign className="h-3 w-3" />{selectedListing.price.toFixed(2)}</Badge>
                       )}
                       <Badge variant="outline" className={tag.color}>{tag.icon} {tag.label}</Badge>
-                      {selectedListing.delivery_type === 'delivery' && <Badge className="bg-blue-500 text-white"><Truck className="h-3 w-3 mr-1" />Delivery</Badge>}
-                      {selectedListing.delivery_type === 'takeaway' && <Badge variant="outline"><Store className="h-3 w-3 mr-1" />Takeaway</Badge>}
-                      {selectedListing.delivery_type === 'both' && <Badge variant="outline">Delivery + Takeaway</Badge>}
+                      {renderDeliveryIcon(selectedListing.delivery_type)}
+                      <Badge variant="outline" className="gap-1"><Package className="h-3 w-3" /> Qty: {selectedListing.quantity}</Badge>
                     </div>
                   </DialogHeader>
                   {selectedListing.image_url && (
@@ -1217,20 +1254,50 @@ const Marketplace = () => {
                       <div className="font-semibold">{selectedListing.seller_name}</div>
                       <div className="text-xs text-muted-foreground flex items-center gap-1">
                         <MapPin className="h-3 w-3" />
-                        {[selectedListing.city, selectedListing.state, selectedListing.country].filter(Boolean).join(', ')}
+                        {[selectedListing.town, selectedListing.city, selectedListing.state, selectedListing.country].filter(Boolean).join(', ')}
                       </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                       {user && user.id !== selectedListing.seller_id && (
-                        <Button variant="outline" size="sm" onClick={() => openMessageDialog(selectedListing)}>
-                          <MessageCircle className="h-4 w-4 mr-1" /> Message
-                        </Button>
+                        <>
+                          <Button variant="outline" size="sm" onClick={() => openMessageDialog(selectedListing)}>
+                            <MessageCircle className="h-4 w-4 mr-1" /> Message
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => { setReviewListing(selectedListing); setReviewDialogOpen(true); }}>
+                            <Star className="h-4 w-4 mr-1" /> Review
+                          </Button>
+                        </>
                       )}
                       {!selectedListing.is_sold_out && (
                         <Button size="sm" onClick={() => handleBuyNow(selectedListing)}>Buy Now</Button>
                       )}
                     </div>
                   </div>
+
+                  {/* Reviews section */}
+                  {reviews.length > 0 && (
+                    <div className="border-t pt-4">
+                      <h4 className="font-semibold text-sm mb-3 flex items-center gap-2"><Star className="h-4 w-4" /> Reviews ({reviews.length})</h4>
+                      <div className="space-y-3 max-h-48 overflow-y-auto">
+                        {reviews.map(r => (
+                          <div key={r.id} className="flex gap-3 p-2 bg-muted/30 rounded-lg">
+                            <Avatar className="h-7 w-7">
+                              <AvatarImage src={r.reviewer_avatar || ''} />
+                              <AvatarFallback className="text-[10px]">{r.reviewer_name?.[0]}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-xs">{r.reviewer_name}</span>
+                                {renderStars(r.rating)}
+                              </div>
+                              {r.comment && <p className="text-xs text-muted-foreground mt-1">{r.comment}</p>}
+                              <p className="text-[10px] text-muted-foreground mt-1">{formatTime(r.created_at)}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </>
               );
             })()}
@@ -1278,6 +1345,12 @@ const Marketplace = () => {
                     <p className="text-sm font-medium mt-1 text-right">Total: ${(buyListing.price * buyQuantity).toFixed(2)}</p>
                   )}
                 </div>
+                {(buyListing.delivery_type === 'delivery' || buyListing.delivery_type === 'both') && (
+                  <div>
+                    <Label className="flex items-center gap-2"><Home className="h-4 w-4" /> Delivery Address</Label>
+                    <Textarea value={buyAddress} onChange={(e) => setBuyAddress(e.target.value)} placeholder="Enter your full delivery address..." className="mt-1" />
+                  </div>
+                )}
                 {(buyListing.delivery_type === 'takeaway' || buyListing.delivery_type === 'both') && (
                   <div>
                     <Label>Pickup Time</Label>
@@ -1290,10 +1363,28 @@ const Marketplace = () => {
                   </div>
                 )}
                 <Button onClick={confirmBuy} className="w-full">
-                  {buyListing.delivery_type === 'delivery' ? '🚚 Order for Delivery' : '🏪 Confirm Takeaway'}
+                  {buyListing.delivery_type === 'delivery' ? '🚚 Order for Delivery' : buyListing.delivery_type === 'both' ? '📦 Place Order' : '🏪 Confirm Takeaway'}
                 </Button>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Review Dialog */}
+        <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader><DialogTitle>Review: {reviewListing?.title}</DialogTitle></DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Rating</Label>
+                <div className="mt-1">{renderStars(reviewRating, true, setReviewRating)}</div>
+              </div>
+              <div>
+                <Label>Comment (optional)</Label>
+                <Textarea value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} placeholder="Share your experience..." />
+              </div>
+              <Button onClick={submitReview} className="w-full">Submit Review</Button>
+            </div>
           </DialogContent>
         </Dialog>
       </main>
