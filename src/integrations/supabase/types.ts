@@ -1302,6 +1302,8 @@ export type Database = {
           activity_level: string | null
           age: number | null
           avatar_url: string | null
+          city: string | null
+          country: string | null
           created_at: string
           current_weight: number | null
           diet_type: string | null
@@ -1312,6 +1314,8 @@ export type Database = {
           goal_weight: number | null
           height: number | null
           id: string
+          state: string | null
+          town: string | null
           updated_at: string
           user_id: string
           username: string | null
@@ -1320,6 +1324,8 @@ export type Database = {
           activity_level?: string | null
           age?: number | null
           avatar_url?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string
           current_weight?: number | null
           diet_type?: string | null
@@ -1330,6 +1336,8 @@ export type Database = {
           goal_weight?: number | null
           height?: number | null
           id?: string
+          state?: string | null
+          town?: string | null
           updated_at?: string
           user_id: string
           username?: string | null
@@ -1338,6 +1346,8 @@ export type Database = {
           activity_level?: string | null
           age?: number | null
           avatar_url?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string
           current_weight?: number | null
           diet_type?: string | null
@@ -1348,6 +1358,8 @@ export type Database = {
           goal_weight?: number | null
           height?: number | null
           id?: string
+          state?: string | null
+          town?: string | null
           updated_at?: string
           user_id?: string
           username?: string | null

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,11 +12,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Progress } from '@/components/ui/progress';
-import { 
-  MapPin, Search, Plus, ShoppingBag, Leaf, Drumstick, 
-  MessageCircle, Edit, Trash2, AlertTriangle, Clock, DollarSign, Upload, Image,
-  Send, ArrowLeft, Truck, Store, Heart, ExternalLink, Star, Package, BarChart3, Home
+import {
+  MapPin, Search, Plus, ShoppingBag, 
+  MessageCircle, Edit, Trash2, Clock, DollarSign, Upload, Image,
+  Send, ArrowLeft, Truck, Store, ExternalLink, Star, Package, BarChart3, Home,
+  Globe, Building2, MapPinned, Filter
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthContext';
@@ -58,7 +58,6 @@ interface MarketMessage {
   content: string;
   is_read: boolean | null;
   created_at: string;
-  sender_name?: string;
 }
 
 interface FoodReview {
@@ -71,6 +70,19 @@ interface FoodReview {
   created_at: string;
   reviewer_name?: string;
   reviewer_avatar?: string;
+}
+
+interface OrderDetail {
+  buyerName: string;
+  buyerAvatar: string | null;
+  quantity: number;
+  deliveryType: string;
+  address: string;
+  pickupTime: string;
+  orderedAt: string;
+  listingTitle: string;
+  listingId: string;
+  buyerId: string;
 }
 
 const COUNTRIES = ['USA', 'Canada', 'UK', 'Australia', 'New Zealand'];
@@ -149,7 +161,7 @@ const Marketplace = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [editImageFile, setEditImageFile] = useState<File | null>(null);
   const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
-  
+
   // Buy now state
   const [buyDialogOpen, setBuyDialogOpen] = useState(false);
   const [buyListing, setBuyListing] = useState<FoodListing | null>(null);
@@ -157,12 +169,12 @@ const Marketplace = () => {
   const [buyQuantity, setBuyQuantity] = useState(1);
   const [buyAddress, setBuyAddress] = useState('');
 
-  // Unified messages state (both buyer and seller messages)
-  const [allConversations, setAllConversations] = useState<{listing: FoodListing, otherUserId: string, otherUserName: string, messages: MarketMessage[], unreadCount: number, isSeller: boolean}[]>([]);
-  const [selectedChat, setSelectedChat] = useState<{listing: FoodListing, otherUserId: string, otherUserName: string, isSeller: boolean} | null>(null);
+  // Unified messages state
+  const [allConversations, setAllConversations] = useState<{listing: FoodListing; otherUserId: string; otherUserName: string; messages: MarketMessage[]; unreadCount: number; isSeller: boolean}[]>([]);
+  const [selectedChat, setSelectedChat] = useState<{listing: FoodListing; otherUserId: string; otherUserName: string; isSeller: boolean} | null>(null);
   const [chatMessages, setChatMessages] = useState<MarketMessage[]>([]);
   const [replyText, setReplyText] = useState('');
-  
+
   // Message dialog (from browse)
   const [messageDialogOpen, setMessageDialogOpen] = useState(false);
   const [messageListing, setMessageListing] = useState<FoodListing | null>(null);
@@ -185,6 +197,15 @@ const Marketplace = () => {
   const [townFilter, setTownFilter] = useState('');
   const [priceFilter, setPriceFilter] = useState<'all' | 'free' | 'paid'>('all');
   const [tagFilter, setTagFilter] = useState('all');
+  const [showFilters, setShowFilters] = useState(false);
+
+  // User saved location
+  const [savedLocation, setSavedLocation] = useState<{country: string; state: string; city: string; town: string}>({ country: '', state: '', city: '', town: '' });
+  const [locationLoaded, setLocationLoaded] = useState(false);
+
+  // Dashboard order detail
+  const [selectedOrder, setSelectedOrder] = useState<OrderDetail | null>(null);
+  const [dashOrders, setDashOrders] = useState<OrderDetail[]>([]);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -201,6 +222,57 @@ const Marketplace = () => {
     delivery_type: 'takeaway', google_maps_link: '', food_tag: 'non-veg'
   });
 
+  // Load user's saved location from profile
+  useEffect(() => {
+    const loadUserLocation = async () => {
+      if (!user) { setLocationLoaded(true); return; }
+      try {
+        const { data } = await supabase.from('profiles').select('country, state, city, town').eq('user_id', user.id).maybeSingle();
+        if (data) {
+          const loc = {
+            country: (data as Record<string, string | null>).country || '',
+            state: (data as Record<string, string | null>).state || '',
+            city: (data as Record<string, string | null>).city || '',
+            town: (data as Record<string, string | null>).town || ''
+          };
+          setSavedLocation(loc);
+          // Auto-fill browse filters
+          if (loc.country) setCountryFilter(loc.country);
+          if (loc.state) setStateFilter(loc.state);
+          if (loc.city) setCityFilter(loc.city);
+          if (loc.town) setTownFilter(loc.town);
+          // Auto-fill create form
+          setFormData(prev => ({
+            ...prev,
+            country: loc.country || 'USA',
+            state: loc.state || '',
+            city: loc.city || '',
+            town: loc.town || ''
+          }));
+        }
+      } catch (err) {
+        console.error('Error loading user location:', err);
+      }
+      setLocationLoaded(true);
+    };
+    loadUserLocation();
+  }, [user]);
+
+  const saveUserLocation = useCallback(async (loc: {country: string; state: string; city: string; town: string}) => {
+    if (!user) return;
+    try {
+      await supabase.from('profiles').update({
+        country: loc.country || null,
+        state: loc.state || null,
+        city: loc.city || null,
+        town: loc.town || null
+      } as Record<string, string | null>).eq('user_id', user.id);
+      setSavedLocation(loc);
+    } catch (err) {
+      console.error('Error saving location:', err);
+    }
+  }, [user]);
+
   useEffect(() => {
     fetchListings();
     if (user) { fetchMyListings(); fetchAllMessages(); }
@@ -210,7 +282,7 @@ const Marketplace = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [conversationMessages, chatMessages]);
 
-  // Real-time message subscription - listen for BOTH sent and received
+  // Real-time message subscription
   useEffect(() => {
     if (!user) return;
     const channel = supabase
@@ -219,14 +291,13 @@ const Marketplace = () => {
         event: 'INSERT', schema: 'public', table: 'direct_messages',
         filter: `receiver_id=eq.${user.id}`
       }, (payload) => {
-        const newMsg = payload.new as any;
+        const newMsg = payload.new as MarketMessage;
         if (newMsg.content?.includes('[FOOD:')) {
-          // Update active chat
           if (selectedChat) {
-            setChatMessages(prev => [...prev, newMsg]);
+            setChatMessages(prev => prev.find(m => m.id === newMsg.id) ? prev : [...prev, newMsg]);
           }
           if (messageListing) {
-            setConversationMessages(prev => [...prev, newMsg]);
+            setConversationMessages(prev => prev.find(m => m.id === newMsg.id) ? prev : [...prev, newMsg]);
           }
           fetchAllMessages();
         }
@@ -235,19 +306,13 @@ const Marketplace = () => {
         event: 'INSERT', schema: 'public', table: 'direct_messages',
         filter: `sender_id=eq.${user.id}`
       }, (payload) => {
-        const newMsg = payload.new as any;
+        const newMsg = payload.new as MarketMessage;
         if (newMsg.content?.includes('[FOOD:')) {
           if (selectedChat) {
-            setChatMessages(prev => {
-              if (prev.find(m => m.id === newMsg.id)) return prev;
-              return [...prev, newMsg];
-            });
+            setChatMessages(prev => prev.find(m => m.id === newMsg.id) ? prev : [...prev, newMsg]);
           }
           if (messageListing) {
-            setConversationMessages(prev => {
-              if (prev.find(m => m.id === newMsg.id)) return prev;
-              return [...prev, newMsg];
-            });
+            setConversationMessages(prev => prev.find(m => m.id === newMsg.id) ? prev : [...prev, newMsg]);
           }
         }
       })
@@ -258,10 +323,7 @@ const Marketplace = () => {
   const fetchListings = async () => {
     try {
       const { data, error } = await supabase
-        .from('food_listings')
-        .select('*')
-        .eq('is_available', true)
-        .order('created_at', { ascending: false });
+        .from('food_listings').select('*').eq('is_available', true).order('created_at', { ascending: false });
       if (error) throw error;
       if (data && data.length > 0) {
         const sellerIds = [...new Set(data.map(l => l.seller_id))];
@@ -290,29 +352,22 @@ const Marketplace = () => {
     setMyListings(data || []);
   };
 
-  // Unified fetch: all marketplace conversations (buyer + seller)
   const fetchAllMessages = async () => {
     if (!user) return;
     try {
       const { data: sentMsgs } = await supabase.from('direct_messages').select('*').eq('sender_id', user.id).order('created_at', { ascending: false });
       const { data: receivedMsgs } = await supabase.from('direct_messages').select('*').eq('receiver_id', user.id).order('created_at', { ascending: false });
-
       const allMsgs = [...(sentMsgs || []), ...(receivedMsgs || [])];
-      
-      // Group by listing + other user
-      const convMap = new Map<string, { listingId: string, otherUserId: string, messages: MarketMessage[] }>();
+      const convMap = new Map<string, { listingId: string; otherUserId: string; messages: MarketMessage[] }>();
       for (const msg of allMsgs) {
         const match = msg.content.match(/\[FOOD:([^\]]+)\]/);
         if (!match) continue;
         const listingId = match[1];
         const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
         const key = `${listingId}-${otherUserId}`;
-        if (!convMap.has(key)) {
-          convMap.set(key, { listingId, otherUserId, messages: [] });
-        }
+        if (!convMap.has(key)) convMap.set(key, { listingId, otherUserId, messages: [] });
         convMap.get(key)!.messages.push(msg);
       }
-
       const results: typeof allConversations = [];
       for (const [, conv] of convMap) {
         const { data: listing } = await supabase.from('food_listings').select('*').eq('id', conv.listingId).maybeSingle();
@@ -325,13 +380,10 @@ const Marketplace = () => {
           listing: listing as FoodListing,
           otherUserId: conv.otherUserId,
           otherUserName: profile?.display_name || (isSeller ? 'Buyer' : 'Seller'),
-          messages: sorted,
-          unreadCount: unread,
-          isSeller
+          messages: sorted, unreadCount: unread, isSeller
         });
       }
-      // Sort by most recent message
-      results.sort((a, b) => new Date(b.messages[0]?.created_at).getTime() - new Date(a.messages[0]?.created_at).getTime());
+      results.sort((a, b) => new Date(b.messages[0]?.created_at || 0).getTime() - new Date(a.messages[0]?.created_at || 0).getTime());
       setAllConversations(results);
     } catch (error) {
       console.error('Error fetching messages:', error);
@@ -346,7 +398,6 @@ const Marketplace = () => {
       .order('created_at', { ascending: true });
     const filtered = (data || []).filter(m => m.content.includes(`[FOOD:${listingId}]`));
     setChatMessages(filtered);
-    // Mark as read
     const unreadIds = filtered.filter(m => m.receiver_id === user.id && !m.is_read).map(m => m.id);
     if (unreadIds.length > 0) {
       await supabase.from('direct_messages').update({ is_read: true }).in('id', unreadIds);
@@ -359,14 +410,12 @@ const Marketplace = () => {
     try {
       const content = `[FOOD:${selectedChat.listing.id}] Re: ${selectedChat.listing.title} — ${replyText.trim()}`;
       const { error } = await supabase.from('direct_messages').insert({
-        sender_id: user.id,
-        receiver_id: selectedChat.otherUserId,
-        content
+        sender_id: user.id, receiver_id: selectedChat.otherUserId, content
       });
       if (error) throw error;
       setReplyText('');
       fetchChatMessages(selectedChat.otherUserId, selectedChat.listing.id);
-    } catch (err) {
+    } catch {
       toast({ title: 'Error sending reply', variant: 'destructive' });
     }
   };
@@ -380,7 +429,7 @@ const Marketplace = () => {
       if (error) { toast({ title: 'Image upload failed', description: error.message, variant: 'destructive' }); return null; }
       const { data } = supabase.storage.from('recipe-media').getPublicUrl(path);
       return data.publicUrl;
-    } catch (err: any) {
+    } catch {
       toast({ title: 'Image upload failed', variant: 'destructive' });
       return null;
     }
@@ -420,12 +469,15 @@ const Marketplace = () => {
         food_tag: formData.food_tag
       });
       if (error) throw error;
+      // Save location to profile
+      await saveUserLocation({ country: formData.country, state: formData.state, city: formData.city, town: formData.town });
       toast({ title: 'Listing created successfully!' });
       setCreateDialogOpen(false);
       resetForm(); setImageFile(null); setImagePreview(null);
       fetchListings(); fetchMyListings();
-    } catch (error: any) {
-      toast({ title: 'Error creating listing', description: error.message, variant: 'destructive' });
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Unknown error';
+      toast({ title: 'Error creating listing', description: msg, variant: 'destructive' });
     }
   };
 
@@ -450,11 +502,13 @@ const Marketplace = () => {
         food_tag: editFormData.food_tag
       }).eq('id', editingListing.id);
       if (error) throw error;
+      await saveUserLocation({ country: editFormData.country, state: editFormData.state, city: editFormData.city, town: editFormData.town });
       toast({ title: 'Listing updated!' });
       setEditDialogOpen(false); setEditingListing(null); setEditImageFile(null); setEditImagePreview(null);
       fetchListings(); fetchMyListings();
-    } catch (error: any) {
-      toast({ title: 'Error updating listing', description: error.message, variant: 'destructive' });
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Unknown error';
+      toast({ title: 'Error updating listing', description: msg, variant: 'destructive' });
     }
   };
 
@@ -480,7 +534,7 @@ const Marketplace = () => {
       await supabase.from('food_listings').delete().eq('id', id);
       toast({ title: 'Listing deleted' });
       fetchMyListings(); fetchListings();
-    } catch (error) {
+    } catch {
       toast({ title: 'Error deleting listing', variant: 'destructive' });
     }
   };
@@ -490,16 +544,22 @@ const Marketplace = () => {
       await supabase.from('food_listings').update({ is_sold_out: !currentStatus }).eq('id', id);
       toast({ title: currentStatus ? 'Marked as available' : 'Marked as sold out' });
       fetchMyListings(); fetchListings();
-    } catch (error) {
+    } catch {
       toast({ title: 'Error updating listing', variant: 'destructive' });
     }
   };
 
   const resetForm = () => {
-    setFormData({ title: '', description: '', price: '0', quantity: '1', category: 'meal',
+    setFormData({
+      title: '', description: '', price: '0', quantity: '1', category: 'meal',
       is_vegetarian: false, calories: '', carbs: '', protein: '', fat: '',
-      ingredients: '', country: 'USA', state: '', city: '', town: '',
-      delivery_type: 'takeaway', google_maps_link: '', food_tag: 'non-veg' });
+      ingredients: '',
+      country: savedLocation.country || 'USA',
+      state: savedLocation.state || '',
+      city: savedLocation.city || '',
+      town: savedLocation.town || '',
+      delivery_type: 'takeaway', google_maps_link: '', food_tag: 'non-veg'
+    });
   };
 
   const sendListingMessage = async () => {
@@ -514,7 +574,7 @@ const Marketplace = () => {
       toast({ title: 'Message sent!' });
       fetchConversation(messageListing.seller_id, messageListing.id);
       fetchAllMessages();
-    } catch (err: any) {
+    } catch {
       toast({ title: 'Error sending message', variant: 'destructive' });
     }
   };
@@ -540,33 +600,90 @@ const Marketplace = () => {
     if (user) fetchConversation(listing.seller_id, listing.id);
   };
 
-  // Buy now
+  // Buy now with quantity decrease
   const handleBuyNow = (listing: FoodListing, e?: React.MouseEvent) => {
     e?.stopPropagation();
     setBuyListing(listing);
     setBuyQuantity(1);
     setBuyAddress('');
+    setBuyPickupTime('');
     setBuyDialogOpen(true);
   };
 
   const confirmBuy = async () => {
     if (!user || !buyListing) return;
     try {
-      const addressPart = (buyListing.delivery_type === 'delivery' || buyListing.delivery_type === 'both') && buyAddress.trim()
-        ? ` — 📍 Delivery Address: ${buyAddress.trim()}`
-        : '';
-      const content = `[FOOD:${buyListing.id}] 🛒 ORDER: I want to buy ${buyQuantity}x "${buyListing.title}"${buyListing.delivery_type === 'takeaway' ? ` — Pickup time: ${buyPickupTime || 'ASAP'}` : ` — Home Delivery requested${addressPart}`}`;
+      const isDelivery = buyListing.delivery_type === 'delivery' || buyListing.delivery_type === 'both';
+      const addressPart = isDelivery && buyAddress.trim() ? ` — 📍 Delivery Address: ${buyAddress.trim()}` : '';
+      const pickupPart = (buyListing.delivery_type === 'takeaway' || buyListing.delivery_type === 'both') ? ` — ⏰ Pickup: ${buyPickupTime || 'ASAP'}` : '';
+      const content = `[FOOD:${buyListing.id}] 🛒 ORDER: I want to buy ${buyQuantity}x "${buyListing.title}" — Total: $${(buyListing.price * buyQuantity).toFixed(2)}${buyListing.delivery_type === 'takeaway' ? pickupPart : ` — Home Delivery${addressPart}`}`;
       const { error } = await supabase.from('direct_messages').insert({
         sender_id: user.id, receiver_id: buyListing.seller_id, content
       });
       if (error) throw error;
+
+      // Decrease quantity on the listing
+      const newQty = Math.max(0, buyListing.quantity - buyQuantity);
+      await supabase.from('food_listings').update({
+        quantity: newQty,
+        is_sold_out: newQty === 0
+      }).eq('id', buyListing.id);
+
+      // Save buyer location
+      if (buyAddress.trim()) {
+        // location is already saved from profile
+      }
+
       toast({ title: 'Order placed!', description: 'The seller has been notified.' });
       setBuyDialogOpen(false); setBuyListing(null); setBuyPickupTime(''); setBuyQuantity(1); setBuyAddress('');
-      fetchAllMessages();
-    } catch (err) {
+      fetchAllMessages(); fetchListings(); fetchMyListings();
+    } catch {
       toast({ title: 'Error placing order', variant: 'destructive' });
     }
   };
+
+  // Parse orders from messages for dashboard
+  const parseDashboardOrders = useCallback(async () => {
+    if (!user) return;
+    const orders: OrderDetail[] = [];
+    for (const conv of allConversations) {
+      if (!conv.isSeller) continue;
+      for (const msg of conv.messages) {
+        if (!msg.content.includes('🛒 ORDER')) continue;
+        // Parse order details
+        const qtyMatch = msg.content.match(/buy (\d+)x/);
+        const qty = qtyMatch ? parseInt(qtyMatch[1]) : 1;
+        const addressMatch = msg.content.match(/📍 Delivery Address: (.+?)(?:$|—)/);
+        const address = addressMatch ? addressMatch[1].trim() : '';
+        const pickupMatch = msg.content.match(/⏰ Pickup: (.+?)(?:$|—)/);
+        const pickupTime = pickupMatch ? pickupMatch[1].trim() : '';
+        const isDelivery = msg.content.includes('Home Delivery');
+        
+        const { data: buyerProfile } = await supabase.from('profiles').select('display_name, avatar_url').eq('user_id', conv.otherUserId).maybeSingle();
+        
+        orders.push({
+          buyerName: buyerProfile?.display_name || conv.otherUserName,
+          buyerAvatar: buyerProfile?.avatar_url || null,
+          quantity: qty,
+          deliveryType: isDelivery ? 'delivery' : 'takeaway',
+          address,
+          pickupTime,
+          orderedAt: msg.created_at,
+          listingTitle: conv.listing.title,
+          listingId: conv.listing.id,
+          buyerId: conv.otherUserId
+        });
+      }
+    }
+    orders.sort((a, b) => new Date(b.orderedAt).getTime() - new Date(a.orderedAt).getTime());
+    setDashOrders(orders);
+  }, [user, allConversations]);
+
+  useEffect(() => {
+    if (activeTab === 'dashboard') {
+      parseDashboardOrders();
+    }
+  }, [activeTab, allConversations, parseDashboardOrders]);
 
   // Reviews
   const fetchReviews = async (listingId: string) => {
@@ -593,8 +710,9 @@ const Marketplace = () => {
       toast({ title: 'Review submitted!' });
       setReviewDialogOpen(false); setReviewComment(''); setReviewRating(5);
       if (selectedListing) fetchReviews(selectedListing.id);
-    } catch (err: any) {
-      toast({ title: 'Error submitting review', description: err.message, variant: 'destructive' });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      toast({ title: 'Error submitting review', description: msg, variant: 'destructive' });
     }
   };
 
@@ -616,25 +734,22 @@ const Marketplace = () => {
   };
 
   const getTagInfo = (tag: string) => FOOD_TAGS.find(t => t.value === tag) || FOOD_TAGS[2];
-  
+
   const extractMessageText = (content: string) => {
     const match = content.match(/— (.+)$/);
     return match ? match[1] : content;
   };
 
   const totalUnread = allConversations.reduce((sum, c) => sum + c.unreadCount, 0);
-
-  // Seller Dashboard stats
-  const totalOrders = allConversations.filter(c => c.isSeller && c.messages.some(m => m.content.includes('🛒 ORDER'))).length;
+  const totalOrders = dashOrders.length;
   const totalQuantityLeft = myListings.reduce((sum, l) => sum + (l.is_sold_out ? 0 : l.quantity), 0);
   const activeLCount = myListings.filter(l => !l.is_sold_out).length;
   const soldOutCount = myListings.filter(l => l.is_sold_out).length;
 
-  // Get unique cities/towns from browse filter context
   const filterCities = stateFilter ? (STATE_CITIES[stateFilter] || []) : [];
   const filterTowns = cityFilter ? (CITY_TOWNS[cityFilter] || []) : [];
 
-  const renderLocationFields = (data: typeof formData, setData: (d: any) => void) => {
+  const renderLocationFields = (data: typeof formData, setData: (d: typeof formData) => void) => {
     const cities = data.state ? (STATE_CITIES[data.state] || []) : [];
     const towns = data.city ? (CITY_TOWNS[data.city] || []) : [];
     return (
@@ -687,7 +802,7 @@ const Marketplace = () => {
     );
   };
 
-  const renderFormFields = (data: typeof formData, setData: (d: any) => void, imgFile: File | null, setImgFile: (f: File | null) => void, preview: string | null, setPreview: (s: string | null) => void) => (
+  const renderFormFields = (data: typeof formData, setData: (d: typeof formData) => void, imgFile: File | null, setImgFile: (f: File | null) => void, preview: string | null, setPreview: (s: string | null) => void) => (
     <div className="grid gap-4 py-4 max-h-[70vh] overflow-y-auto pr-2">
       <div>
         <Label>Food Photo</Label>
@@ -746,7 +861,7 @@ const Marketplace = () => {
         </div>
       </div>
       <div className="border-t pt-4">
-        <Label className="text-base font-semibold mb-2 block flex items-center gap-2"><Truck className="h-4 w-4" /> Delivery Option</Label>
+        <Label className="text-base font-semibold mb-2 flex items-center gap-2"><Truck className="h-4 w-4" /> Delivery Option</Label>
         <Select value={data.delivery_type} onValueChange={(v) => setData({ ...data, delivery_type: v })}>
           <SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -776,7 +891,7 @@ const Marketplace = () => {
         <Input value={data.ingredients} onChange={(e) => setData({ ...data, ingredients: e.target.value })} placeholder="chicken, butter, cream..." />
       </div>
       <div className="border-t pt-4">
-        <Label className="text-base font-semibold mb-2 block flex items-center gap-2"><MapPin className="h-4 w-4" /> Location</Label>
+        <Label className="text-base font-semibold mb-2 flex items-center gap-2"><MapPin className="h-4 w-4" /> Location</Label>
         {renderLocationFields(data, setData)}
       </div>
     </div>
@@ -803,6 +918,8 @@ const Marketplace = () => {
       ))}
     </div>
   );
+
+  const activeFilterCount = [countryFilter, stateFilter, cityFilter, townFilter].filter(Boolean).length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -833,7 +950,7 @@ const Marketplace = () => {
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-auto">
                   <DialogHeader><DialogTitle>Create Food Listing</DialogTitle></DialogHeader>
-                  {renderFormFields(formData, setFormData as any, imageFile, setImageFile, imagePreview, setImagePreview)}
+                  {renderFormFields(formData, setFormData as (d: typeof formData) => void, imageFile, setImageFile, imagePreview, setImagePreview)}
                   <Button onClick={createListing} className="w-full">Create Listing</Button>
                 </DialogContent>
               </Dialog>
@@ -844,43 +961,21 @@ const Marketplace = () => {
           <TabsContent value="browse">
             <Card className="mb-6">
               <CardContent className="pt-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
-                  <div className="col-span-1 sm:col-span-2">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search food..." className="pl-9" />
-                    </div>
+                {/* Main row: search + icon filter toggle + price + tag */}
+                <div className="flex flex-wrap gap-2 items-center">
+                  <div className="relative flex-1 min-w-[200px]">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search food..." className="pl-9" />
                   </div>
-                  <Select value={countryFilter || 'all'} onValueChange={(v) => { setCountryFilter(v === 'all' ? '' : v); setStateFilter(''); setCityFilter(''); setTownFilter(''); }}>
-                    <SelectTrigger><SelectValue placeholder="Country" /></SelectTrigger>
-                    <SelectContent><ScrollArea className="h-48">
-                      <SelectItem value="all">All Countries</SelectItem>
-                      {COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                    </ScrollArea></SelectContent>
-                  </Select>
-                  <Select value={stateFilter || 'all'} onValueChange={(v) => { setStateFilter(v === 'all' ? '' : v); setCityFilter(''); setTownFilter(''); }}>
-                    <SelectTrigger><SelectValue placeholder="State" /></SelectTrigger>
-                    <SelectContent><ScrollArea className="h-48">
-                      <SelectItem value="all">All States</SelectItem>
-                      {(countryFilter ? COUNTRY_STATES[countryFilter] || [] : []).map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                    </ScrollArea></SelectContent>
-                  </Select>
-                  <Select value={cityFilter || 'all'} onValueChange={(v) => { setCityFilter(v === 'all' ? '' : v); setTownFilter(''); }}>
-                    <SelectTrigger><SelectValue placeholder="City" /></SelectTrigger>
-                    <SelectContent><ScrollArea className="h-48">
-                      <SelectItem value="all">All Cities</SelectItem>
-                      {filterCities.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                    </ScrollArea></SelectContent>
-                  </Select>
-                  <Select value={townFilter || 'all'} onValueChange={(v) => setTownFilter(v === 'all' ? '' : v)}>
-                    <SelectTrigger><SelectValue placeholder="Town" /></SelectTrigger>
-                    <SelectContent><ScrollArea className="h-48">
-                      <SelectItem value="all">All Towns</SelectItem>
-                      {filterTowns.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                    </ScrollArea></SelectContent>
-                  </Select>
-                  <Select value={priceFilter} onValueChange={(v: any) => setPriceFilter(v)}>
-                    <SelectTrigger><SelectValue placeholder="Price" /></SelectTrigger>
+                  <Button variant={showFilters ? 'default' : 'outline'} size="sm" className="gap-1 relative" onClick={() => setShowFilters(!showFilters)}>
+                    <Filter className="h-4 w-4" />
+                    <span className="hidden sm:inline">Location</span>
+                    {activeFilterCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[10px] rounded-full h-4 w-4 flex items-center justify-center">{activeFilterCount}</span>
+                    )}
+                  </Button>
+                  <Select value={priceFilter} onValueChange={(v: 'all' | 'free' | 'paid') => setPriceFilter(v)}>
+                    <SelectTrigger className="w-[110px]"><SelectValue placeholder="Price" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Prices</SelectItem>
                       <SelectItem value="free">Free</SelectItem>
@@ -888,13 +983,64 @@ const Marketplace = () => {
                     </SelectContent>
                   </Select>
                   <Select value={tagFilter} onValueChange={setTagFilter}>
-                    <SelectTrigger><SelectValue placeholder="Tag" /></SelectTrigger>
+                    <SelectTrigger className="w-[130px]"><SelectValue placeholder="Tag" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Tags</SelectItem>
                       {FOOD_TAGS.map(t => <SelectItem key={t.value} value={t.value}>{t.icon} {t.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
+
+                {/* Expandable location filters */}
+                {showFilters && (
+                  <div className="mt-3 pt-3 border-t grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <Select value={countryFilter || 'all'} onValueChange={(v) => { setCountryFilter(v === 'all' ? '' : v); setStateFilter(''); setCityFilter(''); setTownFilter(''); }}>
+                      <SelectTrigger className="text-xs h-8">
+                        <Globe className="h-3 w-3 mr-1 shrink-0" />
+                        <SelectValue placeholder="Country" />
+                      </SelectTrigger>
+                      <SelectContent><ScrollArea className="h-48">
+                        <SelectItem value="all">All Countries</SelectItem>
+                        {COUNTRIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                      </ScrollArea></SelectContent>
+                    </Select>
+                    <Select value={stateFilter || 'all'} onValueChange={(v) => { setStateFilter(v === 'all' ? '' : v); setCityFilter(''); setTownFilter(''); }}>
+                      <SelectTrigger className="text-xs h-8">
+                        <MapPin className="h-3 w-3 mr-1 shrink-0" />
+                        <SelectValue placeholder="State" />
+                      </SelectTrigger>
+                      <SelectContent><ScrollArea className="h-48">
+                        <SelectItem value="all">All States</SelectItem>
+                        {(countryFilter ? COUNTRY_STATES[countryFilter] || [] : []).map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                      </ScrollArea></SelectContent>
+                    </Select>
+                    <Select value={cityFilter || 'all'} onValueChange={(v) => { setCityFilter(v === 'all' ? '' : v); setTownFilter(''); }}>
+                      <SelectTrigger className="text-xs h-8">
+                        <Building2 className="h-3 w-3 mr-1 shrink-0" />
+                        <SelectValue placeholder="City" />
+                      </SelectTrigger>
+                      <SelectContent><ScrollArea className="h-48">
+                        <SelectItem value="all">All Cities</SelectItem>
+                        {filterCities.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                      </ScrollArea></SelectContent>
+                    </Select>
+                    <Select value={townFilter || 'all'} onValueChange={(v) => setTownFilter(v === 'all' ? '' : v)}>
+                      <SelectTrigger className="text-xs h-8">
+                        <MapPinned className="h-3 w-3 mr-1 shrink-0" />
+                        <SelectValue placeholder="Town" />
+                      </SelectTrigger>
+                      <SelectContent><ScrollArea className="h-48">
+                        <SelectItem value="all">All Towns</SelectItem>
+                        {filterTowns.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                      </ScrollArea></SelectContent>
+                    </Select>
+                    {activeFilterCount > 0 && (
+                      <Button variant="ghost" size="sm" className="text-xs h-8 col-span-2 sm:col-span-4" onClick={() => { setCountryFilter(''); setStateFilter(''); setCityFilter(''); setTownFilter(''); }}>
+                        Clear location filters
+                      </Button>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -978,7 +1124,7 @@ const Marketplace = () => {
             )}
           </TabsContent>
 
-          {/* MY MESSAGES TAB (unified buyer + seller) */}
+          {/* MY MESSAGES TAB */}
           <TabsContent value="my-messages">
             {!user ? (
               <div className="text-center py-12 text-muted-foreground">Please sign in</div>
@@ -1021,7 +1167,7 @@ const Marketplace = () => {
                                 {conv.unreadCount > 0 && <Badge variant="destructive" className="text-[10px] h-4 px-1">{conv.unreadCount} new</Badge>}
                               </div>
                               <p className="text-xs text-muted-foreground truncate">
-                                {conv.otherUserName}: {extractMessageText(conv.messages[0].content)}
+                                {conv.otherUserName}: {extractMessageText(conv.messages[0]?.content || '')}
                               </p>
                             </div>
                             <ArrowLeft className="h-4 w-4 rotate-180 text-muted-foreground shrink-0" />
@@ -1034,7 +1180,7 @@ const Marketplace = () => {
                       <Button variant="ghost" size="sm" onClick={() => { setSelectedChat(null); fetchAllMessages(); }} className="mb-2">
                         <ArrowLeft className="h-4 w-4 mr-1" /> Back
                       </Button>
-                      <p className="text-sm font-medium mb-2">Chat with {selectedChat.otherUserName} about "{selectedChat.listing.title}"</p>
+                      <p className="text-sm font-medium mb-2">Chat with {selectedChat.otherUserName} about &quot;{selectedChat.listing.title}&quot;</p>
                       <ScrollArea className="h-60 border rounded-lg p-3 mb-2">
                         <div className="space-y-2">
                           {chatMessages.map(msg => (
@@ -1157,7 +1303,7 @@ const Marketplace = () => {
                     {myListings.length > 0 ? (
                       <div className="space-y-3">
                         {myListings.map(listing => {
-                          const listingOrders = allConversations.filter(c => c.isSeller && c.listing.id === listing.id && c.messages.some(m => m.content.includes('🛒 ORDER')));
+                          const listingOrderCount = dashOrders.filter(o => o.listingId === listing.id).length;
                           return (
                             <div key={listing.id} className="flex items-center gap-3 p-3 border rounded-lg">
                               <div className="w-12 h-12 rounded-lg bg-muted overflow-hidden shrink-0">
@@ -1172,7 +1318,7 @@ const Marketplace = () => {
                                 <div className="flex gap-3 text-xs text-muted-foreground mt-1">
                                   <span>💰 {listing.price === 0 ? 'Free' : `$${listing.price.toFixed(2)}`}</span>
                                   <span>📦 Qty: {listing.quantity}</span>
-                                  <span>🛒 {listingOrders.length} orders</span>
+                                  <span>🛒 {listingOrderCount} orders</span>
                                 </div>
                               </div>
                             </div>
@@ -1181,6 +1327,103 @@ const Marketplace = () => {
                       </div>
                     ) : (
                       <p className="text-muted-foreground text-center py-4">No listings yet</p>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Orders Detail Section */}
+                <Card>
+                  <CardHeader><CardTitle className="text-base flex items-center gap-2"><ShoppingBag className="h-4 w-4" /> Order Details</CardTitle></CardHeader>
+                  <CardContent>
+                    {dashOrders.length === 0 ? (
+                      <p className="text-muted-foreground text-center py-4">No orders received yet</p>
+                    ) : selectedOrder ? (
+                      <div>
+                        <Button variant="ghost" size="sm" onClick={() => setSelectedOrder(null)} className="mb-3">
+                          <ArrowLeft className="h-4 w-4 mr-1" /> Back to Orders
+                        </Button>
+                        <div className="border rounded-lg p-4 space-y-4">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-10 w-10">
+                              <AvatarImage src={selectedOrder.buyerAvatar || ''} />
+                              <AvatarFallback>{selectedOrder.buyerName[0]}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-semibold">{selectedOrder.buyerName}</p>
+                              <p className="text-xs text-muted-foreground">Ordered on {formatTime(selectedOrder.orderedAt)}</p>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="bg-muted/50 rounded-lg p-3">
+                              <p className="text-xs text-muted-foreground">Food Item</p>
+                              <p className="font-semibold text-sm">{selectedOrder.listingTitle}</p>
+                            </div>
+                            <div className="bg-muted/50 rounded-lg p-3">
+                              <p className="text-xs text-muted-foreground">Quantity</p>
+                              <p className="font-semibold text-sm">{selectedOrder.quantity}x</p>
+                            </div>
+                          </div>
+                          <div className="bg-muted/50 rounded-lg p-3">
+                            <p className="text-xs text-muted-foreground flex items-center gap-1">
+                              {selectedOrder.deliveryType === 'delivery' ? <><Truck className="h-3 w-3" /> Home Delivery</> : <><Store className="h-3 w-3" /> Takeaway / Pickup</>}
+                            </p>
+                            {selectedOrder.deliveryType === 'delivery' ? (
+                              <div className="mt-2">
+                                <p className="text-xs text-muted-foreground">Buyer&apos;s Delivery Address:</p>
+                                <p className="font-medium text-sm mt-1 flex items-center gap-1">
+                                  <Home className="h-3 w-3 text-blue-500" />
+                                  {selectedOrder.address || 'No address provided'}
+                                </p>
+                              </div>
+                            ) : (
+                              <div className="mt-2">
+                                <p className="text-xs text-muted-foreground">Pickup Time:</p>
+                                <p className="font-medium text-sm mt-1 flex items-center gap-1">
+                                  <Clock className="h-3 w-3 text-amber-500" />
+                                  {selectedOrder.pickupTime || 'ASAP'}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                          <Button variant="outline" size="sm" className="w-full" onClick={() => {
+                            setActiveTab('my-messages');
+                            const conv = allConversations.find(c => c.listing.id === selectedOrder.listingId && c.otherUserId === selectedOrder.buyerId);
+                            if (conv) {
+                              setSelectedChat({ listing: conv.listing, otherUserId: conv.otherUserId, otherUserName: conv.otherUserName, isSeller: conv.isSeller });
+                              fetchChatMessages(conv.otherUserId, conv.listing.id);
+                            }
+                          }}>
+                            <MessageCircle className="h-4 w-4 mr-1" /> Message Buyer
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {dashOrders.map((order, idx) => (
+                          <button key={idx}
+                            className="w-full p-3 flex items-center gap-3 hover:bg-muted/50 rounded-lg text-left transition-colors border"
+                            onClick={() => setSelectedOrder(order)}
+                          >
+                            <Avatar className="h-8 w-8 shrink-0">
+                              <AvatarImage src={order.buyerAvatar || ''} />
+                              <AvatarFallback className="text-xs">{order.buyerName[0]}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-sm truncate">{order.listingTitle}</span>
+                                <Badge variant="outline" className="text-[10px]">{order.quantity}x</Badge>
+                                {order.deliveryType === 'delivery' ? (
+                                  <Badge className="bg-blue-500/90 text-white text-[10px] gap-0.5 px-1"><Truck className="h-2.5 w-2.5" /></Badge>
+                                ) : (
+                                  <Badge variant="outline" className="text-[10px] gap-0.5 px-1 border-amber-400 text-amber-700 bg-amber-50"><Store className="h-2.5 w-2.5" /></Badge>
+                                )}
+                              </div>
+                              <p className="text-xs text-muted-foreground">{order.buyerName} • {formatTime(order.orderedAt)}</p>
+                            </div>
+                            <ArrowLeft className="h-4 w-4 rotate-180 text-muted-foreground shrink-0" />
+                          </button>
+                        ))}
+                      </div>
                     )}
                   </CardContent>
                 </Card>
@@ -1193,7 +1436,7 @@ const Marketplace = () => {
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-auto">
             <DialogHeader><DialogTitle>Edit Listing</DialogTitle></DialogHeader>
-            {renderFormFields(editFormData, setEditFormData as any, editImageFile, setEditImageFile, editImagePreview, setEditImagePreview)}
+            {renderFormFields(editFormData, setEditFormData as (d: typeof editFormData) => void, editImageFile, setEditImageFile, editImagePreview, setEditImagePreview)}
             <Button onClick={updateListing} className="w-full">Update Listing</Button>
           </DialogContent>
         </Dialog>
@@ -1223,7 +1466,7 @@ const Marketplace = () => {
                   )}
                   {selectedListing.description && <p className="text-muted-foreground">{selectedListing.description}</p>}
                   <p className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" />Listed {formatTime(selectedListing.created_at)}</p>
-                  
+
                   {selectedListing.google_maps_link && (
                     <Button variant="outline" size="sm" className="gap-2" asChild>
                       <a href={selectedListing.google_maps_link.startsWith('http') ? selectedListing.google_maps_link : `https://${selectedListing.google_maps_link}`} target="_blank" rel="noopener noreferrer">
