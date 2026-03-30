@@ -18,6 +18,7 @@ import { HealthDashboard } from "@/components/progress/HealthDashboard";
 import { GoalIndicators } from "@/components/progress/GoalIndicators";
 import { WeeklyReport } from "@/components/progress/WeeklyReport";
 import { ProgressInsights } from "@/components/progress/ProgressInsights";
+import FeatureGate from "@/components/FeatureGate";
 
 const ProgressDashboard = () => {
   const { user } = useAuth();
@@ -236,13 +237,15 @@ const ProgressDashboard = () => {
         <NutritionAnalytics />
 
         {/* Visual Progress Charts with real data */}
-        <div className="mt-6">
-          <VisualProgressCharts
-            weightData={weightLogs.slice().reverse().map((w: any) => ({ date: w.logged_at, weight: w.weight }))}
-            macroData={macroChartData}
-            calorieData={calorieChartData}
-          />
-        </div>
+        <FeatureGate feature="visual_progress" fallbackMessage="Upgrade to VIP for Visual Progress Charts">
+          <div className="mt-6">
+            <VisualProgressCharts
+              weightData={weightLogs.slice().reverse().map((w: any) => ({ date: w.logged_at, weight: w.weight }))}
+              macroData={macroChartData}
+              calorieData={calorieChartData}
+            />
+          </div>
+        </FeatureGate>
 
         {/* Goal Indicators & Health Dashboard */}
         <div className="grid md:grid-cols-2 gap-6 mt-6">
@@ -261,7 +264,9 @@ const ProgressDashboard = () => {
 
         {/* Expenditure vs Intake (real data) & Macro Adherence */}
         <div className="grid md:grid-cols-2 gap-6 mt-6">
-          <ExpenditureChart data={expenditureData} />
+          <FeatureGate feature="energy_balance" fallbackMessage="Upgrade to VIP for Energy Balance">
+            <ExpenditureChart data={expenditureData} />
+          </FeatureGate>
           <MacroRings
             protein={{ current: weeklyMacroAvg.avgProtein, goal: 120 }}
             carbs={{ current: weeklyMacroAvg.avgCarbs, goal: 25 }}
@@ -270,27 +275,31 @@ const ProgressDashboard = () => {
         </div>
 
         {/* Weight Trend */}
-        <div className="mt-6">
-          <WeightTrendChart
-            data={weightLogs.slice().reverse().map((log: any) => ({
-              date: new Date(log.logged_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-              weight: log.weight
-            }))}
-            goalWeight={goalWeight}
-          />
-        </div>
+        <FeatureGate feature="weight_trend" fallbackMessage="Upgrade to VIP for Weight Trends">
+          <div className="mt-6">
+            <WeightTrendChart
+              data={weightLogs.slice().reverse().map((log: any) => ({
+                date: new Date(log.logged_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                weight: log.weight
+              }))}
+              goalWeight={goalWeight}
+            />
+          </div>
+        </FeatureGate>
 
         {/* Weekly Report & Insights with real data */}
         <div className="grid md:grid-cols-2 gap-6 mt-6">
-          <WeeklyReport
-            avgCarbs={weeklyMacroAvg.avgCarbs}
-            avgProtein={weeklyMacroAvg.avgProtein}
-            avgFat={weeklyMacroAvg.avgFat}
-            avgCalories={weeklyMacroAvg.avgCalories}
-            carbSuccessRate={weeklySummary.ketoDays > 0 ? Math.round((weeklySummary.ketoDays / 7) * 100) : 0}
-            weightChange={weeklySummary.weeklyWeightChange}
-            daysTracked={macroLogs.length}
-          />
+          <FeatureGate feature="weekly_report" fallbackMessage="Upgrade to VIP for Weekly Reports">
+            <WeeklyReport
+              avgCarbs={weeklyMacroAvg.avgCarbs}
+              avgProtein={weeklyMacroAvg.avgProtein}
+              avgFat={weeklyMacroAvg.avgFat}
+              avgCalories={weeklyMacroAvg.avgCalories}
+              carbSuccessRate={weeklySummary.ketoDays > 0 ? Math.round((weeklySummary.ketoDays / 7) * 100) : 0}
+              weightChange={weeklySummary.weeklyWeightChange}
+              daysTracked={macroLogs.length}
+            />
+          </FeatureGate>
           <ProgressInsights
             data={{
               carbDaysMetTarget: weeklySummary.ketoDays,

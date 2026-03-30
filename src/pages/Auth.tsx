@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/components/auth/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -18,6 +19,15 @@ const Auth = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  const checkSurveyCompleted = async (userId: string) => {
+    const { data } = await supabase
+      .from('user_survey_responses')
+      .select('id')
+      .eq('user_id', userId)
+      .maybeSingle();
+    return !!data;
+  };
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -26,24 +36,20 @@ const Auth = () => {
       const { error } = await signIn(email, password);
       
       if (error) {
-        toast({
-          title: "Error signing in",
-          description: error.message,
-          variant: "destructive",
-        });
+        toast({ title: "Error signing in", description: error.message, variant: "destructive" });
       } else {
-        toast({
-          title: "Welcome back!",
-          description: "You have successfully signed in.",
-        });
-        navigate('/');
+        toast({ title: "Welcome back!", description: "You have successfully signed in." });
+        // Get user and check survey
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const completed = await checkSurveyCompleted(user.id);
+          navigate(completed ? '/' : '/onboarding');
+        } else {
+          navigate('/');
+        }
       }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred.",
-        variant: "destructive",
-      });
+    } catch {
+      toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
@@ -57,34 +63,23 @@ const Auth = () => {
       const { error } = await signUp(email, password, displayName);
       
       if (error) {
-        toast({
-          title: "Error creating account",
-          description: error.message,
-          variant: "destructive",
-        });
+        toast({ title: "Error creating account", description: error.message, variant: "destructive" });
       } else {
-        toast({
-          title: "Account created!",
-          description: "Please check your email to verify your account.",
-        });
+        toast({ title: "Account created!", description: "Please check your email to verify your account, then complete your profile survey." });
       }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred.",
-        variant: "destructive",
-      });
+    } catch {
+      toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-keto-green-light to-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-keto-green to-keto-green-dark flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-lg">K</span>
+          <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center mx-auto mb-4">
+            <span className="text-primary-foreground font-bold text-lg">K</span>
           </div>
           <CardTitle className="text-2xl">Welcome to Ketopia</CardTitle>
           <CardDescription>
@@ -102,31 +97,13 @@ const Auth = () => {
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signin-email">Email</Label>
-                  <Input
-                    id="signin-email"
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
+                  <Input id="signin-email" type="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signin-password">Password</Label>
-                  <Input
-                    id="signin-password"
-                    type="password"
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
+                  <Input id="signin-password" type="password" placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                 </div>
-                <Button 
-                  type="submit" 
-                  className="w-full bg-gradient-to-r from-keto-green to-keto-green-dark hover:opacity-90"
-                  disabled={isLoading}
-                >
+                <Button type="submit" className="w-full bg-gradient-to-r from-primary to-primary/80 hover:opacity-90" disabled={isLoading}>
                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Sign In
                 </Button>
@@ -137,41 +114,17 @@ const Auth = () => {
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signup-name">Display Name</Label>
-                  <Input
-                    id="signup-name"
-                    type="text"
-                    placeholder="Enter your name"
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                  />
+                  <Input id="signup-name" type="text" placeholder="Enter your name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">Email</Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
+                  <Input id="signup-email" type="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">Password</Label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    placeholder="Create a password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
+                  <Input id="signup-password" type="password" placeholder="Create a password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                 </div>
-                <Button 
-                  type="submit" 
-                  className="w-full bg-gradient-to-r from-keto-green to-keto-green-dark hover:opacity-90"
-                  disabled={isLoading}
-                >
+                <Button type="submit" className="w-full bg-gradient-to-r from-primary to-primary/80 hover:opacity-90" disabled={isLoading}>
                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Create Account
                 </Button>

@@ -18,13 +18,11 @@ import Tracker from "./pages/Tracker";
 import Progress from "./pages/Progress";
 import Challenges from "./pages/Challenges";
 import Marketplace from "./pages/Marketplace";
-
 import Keto30 from "./pages/Keto30";
 import Fasting from "./pages/Fasting";
 import Workout from "./pages/Workout";
 import Water from "./pages/Water";
 import PeriodTracker from "./pages/PeriodTracker";
-
 import WeeklyPlan from "./pages/WeeklyPlan";
 import QuickMeals from "./pages/QuickMeals";
 import CustomPlan from "./pages/CustomPlan";
@@ -41,6 +39,10 @@ import Contact from "./pages/Contact";
 import Community from "./components/Community";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import VipUpgrade from "./pages/VipUpgrade";
+import ThankYou from "./pages/ThankYou";
+import OnboardingSurvey from "./pages/OnboardingSurvey";
+import Shop from "./pages/Shop";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +58,10 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/onboarding" element={<OnboardingSurvey />} />
+              <Route path="/vip-upgrade" element={<VipUpgrade />} />
+              <Route path="/thank-you" element={<ThankYou />} />
+              <Route path="/shop" element={<Shop />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/articles" element={<ArticleManager />} />
               <Route path="/admin" element={<Admin />} />
@@ -99,7 +105,6 @@ const App = () => (
                 </div>
               } />
               <Route path="/leaderboard" element={<Progress />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
             <SupportChatButton />

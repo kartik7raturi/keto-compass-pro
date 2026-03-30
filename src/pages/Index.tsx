@@ -11,6 +11,7 @@ import ContactForm from "@/components/ContactForm";
 import WelcomeProgressModal from "@/components/WelcomeProgressModal";
 import { useWelcomeModal } from "@/hooks/useWelcomeModal";
 import { useAuth } from "@/components/auth/AuthContext";
+import PricingSection from "@/components/PricingSection";
 
 const Index = () => {
   const { user } = useAuth();
@@ -29,6 +30,7 @@ const Index = () => {
         <AdvertisementBanner />
       </div>
       <HealthBadges />
+      <PricingSection />
       <Transformations />
       <Testimonials />
       <FAQSection />
