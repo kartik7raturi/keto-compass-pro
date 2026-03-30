@@ -1,0 +1,43 @@
+import React from 'react';
+import { useSubscription } from '@/hooks/useSubscription';
+import { Lock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+
+interface FeatureGateProps {
+  feature: string;
+  children: React.ReactNode;
+  fallbackMessage?: string;
+}
+
+const FeatureGate: React.FC<FeatureGateProps> = ({ feature, children, fallbackMessage }) => {
+  const { hasAccess, loading } = useSubscription();
+  const navigate = useNavigate();
+
+  if (loading) return <>{children}</>;
+
+  if (!hasAccess(feature)) {
+    return (
+      <div className="relative">
+        <div className="blur-sm pointer-events-none select-none">{children}</div>
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/60 backdrop-blur-sm rounded-lg z-10">
+          <Lock className="h-10 w-10 text-primary mb-3" />
+          <p className="text-sm text-muted-foreground mb-3 text-center px-4">
+            {fallbackMessage || 'This feature requires an upgrade'}
+          </p>
+          <Button
+            size="sm"
+            className="bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-90"
+            onClick={() => navigate('/vip-upgrade')}
+          >
+            🔓 Upgrade Now
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+};
+
+export default FeatureGate;

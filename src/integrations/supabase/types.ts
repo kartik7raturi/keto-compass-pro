@@ -1985,6 +1985,108 @@ export type Database = {
         }
         Relationships: []
       }
+      user_subscriptions: {
+        Row: {
+          amount_paid: number | null
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          payment_type: string | null
+          plan_type: string
+          started_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_paid?: number | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          payment_type?: string | null
+          plan_type?: string
+          started_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_paid?: number | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          payment_type?: string | null
+          plan_type?: string
+          started_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_survey_responses: {
+        Row: {
+          activity_level: string | null
+          age: number | null
+          completed_at: string | null
+          created_at: string | null
+          current_weight: number | null
+          daily_calorie_target: number | null
+          daily_carb_target: number | null
+          daily_fat_target: number | null
+          daily_protein_target: number | null
+          diet_experience: string | null
+          exercise_frequency: string | null
+          gender: string | null
+          goal_weight: number | null
+          health_conditions: string[] | null
+          height: number | null
+          id: string
+          motivation: string | null
+          user_id: string
+        }
+        Insert: {
+          activity_level?: string | null
+          age?: number | null
+          completed_at?: string | null
+          created_at?: string | null
+          current_weight?: number | null
+          daily_calorie_target?: number | null
+          daily_carb_target?: number | null
+          daily_fat_target?: number | null
+          daily_protein_target?: number | null
+          diet_experience?: string | null
+          exercise_frequency?: string | null
+          gender?: string | null
+          goal_weight?: number | null
+          health_conditions?: string[] | null
+          height?: number | null
+          id?: string
+          motivation?: string | null
+          user_id: string
+        }
+        Update: {
+          activity_level?: string | null
+          age?: number | null
+          completed_at?: string | null
+          created_at?: string | null
+          current_weight?: number | null
+          daily_calorie_target?: number | null
+          daily_carb_target?: number | null
+          daily_fat_target?: number | null
+          daily_protein_target?: number | null
+          diet_experience?: string | null
+          exercise_frequency?: string | null
+          gender?: string | null
+          goal_weight?: number | null
+          health_conditions?: string[] | null
+          height?: number | null
+          id?: string
+          motivation?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       water_logs: {
         Row: {
           created_at: string
