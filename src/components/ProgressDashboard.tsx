@@ -18,6 +18,7 @@ import { HealthDashboard } from "@/components/progress/HealthDashboard";
 import { GoalIndicators } from "@/components/progress/GoalIndicators";
 import { WeeklyReport } from "@/components/progress/WeeklyReport";
 import { ProgressInsights } from "@/components/progress/ProgressInsights";
+import FeatureGate from "@/components/FeatureGate";
 
 const ProgressDashboard = () => {
   const { user } = useAuth();
