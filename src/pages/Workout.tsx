@@ -166,6 +166,7 @@ const Workout = () => {
           )}
         </div>
       </main>
+      </FeatureGate>
       <Footer />
     </div>
   );
