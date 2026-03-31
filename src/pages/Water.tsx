@@ -181,6 +181,7 @@ const Water = () => {
           </CardContent>
         </Card>
       </main>
+      </FeatureGate>
       <Footer />
     </div>
   );
