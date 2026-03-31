@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Check, Crown, PartyPopper } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
+import DigiStoreBadge from '@/components/DigiStoreBadge';
+import DigiStorePromo from '@/components/DigiStorePromo';
 
 const ThankYou = () => {
   const [searchParams] = useSearchParams();
@@ -37,6 +39,8 @@ const ThankYou = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <DigiStoreBadge type="thankyoupage" />
+      <DigiStorePromo />
       <Header />
       <main className="container mx-auto px-4 py-16">
         <div className="max-w-lg mx-auto text-center">
