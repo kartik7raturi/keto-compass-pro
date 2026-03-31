@@ -744,6 +744,7 @@ const WeeklyPlan = () => {
           onOpenChange={(open) => !open && setSelectedRecipe(null)} 
         />
       </main>
+      </FeatureGate>
       <Footer />
     </div>
   );

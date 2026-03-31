@@ -404,6 +404,7 @@ const CustomPlan = () => {
           </div>
         </div>
       </main>
+      </FeatureGate>
       <Footer />
     </div>
   );
