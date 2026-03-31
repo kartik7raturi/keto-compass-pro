@@ -162,6 +162,7 @@ const Fasting = () => {
     <div className="min-h-screen bg-background">
       <SEO />
       <Header />
+      <FeatureGate feature="fasting" fallbackMessage="Fasting Tracker requires VIP">
       <main className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <h1 className="text-3xl font-bold">Intermittent Fasting</h1>
