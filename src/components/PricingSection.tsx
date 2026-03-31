@@ -52,7 +52,7 @@ const PricingSection = () => {
               </ul>
               <Button
                 className="w-full bg-gradient-to-r from-primary to-primary/80 text-lg py-6"
-                onClick={() => window.openhttps://www.digistore24.com/product/678112', '_blank')}
+                onClick={() => window.open('https://www.digistore24.com/product/678112', '_blank')}
               >
                 Get Started — $19.99/mo
               </Button>
