@@ -162,6 +162,7 @@ const Keto30 = () => {
     <div className="min-h-screen bg-background">
       <SEO />
       <Header />
+      <FeatureGate feature="keto30" fallbackMessage="30-Day Keto Tracker requires VIP">
       <main className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <h1 className="text-3xl font-bold">30-Day Keto Tracker</h1>
