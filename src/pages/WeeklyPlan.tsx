@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import FeatureGate from "@/components/FeatureGate";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
