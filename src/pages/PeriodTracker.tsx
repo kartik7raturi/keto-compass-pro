@@ -1,5 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import FeatureGate from "@/components/FeatureGate";
 import { PeriodTracker as PeriodTrackerComponent } from "@/components/PeriodTracker";
 
 const PeriodTracker = () => {
