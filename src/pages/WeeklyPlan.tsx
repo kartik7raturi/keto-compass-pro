@@ -464,6 +464,7 @@ const WeeklyPlan = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <FeatureGate feature="weekly_plan" fallbackMessage="Weekly Meal Planner requires VIP">
       <main className="container mx-auto px-4 py-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <div>
