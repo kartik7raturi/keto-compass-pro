@@ -12,18 +12,21 @@ import WelcomeProgressModal from "@/components/WelcomeProgressModal";
 import { useWelcomeModal } from "@/hooks/useWelcomeModal";
 import { useAuth } from "@/components/auth/AuthContext";
 import PricingSection from "@/components/PricingSection";
+import DigiStoreBadge from "@/components/DigiStoreBadge";
+import DigiStorePromo from "@/components/DigiStorePromo";
 
 const Index = () => {
   const { user } = useAuth();
   const { showWelcome, closeWelcome } = useWelcomeModal();
 
-  // Redirect logged-in users to progress page
   if (user) {
     return <Navigate to="/progress" replace />;
   }
 
   return (
     <div className="min-h-screen bg-background">
+      <DigiStoreBadge type="salespage" />
+      <DigiStorePromo />
       <Header />
       <Hero />
       <div className="container mx-auto px-4 py-4">
@@ -35,9 +38,9 @@ const Index = () => {
       <Testimonials />
       <FAQSection />
       <section className="py-16 bg-secondary/30">
-        <div className="container mx-auto px-4 border-primary border-0">
-          <div className="text-center mb-8 border border-primary-foreground">
-            <h2 className="text-3xl font-bold mb-4 bg-primary-foreground text-black">Send us a suggestion</h2>
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold mb-4">Send us a suggestion</h2>
             <p className="text-muted-foreground">Send us your recipe suggestions, feedback, or report any issues</p>
           </div>
           <ContactForm />

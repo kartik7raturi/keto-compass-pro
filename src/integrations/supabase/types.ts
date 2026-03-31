@@ -128,6 +128,33 @@ export type Database = {
         }
         Relationships: []
       }
+      button_links: {
+        Row: {
+          button_key: string
+          created_at: string | null
+          id: string
+          label: string
+          updated_at: string | null
+          url: string
+        }
+        Insert: {
+          button_key: string
+          created_at?: string | null
+          id?: string
+          label: string
+          updated_at?: string | null
+          url?: string
+        }
+        Update: {
+          button_key?: string
+          created_at?: string | null
+          id?: string
+          label?: string
+          updated_at?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
       challenge_communities: {
         Row: {
           challenge_id: string
@@ -1296,6 +1323,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      products: {
+        Row: {
+          benefits: string[] | null
+          created_at: string | null
+          description: string | null
+          faqs: Json | null
+          id: string
+          image_url: string | null
+          ingredients: string[] | null
+          is_active: boolean | null
+          original_price: number | null
+          price: number
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          benefits?: string[] | null
+          created_at?: string | null
+          description?: string | null
+          faqs?: Json | null
+          id?: string
+          image_url?: string | null
+          ingredients?: string[] | null
+          is_active?: boolean | null
+          original_price?: number | null
+          price?: number
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          benefits?: string[] | null
+          created_at?: string | null
+          description?: string | null
+          faqs?: Json | null
+          id?: string
+          image_url?: string | null
+          ingredients?: string[] | null
+          is_active?: boolean | null
+          original_price?: number | null
+          price?: number
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       profiles: {
         Row: {

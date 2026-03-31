@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Header from "@/components/Header";
+import FeatureGate from "@/components/FeatureGate";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -172,6 +173,7 @@ const CustomPlan = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <FeatureGate feature="custom_plan" fallbackMessage="Custom Meal Plans require VIP">
       <main className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
           <h1 className="text-2xl md:text-4xl font-bold mb-4">Create Custom Meal Plan</h1>
@@ -402,6 +404,7 @@ const CustomPlan = () => {
           </div>
         </div>
       </main>
+      </FeatureGate>
       <Footer />
     </div>
   );

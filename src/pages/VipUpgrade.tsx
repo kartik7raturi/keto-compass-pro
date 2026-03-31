@@ -2,7 +2,11 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Check, Crown, Zap, Target, TrendingUp, Dumbbell, Droplets, Calendar, Star, Shield } from 'lucide-react';
+import { Check, Crown, Zap, Target, TrendingUp, Dumbbell, Droplets, Calendar, Star, Shield, Lock } from 'lucide-react';
+import DigiStoreBadge from '@/components/DigiStoreBadge';
+import DigiStorePromo from '@/components/DigiStorePromo';
+import { useButtonLinks } from '@/hooks/useButtonLinks';
+import { Badge } from '@/components/ui/badge';
 
 const VIP_FEATURES = [
   { icon: Target, label: '30-Day Keto Challenge', desc: 'Structured daily plan to reach ketosis' },
@@ -20,9 +24,19 @@ const VIP_FEATURES = [
   { icon: Shield, label: 'Marketplace Access', desc: 'Buy & sell keto food locally' },
 ];
 
+const TESTIMONIALS = [
+  { name: 'Sarah M.', text: 'Lost 20 lbs in 2 months with VIP features!', stars: 5 },
+  { name: 'James K.', text: 'The fasting tracker changed my routine completely.', stars: 5 },
+  { name: 'Maria L.', text: 'Best investment for my keto journey.', stars: 5 },
+];
+
 const VipUpgrade = () => {
+  const { getUrl } = useButtonLinks();
+
   return (
     <div className="min-h-screen bg-background">
+      <DigiStoreBadge type="salespage" />
+      <DigiStorePromo />
       <Header />
       <main>
         {/* Hero */}
@@ -62,10 +76,33 @@ const VipUpgrade = () => {
           </div>
         </section>
 
+        {/* Testimonials */}
+        <section className="py-12 bg-secondary/20">
+          <div className="container px-4">
+            <h2 className="text-2xl font-bold text-center mb-8">What VIP Members Say</h2>
+            <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+              {TESTIMONIALS.map(t => (
+                <Card key={t.name}>
+                  <CardContent className="p-6 text-center">
+                    <div className="flex justify-center gap-1 mb-3">
+                      {Array.from({ length: t.stars }).map((_, i) => (
+                        <Star key={i} className="h-4 w-4 text-amber-500 fill-amber-500" />
+                      ))}
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">"{t.text}"</p>
+                    <p className="font-semibold text-sm">{t.name}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Pricing */}
         <section className="py-16 bg-gradient-to-b from-amber-500/5 to-background">
           <div className="container px-4">
-            <h2 className="text-2xl font-bold text-center mb-8">Choose Your VIP Plan</h2>
+            <h2 className="text-2xl font-bold text-center mb-2">Choose Your VIP Plan</h2>
+            <p className="text-center text-muted-foreground mb-8">Unlock everything. No restrictions.</p>
             <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
               <Card className="border-2 border-amber-500/30 shadow-lg">
                 <CardContent className="p-6 text-center space-y-4">
@@ -81,7 +118,7 @@ const VipUpgrade = () => {
                   </ul>
                   <Button
                     className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-6 text-lg"
-                    onClick={() => window.open('https://buy.stripe.com/YOUR_VIP_MONTHLY_LINK', '_blank')}
+                    onClick={() => window.open(getUrl('vip_monthly'), '_blank')}
                   >
                     Subscribe — $49/mo
                   </Button>
@@ -104,7 +141,7 @@ const VipUpgrade = () => {
                   </ul>
                   <Button
                     className="w-full bg-gradient-to-r from-primary to-primary/80 text-primary-foreground py-6 text-lg"
-                    onClick={() => window.open('https://buy.stripe.com/YOUR_VIP_LIFETIME_LINK', '_blank')}
+                    onClick={() => window.open(getUrl('vip_lifetime'), '_blank')}
                   >
                     Get Lifetime — $299
                   </Button>
