@@ -7,7 +7,7 @@ import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, Loader2, ChefHat, FileText, BookOpen, Image, Target, MessageSquare, Award, Headphones, Layout, Crown, Users } from "lucide-react";
+import { Shield, Loader2, ChefHat, FileText, BookOpen, Image, Target, MessageSquare, Award, Headphones, Layout, Crown, Users, Link2, Package } from "lucide-react";
 import { AdminRecipes } from "@/components/admin/AdminRecipes";
 import { AdminArticles } from "@/components/admin/AdminArticles";
 import { AdminStories } from "@/components/admin/AdminStories";
@@ -17,6 +17,8 @@ import { AdminMessages } from "@/components/admin/AdminMessages";
 import { AdminBadges } from "@/components/admin/AdminBadges";
 import { AdminModeration } from "@/components/admin/AdminModeration";
 import { AdminSupportChats } from "@/components/admin/AdminSupportChats";
+import { AdminButtonLinks } from "@/components/admin/AdminButtonLinks";
+import { AdminProducts } from "@/components/admin/AdminProducts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 
@@ -38,7 +40,7 @@ const AdminPages = () => {
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <h3 className="text-lg font-semibold">Page Management</h3>
       <Table>
         <TableHeader>
@@ -62,6 +64,9 @@ const AdminPages = () => {
           ))}
         </TableBody>
       </Table>
+
+      {/* Button Links */}
+      <AdminButtonLinks />
     </div>
   );
 };
@@ -180,6 +185,9 @@ const Admin = () => {
             <TabsTrigger value="support" className="flex items-center gap-1 text-xs">
               <Headphones className="h-3.5 w-3.5" /><span className="hidden sm:inline">Support</span>
             </TabsTrigger>
+            <TabsTrigger value="products" className="flex items-center gap-1 text-xs">
+              <Package className="h-3.5 w-3.5" /><span className="hidden sm:inline">Products</span>
+            </TabsTrigger>
             <TabsTrigger value="pages" className="flex items-center gap-1 text-xs">
               <Layout className="h-3.5 w-3.5" /><span className="hidden sm:inline">Pages</span>
             </TabsTrigger>
@@ -197,6 +205,7 @@ const Admin = () => {
           <TabsContent value="messages"><AdminMessages /></TabsContent>
           <TabsContent value="moderation"><AdminModeration /></TabsContent>
           <TabsContent value="support"><AdminSupportChats /></TabsContent>
+          <TabsContent value="products"><AdminProducts /></TabsContent>
           <TabsContent value="pages"><AdminPages /></TabsContent>
           <TabsContent value="subscriptions"><AdminSubscriptions /></TabsContent>
         </Tabs>
