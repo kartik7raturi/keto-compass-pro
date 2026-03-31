@@ -25,6 +25,16 @@ const ChallengeLeaderboard = ({ category = 'all' }: ChallengeLeaderboardProps) =
 
   useEffect(() => {
     fetchLeaderboard();
+
+    // Real-time subscription for leaderboard updates
+    const channel = supabase
+      .channel('leaderboard-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'user_challenges' }, () => {
+        fetchLeaderboard();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [category, timeframe]);
 
   const fetchLeaderboard = async () => {
