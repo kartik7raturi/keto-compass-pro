@@ -213,6 +213,7 @@ const Fasting = () => {
           </CardContent>
         </Card>
       </main>
+      </FeatureGate>
       <Footer />
     </div>
   );
