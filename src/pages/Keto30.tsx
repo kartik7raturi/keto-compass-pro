@@ -217,6 +217,7 @@ const Keto30 = () => {
           </CardContent>
         </Card>
       </main>
+      </FeatureGate>
       <Footer />
     </div>
   );
