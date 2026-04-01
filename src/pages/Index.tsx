@@ -14,13 +14,39 @@ import { useAuth } from "@/components/auth/AuthContext";
 import PricingSection from "@/components/PricingSection";
 import DigiStoreBadge from "@/components/DigiStoreBadge";
 import DigiStorePromo from "@/components/DigiStorePromo";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const { user } = useAuth();
   const { showWelcome, closeWelcome } = useWelcomeModal();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [checking, setChecking] = useState(true);
 
-  if (user) {
+  useEffect(() => {
+    const checkAdmin = async () => {
+      if (user) {
+        const { data } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('role', 'admin')
+          .maybeSingle();
+        setIsAdmin(!!data);
+      }
+      setChecking(false);
+    };
+    checkAdmin();
+  }, [user]);
+
+  // If logged in and NOT admin, go to progress
+  if (user && !checking && !isAdmin) {
     return <Navigate to="/progress" replace />;
+  }
+
+  // Still checking admin status for logged-in user
+  if (user && checking) {
+    return null;
   }
 
   return (

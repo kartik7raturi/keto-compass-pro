@@ -56,7 +56,7 @@ const Header = () => {
     fetchUserProfile();
   }, [user]);
 
-  // Only show full nav when logged in
+  // Nav for logged-in users
   const navItems = user ? [
     { label: 'Home', path: '/' },
     { label: 'Recipes', path: '/recipes' },
@@ -66,22 +66,24 @@ const Header = () => {
     { label: 'Community', path: '/community' },
     { label: 'Marketplace', path: '/marketplace' },
     { label: 'Shop', path: '/shop', icon: ShoppingBag },
-  ] : [];
+  ] : [
+    { label: 'Features', path: '/#features' },
+    { label: 'Pricing', path: '/pricing' },
+    { label: 'Contact', path: '/contact' },
+  ];
 
   return (
     <header className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b">
       <div className="container flex h-14 md:h-16 items-center justify-between px-4">
         <div className="flex items-center gap-3">
-          {user && (
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="md:hidden h-8 w-8" 
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
-          )}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="md:hidden h-8 w-8" 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
             <div className="h-7 w-7 md:h-8 md:w-8 rounded-lg bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-sm">K</span>
@@ -90,20 +92,18 @@ const Header = () => {
           </div>
         </div>
         
-        {user && (
-          <nav className="hidden md:flex items-center gap-4 lg:gap-6">
-            {navItems.map(item => (
-              <button
-                key={item.path}
-                onClick={() => navigate(item.path)}
-                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
-              >
-                {item.icon && <item.icon className="h-3.5 w-3.5" />}
-                {item.label}
-              </button>
-            ))}
-          </nav>
-        )}
+        <nav className="hidden md:flex items-center gap-4 lg:gap-6">
+          {navItems.map(item => (
+            <button
+              key={item.path}
+              onClick={() => navigate(item.path)}
+              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+            >
+              {(item as any).icon && <ShoppingBag className="h-3.5 w-3.5" />}
+              {item.label}
+            </button>
+          ))}
+        </nav>
 
         <div className="flex items-center gap-2">
           {user ? (
@@ -165,7 +165,7 @@ const Header = () => {
               <Button variant="ghost" size="sm" onClick={() => navigate('/auth')}>
                 Sign In
               </Button>
-              <Button size="sm" className="bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 transition-opacity" onClick={() => navigate('/auth')}>
+              <Button size="sm" className="bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 transition-opacity" onClick={() => navigate('/pricing')}>
                 Get Started
               </Button>
             </>
@@ -173,8 +173,8 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Mobile Menu — only when logged in */}
-      {user && mobileMenuOpen && (
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
         <div className="md:hidden border-t bg-background/95 backdrop-blur">
           <nav className="container py-3 px-4 space-y-1">
             {navItems.map(item => (
@@ -183,7 +183,6 @@ const Header = () => {
                 onClick={() => handleNavigation(item.path)}
                 className="block w-full text-left py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
               >
-                {item.icon && <item.icon className="h-4 w-4" />}
                 {item.label}
               </button>
             ))}

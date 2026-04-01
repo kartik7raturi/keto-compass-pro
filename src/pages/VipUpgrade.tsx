@@ -4,8 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Check, Crown, Zap, Target, TrendingUp, Dumbbell, Droplets, Calendar, Star, Shield, Lock } from 'lucide-react';
 import DigiStoreBadge from '@/components/DigiStoreBadge';
-import DigiStorePromo from '@/components/DigiStorePromo';
-import { useButtonLinks } from '@/hooks/useButtonLinks';
+import DigiStoreUpsell from '@/components/DigiStoreUpsell';
 import { Badge } from '@/components/ui/badge';
 
 const VIP_FEATURES = [
@@ -31,12 +30,10 @@ const TESTIMONIALS = [
 ];
 
 const VipUpgrade = () => {
-  const { getUrl } = useButtonLinks();
-
   return (
     <div className="min-h-screen bg-background">
       <DigiStoreBadge type="salespage" />
-      <DigiStorePromo />
+      <DigiStoreUpsell />
       <Header />
       <main>
         {/* Hero */}
@@ -98,7 +95,7 @@ const VipUpgrade = () => {
           </div>
         </section>
 
-        {/* Pricing */}
+        {/* Pricing with Digistore Upsell Buttons */}
         <section className="py-16 bg-gradient-to-b from-amber-500/5 to-background">
           <div className="container px-4">
             <h2 className="text-2xl font-bold text-center mb-2">Choose Your VIP Plan</h2>
@@ -118,9 +115,16 @@ const VipUpgrade = () => {
                   </ul>
                   <Button
                     className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-6 text-lg"
-                    onClick={() => window.open(getUrl('vip_monthly'), '_blank')}
+                    onClick={() => window.open('https://www.digistore24.com/answer/yes?template=light', '_blank')}
                   >
-                    Subscribe — $49/mo
+                    Yes, Upgrade Now — $49/mo
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full text-muted-foreground"
+                    onClick={() => window.open('https://www.digistore24.com/answer/no', '_blank')}
+                  >
+                    No thanks, maybe later
                   </Button>
                 </CardContent>
               </Card>
@@ -141,9 +145,16 @@ const VipUpgrade = () => {
                   </ul>
                   <Button
                     className="w-full bg-gradient-to-r from-primary to-primary/80 text-primary-foreground py-6 text-lg"
-                    onClick={() => window.open(getUrl('vip_lifetime'), '_blank')}
+                    onClick={() => window.open('https://www.digistore24.com/answer/yes?template=light', '_blank')}
                   >
-                    Get Lifetime — $299
+                    Yes, Get Lifetime — $299
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full text-muted-foreground"
+                    onClick={() => window.open('https://www.digistore24.com/answer/no', '_blank')}
+                  >
+                    No thanks, maybe later
                   </Button>
                 </CardContent>
               </Card>

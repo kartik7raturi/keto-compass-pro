@@ -3,130 +3,193 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Star, Shield, Truck, Check, ChevronDown, ChevronUp, MessageSquare } from 'lucide-react';
-import supplementImage from '@/assets/keto-supplement.png';
-import { useButtonLinks } from '@/hooks/useButtonLinks';
-import { useState } from 'react';
-import DigiStorePromo from '@/components/DigiStorePromo';
+import { Star, Shield, Truck, Check, MessageSquare, Package } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import DigiStoreUpsell from '@/components/DigiStoreUpsell';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 const BENEFITS = [
-  'Supports Sleep Aid',
-  'Boosts Metabolism',
-  'Appetite Suppression',
-  'Night Time Weight Loss',
-  'High Potency Formula',
-  'Dietary Supplement — 60 Softgels',
+  'Supports Healthy Ketosis',
+  'Boosts Energy & Mental Clarity',
+  'Appetite & Craving Control',
+  'Enhanced Fat Burning',
+  'Electrolyte Balance Support',
+  'Premium BHB Ketone Formula',
 ];
 
 const INGREDIENTS = [
-  'CLA (Conjugated Linoleic Acid)',
-  'L-Carnitine',
+  'Beta-Hydroxybutyrate (BHB)',
+  'MCT Oil Powder',
+  'Magnesium BHB',
+  'Calcium BHB',
+  'Sodium BHB',
   'Green Tea Extract',
-  'Melatonin',
-  'Ashwagandha Root',
-  'White Kidney Bean Extract',
 ];
 
 const DETAILED_BENEFITS = [
-  { title: 'Burn Fat While You Sleep', desc: 'Our unique night-time formula works with your body\'s natural metabolism to promote fat burning during sleep.' },
-  { title: 'Better Sleep Quality', desc: 'Melatonin and Ashwagandha help improve sleep quality so you wake up refreshed and energized.' },
-  { title: 'Suppress Late Night Cravings', desc: 'White Kidney Bean Extract and CLA help reduce those late-night urges to snack.' },
-  { title: 'Support Ketosis', desc: 'Perfectly formulated to complement your keto diet and help maintain ketosis overnight.' },
+  { title: 'Accelerate Ketosis', desc: 'Exogenous BHB ketones help your body enter ketosis faster, even if you slip up on carbs.' },
+  { title: 'Sustained Energy', desc: 'Clean, long-lasting energy without the crash of sugar or caffeine.' },
+  { title: 'Crush Cravings', desc: 'BHB and MCT help suppress appetite naturally so you stay on track.' },
+  { title: 'Mental Clarity', desc: 'Ketones are premium brain fuel — experience sharper focus and concentration.' },
 ];
 
 const FAQS = [
-  { q: 'How do I take this supplement?', a: 'Take 2 softgels 30 minutes before bedtime with water.' },
-  { q: 'Is it safe to use with keto diet?', a: 'Yes! This supplement is specially formulated for keto dieters.' },
-  { q: 'How long until I see results?', a: 'Most users notice changes within 2-4 weeks of consistent use.' },
-  { q: 'Are there any side effects?', a: 'Our formula uses natural ingredients. Some may experience drowsiness due to melatonin.' },
-  { q: 'Can I cancel my order?', a: 'Yes, we offer a 30-day money-back guarantee if you\'re not satisfied.' },
+  { q: 'How do I take this supplement?', a: 'Take 2 capsules daily with water, preferably in the morning or before a workout.' },
+  { q: 'Is it safe to use with keto diet?', a: 'Absolutely! This supplement is specially formulated to complement your keto lifestyle.' },
+  { q: 'How long until I see results?', a: 'Most users notice increased energy within days. Fat loss results typically appear within 2-4 weeks.' },
+  { q: 'Are there any side effects?', a: 'Our formula uses clean, natural ingredients. Some may experience mild digestive adjustment in the first few days.' },
+  { q: 'Can I get a refund?', a: 'Yes, we offer a 60-day money-back guarantee if you are not satisfied.' },
 ];
 
 const REVIEWS = [
-  { name: 'Jessica R.', rating: 5, text: 'Amazing product! Lost 8 lbs in the first month while sleeping better than ever.', date: '2 weeks ago' },
-  { name: 'Mike T.', rating: 5, text: 'I was skeptical at first but the results speak for themselves. Highly recommend!', date: '1 month ago' },
-  { name: 'Amanda S.', rating: 4, text: 'Good supplement. Noticed reduced cravings and better sleep. Will buy again.', date: '3 weeks ago' },
-  { name: 'David L.', rating: 5, text: 'Perfect complement to my keto lifestyle. The ingredients are top quality.', date: '1 month ago' },
+  { name: 'Jessica R.', rating: 5, text: 'Amazing product! I feel so much more energized on keto now.', date: '2 weeks ago' },
+  { name: 'Mike T.', rating: 5, text: 'Finally a BHB supplement that actually works. Highly recommend!', date: '1 month ago' },
+  { name: 'Amanda S.', rating: 4, text: 'Good supplement. Noticed reduced cravings and better focus.', date: '3 weeks ago' },
+  { name: 'David L.', rating: 5, text: 'Perfect complement to my keto lifestyle. Top quality ingredients.', date: '1 month ago' },
+];
+
+const PRICING_OPTIONS = [
+  {
+    label: 'Sample Option',
+    bottles: 1,
+    pricePerBottle: 39.95,
+    total: 39.95,
+    savings: null,
+    freeShipping: false,
+    popular: false,
+    best: false,
+  },
+  {
+    label: 'Biggest Savings',
+    bottles: 6,
+    pricePerBottle: 33.25,
+    total: 199.50,
+    savings: 40.20,
+    freeShipping: true,
+    popular: false,
+    best: true,
+  },
+  {
+    label: 'Most Popular',
+    bottles: 3,
+    pricePerBottle: 35.95,
+    total: 107.85,
+    savings: 12.00,
+    freeShipping: true,
+    popular: true,
+    best: false,
+  },
 ];
 
 const Shop = () => {
-  const { getUrl } = useButtonLinks();
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background">
-      <DigiStorePromo />
+      <DigiStoreUpsell />
       <Header />
       <main>
         {/* Breadcrumb */}
         <div className="container px-4 py-4">
-          <p className="text-sm text-muted-foreground">Home / Shop / Night Time Fat Burner</p>
+          <p className="text-sm text-muted-foreground">Home / Shop / Keto BHB Supplement</p>
         </div>
 
         {/* Product Hero */}
         <section className="container px-4 pb-12">
-          <div className="grid md:grid-cols-2 gap-8 lg:gap-12 max-w-6xl mx-auto">
-            <div className="bg-secondary/20 rounded-2xl p-4 md:p-8 flex items-center justify-center">
-              <img
-                src={supplementImage}
-                alt="Beworths Night Time Fat Burner — Keto Supplement"
-                className="max-h-[300px] md:max-h-[450px] w-auto object-contain"
-              />
-            </div>
-
-            <div className="space-y-5">
-              <div>
-                <Badge className="bg-primary/10 text-primary mb-2">Keto Supplement</Badge>
-                <h1 className="text-2xl md:text-4xl font-bold leading-tight">Night Time Fat Burner</h1>
-                <p className="text-muted-foreground mt-2">High Potency Weight Loss — 60 Softgels</p>
-              </div>
-
-              <div className="flex items-center gap-2">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-8">
+              <Badge className="bg-primary/10 text-primary mb-2">Keto Supplement</Badge>
+              <h1 className="text-3xl md:text-5xl font-bold leading-tight mb-3">
+                Advanced Keto BHB Formula
+              </h1>
+              <p className="text-lg text-muted-foreground">Premium Exogenous Ketones — Accelerate Your Keto Results</p>
+              <div className="flex items-center justify-center gap-2 mt-3">
                 {[1,2,3,4,5].map(i => (
                   <Star key={i} className="h-5 w-5 text-amber-500 fill-amber-500" />
                 ))}
                 <span className="text-sm text-muted-foreground">(4.8 / 5 — 2,340 reviews)</span>
               </div>
-
-              <div className="flex items-baseline gap-3">
-                <span className="text-4xl font-bold">$29.99</span>
-                <span className="text-xl text-muted-foreground line-through">$49.99</span>
-                <Badge variant="destructive">40% OFF</Badge>
-              </div>
-
-              <div className="space-y-2">
-                <h3 className="font-semibold">Key Benefits</h3>
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {BENEFITS.map(b => (
-                    <li key={b} className="flex items-center gap-2 text-sm">
-                      <Check className="h-4 w-4 text-primary flex-shrink-0" />
-                      {b}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="space-y-3">
-                <Button
-                  size="lg"
-                  className="w-full bg-gradient-to-r from-primary to-primary/80 text-lg py-7"
-                  onClick={() => window.open(getUrl('shop_product'), '_blank')}
-                >
-                  Buy Now — $29.99
-                </Button>
-                <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> 30-Day Guarantee</span>
-                  <span className="flex items-center gap-1"><Truck className="h-3 w-3" /> Free Shipping</span>
-                </div>
-              </div>
             </div>
+
+            {/* Multi-Bottle Pricing */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12">
+              {PRICING_OPTIONS.map((opt) => (
+                <Card
+                  key={opt.label}
+                  className={`relative overflow-hidden ${opt.best ? 'border-2 border-[#1a3a5c] shadow-xl bg-blue-50/30' : 'border shadow-md'}`}
+                >
+                  {/* Header Banner */}
+                  <div className={`py-3 text-center text-white font-bold text-sm ${opt.best ? 'bg-[#1a3a5c]' : opt.popular ? 'bg-[#1a3a5c]' : 'bg-[#3a6a8a]'}`}>
+                    {opt.label}
+                  </div>
+                  <CardContent className="p-6 text-center space-y-4">
+                    <p className="text-lg font-semibold">{opt.bottles} {opt.bottles === 1 ? 'Bottle' : 'Bottles'}</p>
+                    
+                    <div className="flex items-center justify-center gap-3">
+                      <Package className="h-16 w-16 md:h-20 md:w-20 text-primary/60" />
+                      {opt.bottles >= 3 && <Package className="h-14 w-14 md:h-18 md:w-18 text-primary/40" />}
+                      {opt.bottles >= 6 && <Package className="h-12 w-12 md:h-16 md:w-16 text-primary/30" />}
+                    </div>
+
+                    <div>
+                      <span className="text-4xl font-bold">${opt.pricePerBottle.toFixed(2)}</span>
+                      <span className="text-muted-foreground"> /Bottle</span>
+                    </div>
+
+                    {opt.savings && (
+                      <div className="space-y-1">
+                        <p className="text-sm text-primary font-semibold flex items-center justify-center gap-1">
+                          💰 Instant Savings: ${opt.savings.toFixed(2)}
+                        </p>
+                        {opt.freeShipping && (
+                          <p className="text-sm font-bold flex items-center justify-center gap-1">
+                            🚚 FREE SHIPPING
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    <p className="text-lg font-semibold">Total: ${opt.total.toFixed(2)}</p>
+
+                    <Button
+                      className="w-full bg-amber-600 hover:bg-amber-700 text-white py-5 text-base font-bold"
+                      onClick={() => window.open('https://www.digistore24.com/answer/yes?template=light', '_blank')}
+                    >
+                      Add To Cart
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full text-muted-foreground text-sm"
+                      onClick={() => navigate('/progress')}
+                    >
+                      Go to Dashboard
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Key Benefits */}
+        <section className="py-12 bg-secondary/20">
+          <div className="container px-4 max-w-4xl mx-auto">
+            <h2 className="text-2xl font-bold text-center mb-6">Key Benefits</h2>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl mx-auto">
+              {BENEFITS.map(b => (
+                <li key={b} className="flex items-center gap-2 text-sm">
+                  <Check className="h-4 w-4 text-primary flex-shrink-0" />
+                  {b}
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
 
         {/* Detailed Benefits */}
         <section className="py-12 bg-gradient-to-b from-primary/5 to-background">
           <div className="container px-4 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-bold text-center mb-8">Why Choose Our Fat Burner?</h2>
+            <h2 className="text-2xl font-bold text-center mb-8">Why Choose Our BHB Formula?</h2>
             <div className="grid md:grid-cols-2 gap-6">
               {DETAILED_BENEFITS.map((b, i) => (
                 <Card key={i} className="border-primary/10">
@@ -171,9 +234,9 @@ const Shop = () => {
           <h2 className="text-2xl font-bold text-center mb-8">How It Works</h2>
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { step: '1', title: 'Take Before Bed', desc: 'Take 2 softgels 30 minutes before sleep.' },
-              { step: '2', title: 'Sleep & Burn', desc: 'Ingredients work overnight to boost metabolism.' },
-              { step: '3', title: 'Wake Up Lighter', desc: 'Experience gradual, healthy weight loss.' },
+              { step: '1', title: 'Take Daily', desc: 'Take 2 capsules daily with water.' },
+              { step: '2', title: 'Enter Ketosis', desc: 'BHB ketones accelerate your body into ketosis.' },
+              { step: '3', title: 'See Results', desc: 'Experience energy, focus, and fat loss.' },
             ].map(s => (
               <div key={s.step} className="text-center space-y-3">
                 <div className="h-12 w-12 rounded-full bg-primary text-primary-foreground text-xl font-bold flex items-center justify-center mx-auto">
@@ -216,8 +279,8 @@ const Shop = () => {
           <div className="container px-4 max-w-3xl mx-auto text-center">
             <MessageSquare className="h-10 w-10 text-primary mx-auto mb-4" />
             <blockquote className="text-lg md:text-xl italic text-muted-foreground mb-4">
-              "I've tried many supplements, but this is the first one that actually works while I sleep.
-              Combined with my keto diet, I've lost 15 lbs in just 6 weeks!"
+              "Since starting this BHB supplement alongside keto, my energy levels are through the roof
+              and I've lost 15 lbs in just 6 weeks!"
             </blockquote>
             <p className="font-semibold">— Rachel P., Verified Buyer</p>
           </div>
@@ -238,34 +301,28 @@ const Shop = () => {
           </div>
         </section>
 
-        {/* Pricing CTA */}
+        {/* Bottom CTA */}
         <section className="py-12">
-          <div className="container px-4 max-w-md mx-auto">
-            <Card className="border-2 border-primary shadow-xl">
-              <CardContent className="p-6 text-center space-y-4">
-                <h2 className="text-2xl font-bold">Ready to Burn Fat While You Sleep?</h2>
-                <div className="flex items-baseline justify-center gap-3">
-                  <span className="text-4xl font-bold">$29.99</span>
-                  <span className="text-lg text-muted-foreground line-through">$49.99</span>
-                </div>
-                <ul className="text-sm space-y-2 text-left">
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />60 Softgels (30-Day Supply)</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />Free Shipping</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />30-Day Money Back Guarantee</li>
-                </ul>
-                <Button
-                  size="lg"
-                  className="w-full bg-gradient-to-r from-primary to-primary/80 text-lg py-7"
-                  onClick={() => window.open(getUrl('shop_product'), '_blank')}
-                >
-                  Order Now — $29.99
-                </Button>
-                <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> Secure Payment</span>
-                  <span className="flex items-center gap-1"><Truck className="h-3 w-3" /> Fast Delivery</span>
-                </div>
-              </CardContent>
-            </Card>
+          <div className="container px-4 max-w-md mx-auto text-center space-y-4">
+            <h2 className="text-2xl font-bold">Ready to Accelerate Your Keto Results?</h2>
+            <Button
+              size="lg"
+              className="w-full bg-amber-600 hover:bg-amber-700 text-white text-lg py-7 font-bold"
+              onClick={() => window.open('https://www.digistore24.com/answer/yes?template=light', '_blank')}
+            >
+              Order Now — Best Seller
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full text-muted-foreground"
+              onClick={() => window.open('https://www.digistore24.com/answer/no', '_blank')}
+            >
+              No thanks, not this time
+            </Button>
+            <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> 60-Day Guarantee</span>
+              <span className="flex items-center gap-1"><Truck className="h-3 w-3" /> Free Shipping on 3+</span>
+            </div>
           </div>
         </section>
       </main>
