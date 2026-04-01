@@ -59,7 +59,7 @@ const PricingSection = () => {
                 <span className="text-lg text-muted-foreground line-through mr-2">$39.99</span>
                 <span className="text-5xl font-bold text-primary">$19</span>
                 <span className="text-2xl font-bold text-primary">.99</span>
-                <span className="text-muted-foreground ml-1">/month</span>
+                <span className="text-muted-foreground ml-1">lifetime</span>
               </div>
               <Badge variant="destructive" className="mt-2">50% OFF — Limited Time</Badge>
             </CardHeader>
@@ -75,7 +75,7 @@ const PricingSection = () => {
 
               <div className="bg-primary/5 rounded-lg p-3 border border-primary/20">
                 <p className="text-xs text-center font-medium text-primary">
-                  ✅ 30-day money back guarantee • Cancel anytime
+                  ✅ 30-day money back guarantee • One-time payment
                 </p>
               </div>
 
@@ -83,7 +83,7 @@ const PricingSection = () => {
                 className="w-full bg-gradient-to-r from-primary to-primary/80 text-lg py-7 shadow-lg hover:shadow-xl transition-all"
                 onClick={() => window.open(getUrl('keto_starter'), '_blank')}
               >
-                Get Started Now — $19.99/mo
+                Get Started Now — $19.99 Lifetime
               </Button>
               <p className="text-xs text-center text-muted-foreground">
                 Secure payment • Instant access • No hidden fees

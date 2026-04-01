@@ -22,6 +22,7 @@ interface SurveyData {
   exercise_frequency: string;
   health_conditions: string;
   motivation: string;
+  email: string;
 }
 
 const STEPS = [
@@ -35,6 +36,7 @@ const STEPS = [
   { key: 'diet_experience', q: 'Have you tried keto before?', type: 'select', options: ['Never', 'Tried briefly', 'A few months', 'Over a year', 'Currently on keto'] },
   { key: 'health_conditions', q: 'Any health conditions? (optional)', type: 'text', placeholder: 'e.g. Diabetes, PCOS, None' },
   { key: 'motivation', q: 'What motivates you most?', type: 'select', options: ['Lose Weight', 'More Energy', 'Better Health', 'Mental Clarity', 'Athletic Performance'] },
+  { key: 'email', q: 'Enter your email to get personalized results', type: 'email', placeholder: 'your@email.com' },
 ];
 
 const OnboardingSurvey = () => {
@@ -46,6 +48,7 @@ const OnboardingSurvey = () => {
     current_weight: '', goal_weight: '', height: '', age: '',
     gender: '', activity_level: '', diet_experience: '',
     exercise_frequency: '', health_conditions: '', motivation: '',
+    email: user?.email || '',
   });
   const [submitting, setSubmitting] = useState(false);
 
@@ -62,7 +65,6 @@ const OnboardingSurvey = () => {
     const age = parseInt(data.age) || 30;
     const isMale = data.gender === 'Male';
 
-    // Mifflin-St Jeor
     const bmr = isMale
       ? 10 * (weight * 0.453592) + 6.25 * (height * 2.54) - 5 * age + 5
       : 10 * (weight * 0.453592) + 6.25 * (height * 2.54) - 5 * age - 161;
@@ -73,7 +75,7 @@ const OnboardingSurvey = () => {
     };
     const multiplier = activityMultipliers[data.activity_level] || 1.2;
     const tdee = Math.round(bmr * multiplier);
-    const calories = tdee - 500; // deficit for weight loss
+    const calories = tdee - 500;
 
     return {
       daily_calorie_target: Math.max(1200, calories),
@@ -104,7 +106,6 @@ const OnboardingSurvey = () => {
         ...targets,
       }, { onConflict: 'user_id' });
 
-      // Update profile with survey data
       await supabase.from('profiles').update({
         current_weight: parseFloat(data.current_weight) || null,
         goal_weight: parseFloat(data.goal_weight) || null,
@@ -114,7 +115,8 @@ const OnboardingSurvey = () => {
       }).eq('user_id', user.id);
 
       toast({ title: 'Profile setup complete! 🎉' });
-      navigate('/progress');
+      // After survey, redirect to pricing page
+      navigate('/pricing');
     } catch {
       toast({ title: 'Error saving survey', variant: 'destructive' });
     } finally {
@@ -122,7 +124,7 @@ const OnboardingSurvey = () => {
     }
   };
 
-  const canProceed = !!data[currentStep.key as keyof SurveyData];
+  const canProceed = currentStep.key === 'health_conditions' || !!data[currentStep.key as keyof SurveyData];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/5 flex items-center justify-center p-4">
@@ -148,7 +150,7 @@ const OnboardingSurvey = () => {
             <div>
               <Label className="sr-only">{currentStep.q}</Label>
               <Input
-                type={currentStep.type}
+                type={currentStep.type === 'email' ? 'email' : currentStep.type}
                 placeholder={currentStep.placeholder}
                 value={data[currentStep.key as keyof SurveyData]}
                 onChange={(e) => setValue(e.target.value)}
@@ -177,7 +179,7 @@ const OnboardingSurvey = () => {
                 disabled={!canProceed || submitting}
                 className="flex-1 bg-gradient-to-r from-primary to-primary/80"
               >
-                {submitting ? 'Saving...' : 'Complete Setup ✓'}
+                {submitting ? 'Saving...' : 'See My Plan ✓'}
               </Button>
             )}
           </div>

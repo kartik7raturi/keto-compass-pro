@@ -28,6 +28,15 @@ const Auth = () => {
     return !!data;
   };
 
+  const checkHasPaidPlan = async (userId: string) => {
+    const { data } = await supabase
+      .from('user_subscriptions')
+      .select('plan_type, is_active')
+      .eq('user_id', userId)
+      .maybeSingle();
+    return data && data.is_active && (data.plan_type === 'basic' || data.plan_type === 'vip');
+  };
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -39,11 +48,15 @@ const Auth = () => {
         toast({ title: "Error signing in", description: error.message, variant: "destructive" });
       } else {
         toast({ title: "Welcome back!", description: "You have successfully signed in." });
-        // Get user and check survey
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          const completed = await checkSurveyCompleted(user.id);
-          navigate(completed ? '/' : '/onboarding');
+          const surveyDone = await checkSurveyCompleted(user.id);
+          if (!surveyDone) {
+            navigate('/onboarding');
+          } else {
+            const hasPaid = await checkHasPaidPlan(user.id);
+            navigate(hasPaid ? '/progress' : '/pricing');
+          }
         } else {
           navigate('/');
         }

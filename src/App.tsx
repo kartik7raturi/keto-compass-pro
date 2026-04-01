@@ -43,6 +43,8 @@ import VipUpgrade from "./pages/VipUpgrade";
 import ThankYou from "./pages/ThankYou";
 import OnboardingSurvey from "./pages/OnboardingSurvey";
 import Shop from "./pages/Shop";
+import Pricing from "./pages/Pricing";
+import Messages from "./pages/Messages";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +60,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/pricing" element={<Pricing />} />
               <Route path="/onboarding" element={<OnboardingSurvey />} />
               <Route path="/vip-upgrade" element={<VipUpgrade />} />
               <Route path="/thank-you" element={<ThankYou />} />

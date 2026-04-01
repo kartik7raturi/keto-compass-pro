@@ -49,6 +49,7 @@ export const useSubscription = () => {
 
   const hasAccess = (feature: string): boolean => {
     if (!subscription) return false;
+    if (!subscription.is_active) return false;
     const plan = subscription.plan_type;
     
     const basicFeatures = ['recipes', 'tracker', 'basic_progress'];
@@ -61,6 +62,11 @@ export const useSubscription = () => {
     if (plan === 'vip') return true;
     if (plan === 'basic') return basicFeatures.includes(feature);
     return false;
+  };
+
+  const hasPaidPlan = (): boolean => {
+    if (!subscription) return false;
+    return subscription.is_active && (subscription.plan_type === 'basic' || subscription.plan_type === 'vip');
   };
 
   const upgradePlan = async (planType: PlanType, paymentType: string, amount: number) => {
@@ -78,5 +84,5 @@ export const useSubscription = () => {
     await fetchSubscription();
   };
 
-  return { subscription, loading, hasAccess, upgradePlan, surveyCompleted };
+  return { subscription, loading, hasAccess, hasPaidPlan, upgradePlan, surveyCompleted };
 };
