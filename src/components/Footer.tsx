@@ -52,6 +52,9 @@ const Footer = () => {
               <li><a href="/guide" className="hover:text-keto-green transition-colors">Keto Guide</a></li>
               <li><a href="/blog" className="hover:text-keto-green transition-colors">Blog</a></li>
               <li><a href="/stories" className="hover:text-keto-green transition-colors">Success Stories</a></li>
+              <li><a href="/pricing" className="hover:text-keto-green transition-colors">Pricing</a></li>
+              <li><a href="/vip-upgrade" className="hover:text-keto-green transition-colors">VIP Upgrade</a></li>
+              <li><a href="/shop" className="hover:text-keto-green transition-colors">Shop</a></li>
               <li><a href="/faq" className="hover:text-keto-green transition-colors">FAQ</a></li>
               <li><a href="/support" className="hover:text-keto-green transition-colors">Support</a></li>
             </ul>
@@ -64,6 +67,7 @@ const Footer = () => {
               <li><a href="/careers" className="hover:text-keto-green transition-colors">Careers</a></li>
               <li><a href="/privacy" className="hover:text-keto-green transition-colors">Privacy Policy</a></li>
               <li><a href="/terms" className="hover:text-keto-green transition-colors">Terms of Service</a></li>
+              <li><a href="/imprint" className="hover:text-keto-green transition-colors">Imprint</a></li>
               <li><a href="/contact" className="hover:text-keto-green transition-colors">Contact</a></li>
             </ul>
           </div>

@@ -19,15 +19,6 @@ const Auth = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const checkSurveyCompleted = async (userId: string) => {
-    const { data } = await supabase
-      .from('user_survey_responses')
-      .select('id')
-      .eq('user_id', userId)
-      .maybeSingle();
-    return !!data;
-  };
-
   const checkHasPaidPlan = async (userId: string) => {
     const { data } = await supabase
       .from('user_subscriptions')
@@ -40,23 +31,16 @@ const Auth = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
     try {
       const { error } = await signIn(email, password);
-      
       if (error) {
         toast({ title: "Error signing in", description: error.message, variant: "destructive" });
       } else {
-        toast({ title: "Welcome back!", description: "You have successfully signed in." });
+        toast({ title: "Welcome back!" });
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          const surveyDone = await checkSurveyCompleted(user.id);
-          if (!surveyDone) {
-            navigate('/onboarding');
-          } else {
-            const hasPaid = await checkHasPaidPlan(user.id);
-            navigate(hasPaid ? '/progress' : '/pricing');
-          }
+          const hasPaid = await checkHasPaidPlan(user.id);
+          navigate(hasPaid ? '/progress' : '/pricing');
         } else {
           navigate('/');
         }
@@ -71,14 +55,12 @@ const Auth = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
     try {
       const { error } = await signUp(email, password, displayName);
-      
       if (error) {
         toast({ title: "Error creating account", description: error.message, variant: "destructive" });
       } else {
-        toast({ title: "Account created!", description: "Please check your email to verify your account, then complete your profile survey." });
+        toast({ title: "Account created!", description: "Please check your email to verify your account." });
       }
     } catch {
       toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
