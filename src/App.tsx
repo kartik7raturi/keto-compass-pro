@@ -41,10 +41,12 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import VipUpgrade from "./pages/VipUpgrade";
 import ThankYou from "./pages/ThankYou";
+import ThankYouVip from "./pages/ThankYouVip";
 import OnboardingSurvey from "./pages/OnboardingSurvey";
 import Shop from "./pages/Shop";
 import Pricing from "./pages/Pricing";
 import Messages from "./pages/Messages";
+import Imprint from "./pages/Imprint";
 
 const queryClient = new QueryClient();
 
@@ -64,7 +66,9 @@ const App = () => (
               <Route path="/onboarding" element={<OnboardingSurvey />} />
               <Route path="/vip-upgrade" element={<VipUpgrade />} />
               <Route path="/thank-you" element={<ThankYou />} />
+              <Route path="/thank-you-vip" element={<ThankYouVip />} />
               <Route path="/shop" element={<Shop />} />
+              <Route path="/imprint" element={<Imprint />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/articles" element={<ArticleManager />} />
               <Route path="/admin" element={<Admin />} />

@@ -14,7 +14,7 @@ const FeatureGate: React.FC<FeatureGateProps> = ({ feature, children, fallbackMe
   const { hasAccess, loading } = useSubscription();
   const navigate = useNavigate();
 
-  // Show content while loading to prevent flash
+  // Show loading skeleton briefly
   if (loading) return <>{children}</>;
 
   if (!hasAccess(feature)) {

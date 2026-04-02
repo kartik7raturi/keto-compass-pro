@@ -17,7 +17,7 @@ const ThankYou = () => {
 
   useEffect(() => {
     if (plan === 'basic') {
-      upgradePlan('basic', 'monthly', 19.99);
+      upgradePlan('basic', 'one_time', 19.99);
     } else if (plan === 'vip-monthly') {
       upgradePlan('vip', 'monthly', 49);
     } else if (plan === 'vip-lifetime') {
@@ -72,12 +72,18 @@ const ThankYou = () => {
           </Card>
 
           <div className="space-y-3">
-            <Button className="w-full" size="lg" onClick={() => navigate('/progress')}>
-              Go to Dashboard
-            </Button>
-            {!isVip && (
-              <Button variant="outline" className="w-full border-amber-500 text-amber-600" size="lg" onClick={() => navigate('/vip-upgrade')}>
-                <Crown className="h-4 w-4 mr-2" /> Upgrade to VIP
+            {!isVip ? (
+              <>
+                <Button className="w-full" size="lg" onClick={() => navigate('/vip-upgrade')}>
+                  <Crown className="h-4 w-4 mr-2" /> Upgrade to VIP
+                </Button>
+                <Button variant="outline" className="w-full" size="lg" onClick={() => navigate('/progress')}>
+                  Go to Dashboard
+                </Button>
+              </>
+            ) : (
+              <Button className="w-full" size="lg" onClick={() => navigate('/progress')}>
+                Go to Dashboard
               </Button>
             )}
           </div>

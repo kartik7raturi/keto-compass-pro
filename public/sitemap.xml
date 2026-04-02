@@ -27,4 +27,7 @@
   <url><loc>https://ketopia.online/terms</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
   <url><loc>https://ketopia.online/shop</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://ketopia.online/vip-upgrade</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://ketopia.online/pricing</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://ketopia.online/imprint</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://ketopia.online/onboarding</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
 </urlset>
