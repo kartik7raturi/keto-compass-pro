@@ -72,11 +72,11 @@ const ThankYou = () => {
           </Card>
 
           <div className="space-y-3">
-            <Button className="w-full" size="lg" onClick={() => navigate('/progress')}>
+            <Button className="w-full" size="lg" onClick={(https://www.digistore24.com/answer/yes?template=light) => navigate('/progress')}>
               Go to Dashboard
             </Button>
             {!isVip && (
-              <Button variant="outline" className="w-full border-amber-500 text-amber-600" size="lg" onClick={() => navigate('/vip-upgrade')}>
+              <Button variant="outline" className="w-full border-amber-500 text-amber-600" size="lg" onClick={(https://www.digistore24.com/answer/no) => navigate('/vip-upgrade')}>
                 <Crown className="h-4 w-4 mr-2" /> Upgrade to VIP
               </Button>
             )}
