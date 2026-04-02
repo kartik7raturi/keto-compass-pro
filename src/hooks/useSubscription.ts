@@ -48,8 +48,10 @@ export const useSubscription = () => {
   };
 
   const hasAccess = (feature: string): boolean => {
+    // If no subscription data yet, deny access
     if (!subscription) return false;
     if (!subscription.is_active) return false;
+    
     const plan = subscription.plan_type;
     
     const basicFeatures = ['recipes', 'tracker', 'basic_progress'];
@@ -59,7 +61,9 @@ export const useSubscription = () => {
       'weekly_report', 'challenges', 'marketplace', 'advanced_progress'
     ];
 
+    // VIP gets everything
     if (plan === 'vip') return true;
+    // Basic gets basic features + all basic features
     if (plan === 'basic') return basicFeatures.includes(feature);
     return false;
   };
@@ -81,8 +85,9 @@ export const useSubscription = () => {
         is_active: true,
         started_at: new Date().toISOString(),
       }, { onConflict: 'user_id' });
+    // Immediately refetch to update local state
     await fetchSubscription();
   };
 
-  return { subscription, loading, hasAccess, hasPaidPlan, upgradePlan, surveyCompleted };
+  return { subscription, loading, hasAccess, hasPaidPlan, upgradePlan, surveyCompleted, refetch: fetchSubscription };
 };

@@ -49,124 +49,60 @@ const REVIEWS = [
 ];
 
 const PRICING_OPTIONS = [
-  {
-    label: 'Sample Option',
-    bottles: 1,
-    pricePerBottle: 39.95,
-    total: 39.95,
-    savings: null,
-    freeShipping: false,
-    popular: false,
-    best: false,
-  },
-  {
-    label: 'Biggest Savings',
-    bottles: 6,
-    pricePerBottle: 33.25,
-    total: 199.50,
-    savings: 40.20,
-    freeShipping: true,
-    popular: false,
-    best: true,
-  },
-  {
-    label: 'Most Popular',
-    bottles: 3,
-    pricePerBottle: 35.95,
-    total: 107.85,
-    savings: 12.00,
-    freeShipping: true,
-    popular: true,
-    best: false,
-  },
+  { label: 'Sample Option', bottles: 1, pricePerBottle: 39.95, total: 39.95, savings: null, freeShipping: false, popular: false, best: false },
+  { label: 'Biggest Savings', bottles: 6, pricePerBottle: 33.25, total: 199.50, savings: 40.20, freeShipping: true, popular: false, best: true },
+  { label: 'Most Popular', bottles: 3, pricePerBottle: 35.95, total: 107.85, savings: 12.00, freeShipping: true, popular: true, best: false },
 ];
 
 const Shop = () => {
   const navigate = useNavigate();
+
+  const scrollToPricing = () => {
+    document.getElementById('supplement-pricing')?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <DigiStoreUpsell />
       <Header />
       <main>
-        {/* Breadcrumb */}
-        <div className="container px-4 py-4">
-          <p className="text-sm text-muted-foreground">Home / Shop / Keto BHB Supplement</p>
-        </div>
-
-        {/* Product Hero */}
-        <section className="container px-4 pb-12">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-8">
-              <Badge className="bg-primary/10 text-primary mb-2">Keto Supplement</Badge>
-              <h1 className="text-3xl md:text-5xl font-bold leading-tight mb-3">
+        {/* Product Overview Hero */}
+        <section className="py-12 md:py-16 bg-gradient-to-br from-primary/5 via-background to-primary/10">
+          <div className="container px-4">
+            <div className="max-w-4xl mx-auto text-center space-y-4">
+              <Badge className="bg-primary/10 text-primary">Keto Supplement</Badge>
+              <h1 className="text-3xl md:text-5xl font-bold leading-tight">
                 Advanced Keto BHB Formula
               </h1>
-              <p className="text-lg text-muted-foreground">Premium Exogenous Ketones — Accelerate Your Keto Results</p>
-              <div className="flex items-center justify-center gap-2 mt-3">
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Premium Exogenous Ketones — Accelerate Your Keto Results. Enter ketosis faster, boost energy, and crush cravings.
+              </p>
+              <div className="flex items-center justify-center gap-2">
                 {[1,2,3,4,5].map(i => (
                   <Star key={i} className="h-5 w-5 text-amber-500 fill-amber-500" />
                 ))}
                 <span className="text-sm text-muted-foreground">(4.8 / 5 — 2,340 reviews)</span>
               </div>
-            </div>
 
-            {/* Multi-Bottle Pricing */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12">
-              {PRICING_OPTIONS.map((opt) => (
-                <Card
-                  key={opt.label}
-                  className={`relative overflow-hidden ${opt.best ? 'border-2 border-[#1a3a5c] shadow-xl bg-blue-50/30' : 'border shadow-md'}`}
-                >
-                  {/* Header Banner */}
-                  <div className={`py-3 text-center text-white font-bold text-sm ${opt.best ? 'bg-[#1a3a5c]' : opt.popular ? 'bg-[#1a3a5c]' : 'bg-[#3a6a8a]'}`}>
-                    {opt.label}
-                  </div>
-                  <CardContent className="p-6 text-center space-y-4">
-                    <p className="text-lg font-semibold">{opt.bottles} {opt.bottles === 1 ? 'Bottle' : 'Bottles'}</p>
-                    
-                    <div className="flex items-center justify-center gap-3">
-                      <Package className="h-16 w-16 md:h-20 md:w-20 text-primary/60" />
-                      {opt.bottles >= 3 && <Package className="h-14 w-14 md:h-18 md:w-18 text-primary/40" />}
-                      {opt.bottles >= 6 && <Package className="h-12 w-12 md:h-16 md:w-16 text-primary/30" />}
-                    </div>
+              <div className="flex items-center justify-center">
+                <Package className="h-24 w-24 md:h-32 md:w-32 text-primary/60" />
+              </div>
 
-                    <div>
-                      <span className="text-4xl font-bold">${opt.pricePerBottle.toFixed(2)}</span>
-                      <span className="text-muted-foreground"> /Bottle</span>
-                    </div>
+              <ul className="flex flex-wrap justify-center gap-3 text-sm">
+                {BENEFITS.slice(0, 4).map(b => (
+                  <li key={b} className="flex items-center gap-1">
+                    <Check className="h-3.5 w-3.5 text-primary" />{b}
+                  </li>
+                ))}
+              </ul>
 
-                    {opt.savings && (
-                      <div className="space-y-1">
-                        <p className="text-sm text-primary font-semibold flex items-center justify-center gap-1">
-                          💰 Instant Savings: ${opt.savings.toFixed(2)}
-                        </p>
-                        {opt.freeShipping && (
-                          <p className="text-sm font-bold flex items-center justify-center gap-1">
-                            🚚 FREE SHIPPING
-                          </p>
-                        )}
-                      </div>
-                    )}
-
-                    <p className="text-lg font-semibold">Total: ${opt.total.toFixed(2)}</p>
-
-                    <Button
-                      className="w-full bg-amber-600 hover:bg-amber-700 text-white py-5 text-base font-bold"
-                      onClick={() => window.open('https://www.digistore24.com/answer/yes?template=light', '_blank')}
-                    >
-                      Add To Cart
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full text-muted-foreground text-sm"
-                      onClick={() => navigate('/progress')}
-                    >
-                      Go to Dashboard
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-amber-500 to-orange-600 text-white text-lg px-10 py-7 font-bold"
+                onClick={scrollToPricing}
+              >
+                Order Now
+              </Button>
             </div>
           </div>
         </section>
@@ -229,23 +165,62 @@ const Shop = () => {
           </div>
         </section>
 
-        {/* How It Works */}
-        <section className="py-12 container px-4 max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold text-center mb-8">How It Works</h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              { step: '1', title: 'Take Daily', desc: 'Take 2 capsules daily with water.' },
-              { step: '2', title: 'Enter Ketosis', desc: 'BHB ketones accelerate your body into ketosis.' },
-              { step: '3', title: 'See Results', desc: 'Experience energy, focus, and fat loss.' },
-            ].map(s => (
-              <div key={s.step} className="text-center space-y-3">
-                <div className="h-12 w-12 rounded-full bg-primary text-primary-foreground text-xl font-bold flex items-center justify-center mx-auto">
-                  {s.step}
-                </div>
-                <h3 className="font-semibold">{s.title}</h3>
-                <p className="text-sm text-muted-foreground">{s.desc}</p>
-              </div>
-            ))}
+        {/* Multi-Bottle Pricing */}
+        <section id="supplement-pricing" className="py-14 scroll-mt-20">
+          <div className="container px-4">
+            <h2 className="text-2xl font-bold text-center mb-2">Choose Your Package</h2>
+            <p className="text-center text-muted-foreground mb-8">Select the best option for your keto goals</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              {PRICING_OPTIONS.map((opt) => (
+                <Card
+                  key={opt.label}
+                  className={`relative overflow-hidden ${opt.best ? 'border-2 border-[hsl(var(--primary))] shadow-xl' : 'border shadow-md'}`}
+                >
+                  <div className={`py-3 text-center text-white font-bold text-sm ${opt.best ? 'bg-[hsl(var(--primary))]' : opt.popular ? 'bg-[hsl(var(--primary))]' : 'bg-muted-foreground'}`}>
+                    {opt.label}
+                  </div>
+                  <CardContent className="p-6 text-center space-y-4">
+                    <p className="text-lg font-semibold">{opt.bottles} {opt.bottles === 1 ? 'Bottle' : 'Bottles'}</p>
+                    
+                    <div className="flex items-center justify-center gap-3">
+                      <Package className="h-16 w-16 md:h-20 md:w-20 text-primary/60" />
+                      {opt.bottles >= 3 && <Package className="h-14 w-14 text-primary/40" />}
+                      {opt.bottles >= 6 && <Package className="h-12 w-12 text-primary/30" />}
+                    </div>
+
+                    <div>
+                      <span className="text-4xl font-bold">${opt.pricePerBottle.toFixed(2)}</span>
+                      <span className="text-muted-foreground"> /Bottle</span>
+                    </div>
+
+                    {opt.savings && (
+                      <div className="space-y-1">
+                        <p className="text-sm text-primary font-semibold">💰 Save ${opt.savings.toFixed(2)}</p>
+                        {opt.freeShipping && (
+                          <p className="text-sm font-bold">🚚 FREE SHIPPING</p>
+                        )}
+                      </div>
+                    )}
+
+                    <p className="text-lg font-semibold">Total: ${opt.total.toFixed(2)}</p>
+
+                    <Button
+                      className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-5 text-base font-bold"
+                      onClick={() => window.open('https://www.digistore24.com/answer/yes?template=light', '_blank')}
+                    >
+                      Add To Cart
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full text-muted-foreground text-sm"
+                      onClick={() => navigate('/progress')}
+                    >
+                      Go to Dashboard
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -307,7 +282,7 @@ const Shop = () => {
             <h2 className="text-2xl font-bold">Ready to Accelerate Your Keto Results?</h2>
             <Button
               size="lg"
-              className="w-full bg-amber-600 hover:bg-amber-700 text-white text-lg py-7 font-bold"
+              className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white text-lg py-7 font-bold"
               onClick={() => window.open('https://www.digistore24.com/answer/yes?template=light', '_blank')}
             >
               Order Now — Best Seller
