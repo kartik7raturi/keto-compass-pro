@@ -7,7 +7,7 @@ import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, Loader2, ChefHat, FileText, BookOpen, Image, Target, MessageSquare, Award, Headphones, Layout, Crown, Users, Link2, Package } from "lucide-react";
+import { Shield, Loader2, ChefHat, FileText, BookOpen, Image, Target, MessageSquare, Award, Headphones, Layout, Crown, Package } from "lucide-react";
 import { AdminRecipes } from "@/components/admin/AdminRecipes";
 import { AdminArticles } from "@/components/admin/AdminArticles";
 import { AdminStories } from "@/components/admin/AdminStories";
@@ -25,38 +25,52 @@ import { Badge } from "@/components/ui/badge";
 const AdminPages = () => {
   const navigate = useNavigate();
   const pages = [
-    { name: 'Homepage', path: '/', status: 'active' },
-    { name: 'VIP Upgrade', path: '/vip-upgrade', status: 'active' },
-    { name: 'Shop', path: '/shop', status: 'active' },
-    { name: 'Thank You', path: '/thank-you', status: 'active' },
-    { name: 'Onboarding Survey', path: '/onboarding', status: 'active' },
-    { name: 'Recipes', path: '/recipes', status: 'active' },
-    { name: 'Tracker', path: '/tracker', status: 'active' },
-    { name: 'Progress', path: '/progress', status: 'active' },
-    { name: 'Challenges', path: '/challenges', status: 'active' },
-    { name: 'Marketplace', path: '/marketplace', status: 'active' },
-    { name: 'Community', path: '/community', status: 'active' },
-    { name: 'Blog', path: '/blog', status: 'active' },
+    { name: 'Homepage', path: '/', buttons: [] },
+    { name: 'Sales Page ($19.99)', path: '/pricing', buttons: ['keto_starter'] },
+    { name: 'VIP Upgrade', path: '/vip-upgrade', buttons: ['vip_monthly', 'vip_lifetime'] },
+    { name: 'Thank You (Basic)', path: '/thank-you', buttons: ['VIP Upgrade button', 'Go to Dashboard button'] },
+    { name: 'Thank You (VIP)', path: '/thank-you-vip', buttons: ['Buy Supplement button', 'Go to Dashboard button'] },
+    { name: 'Shop / Supplement', path: '/shop', buttons: ['1 Bottle', '3 Bottles', '6 Bottles'] },
+    { name: 'Onboarding Quiz', path: '/onboarding', buttons: [] },
+    { name: 'Imprint', path: '/imprint', buttons: [] },
+    { name: 'Recipes', path: '/recipes', buttons: [] },
+    { name: 'Tracker', path: '/tracker', buttons: [] },
+    { name: 'Progress', path: '/progress', buttons: [] },
+    { name: 'Challenges', path: '/challenges', buttons: [] },
+    { name: 'Marketplace', path: '/marketplace', buttons: [] },
+    { name: 'Community', path: '/community', buttons: [] },
+    { name: 'Blog', path: '/blog', buttons: [] },
   ];
 
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-semibold">Page Management</h3>
+      <p className="text-sm text-muted-foreground">View all pages and manage their payment/redirect button URLs below.</p>
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Page</TableHead>
             <TableHead>Path</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead>Buttons</TableHead>
             <TableHead>Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {pages.map(p => (
             <TableRow key={p.path}>
-              <TableCell className="font-medium">{p.name}</TableCell>
-              <TableCell className="text-muted-foreground text-sm">{p.path}</TableCell>
-              <TableCell><Badge variant="secondary" className="bg-primary/10 text-primary">Active</Badge></TableCell>
+              <TableCell className="font-medium text-sm">{p.name}</TableCell>
+              <TableCell className="text-muted-foreground text-xs">{p.path}</TableCell>
+              <TableCell>
+                {p.buttons.length > 0 ? (
+                  <div className="flex flex-wrap gap-1">
+                    {p.buttons.map(b => (
+                      <Badge key={b} variant="secondary" className="text-xs">{b}</Badge>
+                    ))}
+                  </div>
+                ) : (
+                  <span className="text-xs text-muted-foreground">—</span>
+                )}
+              </TableCell>
               <TableCell>
                 <Button size="sm" variant="outline" onClick={() => navigate(p.path)}>View</Button>
               </TableCell>
@@ -65,7 +79,7 @@ const AdminPages = () => {
         </TableBody>
       </Table>
 
-      {/* Button Links */}
+      {/* Button Links Management */}
       <AdminButtonLinks />
     </div>
   );
