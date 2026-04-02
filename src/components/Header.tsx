@@ -164,8 +164,8 @@ const Header = () => {
               <Button variant="ghost" size="sm" onClick={() => navigate('/auth')}>
                 Sign In
               </Button>
-              <Button size="sm" className="bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 transition-opacity" onClick={() => navigate('/pricing')}>
-                Get Started
+              <Button size="sm" className="bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 transition-opacity" onClick={() => navigate('/onboarding')}>
+                Get Free Keto Plan
               </Button>
             </>
           )}
