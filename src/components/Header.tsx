@@ -67,8 +67,7 @@ const Header = () => {
     { label: 'Marketplace', path: '/marketplace' },
     { label: 'Shop', path: '/shop', icon: ShoppingBag },
   ] : [
-    { label: 'Features', path: '/#features' },
-    { label: 'Pricing', path: '/pricing' },
+    { label: 'Home', path: '/' },
     { label: 'Contact', path: '/contact' },
   ];
 
