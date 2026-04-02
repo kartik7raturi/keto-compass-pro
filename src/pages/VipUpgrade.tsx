@@ -115,14 +115,14 @@ const VipUpgrade = () => {
                   </ul>
                   <Button
                     className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-6 text-lg"
-                    onClick={() => window.open('https://www.digistore24.com/product/680740)}
+                    onClick={() => window.open('https://www.digistore24.com/answer/yes?template=light', '_blank')}
                   >
                     Yes, Upgrade Now — $49/mo
                   </Button>
                   <Button
                     variant="outline"
                     className="w-full text-muted-foreground"
-                    onClick={() => window.open('https://www.digistore24.com/product/680740')}
+                    onClick={() => window.open('https://www.digistore24.com/answer/no', '_blank')}
                   >
                     No thanks, maybe later
                   </Button>
@@ -145,14 +145,14 @@ const VipUpgrade = () => {
                   </ul>
                   <Button
                     className="w-full bg-gradient-to-r from-primary to-primary/80 text-primary-foreground py-6 text-lg"
-                    onClick={() => window.open('https://www.ketopia.online/progress')}
+                    onClick={() => window.open('https://www.digistore24.com/answer/yes?template=light', '_blank')}
                   >
                     Yes, Get Lifetime — $299
                   </Button>
                   <Button
                     variant="outline"
                     className="w-full text-muted-foreground"
-                    onClick={() => window.open('https://www.digistore24.com/product/680740')}
+                    onClick={() => window.open('https://www.digistore24.com/answer/no', '_blank')}
                   >
                     No thanks, maybe later
                   </Button>
