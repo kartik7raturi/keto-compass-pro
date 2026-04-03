@@ -74,6 +74,9 @@ const Footer = () => {
         </div>
 
         <div className="border-t pt-8">
+          <p className="text-xs text-muted-foreground text-center mb-4">
+            These earnings are not representative of every participant's experience. Individual results may vary based on effort, consistency, and other factors. This product does not guarantee income or specific health outcomes.
+          </p>
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-muted-foreground">
               © 2024 Ketopia. All rights reserved.
