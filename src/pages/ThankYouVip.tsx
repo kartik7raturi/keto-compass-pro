@@ -3,12 +3,26 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Check, Crown, PartyPopper, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Check, Crown, ShoppingBag, ArrowRight } from 'lucide-react';
 import DigiStoreBadge from '@/components/DigiStoreBadge';
 import DigiStoreUpsell from '@/components/DigiStoreUpsell';
+import { useButtonLinks } from '@/hooks/useButtonLinks';
 
 const ThankYouVip = () => {
   const navigate = useNavigate();
+  const { getUrl } = useButtonLinks();
+
+  const handleBuySupplement = () => {
+    const url = getUrl('thankyou_vip_supplement');
+    if (url.startsWith('/')) navigate(url);
+    else window.open(url, '_blank');
+  };
+
+  const handleDashboard = () => {
+    const url = getUrl('thankyou_vip_dashboard');
+    if (url.startsWith('/')) navigate(url);
+    else window.open(url, '_blank');
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -17,7 +31,6 @@ const ThankYouVip = () => {
       <Header />
       <main className="container mx-auto px-4 py-12">
         <div className="max-w-xl mx-auto text-center space-y-8">
-          {/* Success message */}
           <div>
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-amber-500/10 mb-4">
               <Crown className="h-10 w-10 text-amber-500" />
@@ -28,7 +41,6 @@ const ThankYouVip = () => {
             </p>
           </div>
 
-          {/* Supplement Upsell */}
           <Card className="border-2 border-primary shadow-xl overflow-hidden">
             <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground py-3 text-center font-bold">
               🔥 EXCLUSIVE VIP OFFER — ONE TIME ONLY 🔥
@@ -50,7 +62,7 @@ const ThankYouVip = () => {
               </ul>
               <Button
                 className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-6 text-lg font-bold"
-                onClick={() => window.open('https://www.digistore24.com/answer/yes?template=light', '_blank')}
+                onClick={handleBuySupplement}
               >
                 Yes, Add Supplement to My Order
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -58,7 +70,7 @@ const ThankYouVip = () => {
               <Button
                 variant="outline"
                 className="w-full text-muted-foreground"
-                onClick={() => navigate('/progress')}
+                onClick={handleDashboard}
               >
                 No thanks, go to my dashboard
               </Button>

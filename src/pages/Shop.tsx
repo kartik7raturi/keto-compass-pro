@@ -7,6 +7,8 @@ import { Star, Shield, Truck, Check, MessageSquare, Package } from 'lucide-react
 import { useNavigate } from 'react-router-dom';
 import DigiStoreUpsell from '@/components/DigiStoreUpsell';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { useButtonLinks } from '@/hooks/useButtonLinks';
+import supplementImg from '@/assets/supplement-product.png';
 
 const BENEFITS = [
   'Supports Healthy Ketosis',
@@ -49,13 +51,14 @@ const REVIEWS = [
 ];
 
 const PRICING_OPTIONS = [
-  { label: 'Sample Option', bottles: 1, pricePerBottle: 39.95, total: 39.95, savings: null, freeShipping: false, popular: false, best: false },
-  { label: 'Biggest Savings', bottles: 6, pricePerBottle: 33.25, total: 199.50, savings: 40.20, freeShipping: true, popular: false, best: true },
-  { label: 'Most Popular', bottles: 3, pricePerBottle: 35.95, total: 107.85, savings: 12.00, freeShipping: true, popular: true, best: false },
+  { label: 'Sample Option', bottles: 1, pricePerBottle: 39.95, total: 39.95, savings: null, freeShipping: false, popular: false, best: false, linkKey: 'shop_1_bottle' },
+  { label: 'Biggest Savings', bottles: 6, pricePerBottle: 33.25, total: 199.50, savings: 40.20, freeShipping: true, popular: false, best: true, linkKey: 'shop_6_bottles' },
+  { label: 'Most Popular', bottles: 3, pricePerBottle: 35.95, total: 107.85, savings: 12.00, freeShipping: true, popular: true, best: false, linkKey: 'shop_3_bottles' },
 ];
 
 const Shop = () => {
   const navigate = useNavigate();
+  const { getUrl } = useButtonLinks();
 
   const scrollToPricing = () => {
     document.getElementById('supplement-pricing')?.scrollIntoView({ behavior: 'smooth' });
@@ -85,7 +88,7 @@ const Shop = () => {
               </div>
 
               <div className="flex items-center justify-center">
-                <Package className="h-24 w-24 md:h-32 md:w-32 text-primary/60" />
+                <img src={supplementImg} alt="Keto BHB Supplement" className="h-48 md:h-64 object-contain rounded-xl" />
               </div>
 
               <ul className="flex flex-wrap justify-center gap-3 text-sm">
@@ -182,10 +185,8 @@ const Shop = () => {
                   <CardContent className="p-6 text-center space-y-4">
                     <p className="text-lg font-semibold">{opt.bottles} {opt.bottles === 1 ? 'Bottle' : 'Bottles'}</p>
                     
-                    <div className="flex items-center justify-center gap-3">
-                      <Package className="h-16 w-16 md:h-20 md:w-20 text-primary/60" />
-                      {opt.bottles >= 3 && <Package className="h-14 w-14 text-primary/40" />}
-                      {opt.bottles >= 6 && <Package className="h-12 w-12 text-primary/30" />}
+                    <div className="flex items-center justify-center">
+                      <img src={supplementImg} alt="Keto BHB Supplement" className="h-24 md:h-28 object-contain" />
                     </div>
 
                     <div>
@@ -206,7 +207,7 @@ const Shop = () => {
 
                     <Button
                       className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-5 text-base font-bold"
-                      onClick={() => window.open('https://www.digistore24.com/answer/yes?template=light', '_blank')}
+                      onClick={() => window.open(getUrl(opt.linkKey), '_blank')}
                     >
                       Add To Cart
                     </Button>
@@ -283,16 +284,16 @@ const Shop = () => {
             <Button
               size="lg"
               className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white text-lg py-7 font-bold"
-              onClick={() => window.open('https://www.digistore24.com/answer/yes?template=light', '_blank')}
+              onClick={() => window.open(getUrl('shop_3_bottles'), '_blank')}
             >
               Order Now — Best Seller
             </Button>
             <Button
               variant="outline"
               className="w-full text-muted-foreground"
-              onClick={() => window.open('https://www.digistore24.com/answer/no', '_blank')}
+              onClick={() => navigate('/progress')}
             >
-              No thanks, not this time
+              No thanks, go to dashboard
             </Button>
             <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground">
               <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> 60-Day Guarantee</span>

@@ -8,11 +8,13 @@ import { Check, Crown, PartyPopper } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
 import DigiStoreBadge from '@/components/DigiStoreBadge';
 import DigiStorePromo from '@/components/DigiStorePromo';
+import { useButtonLinks } from '@/hooks/useButtonLinks';
 
 const ThankYou = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { upgradePlan } = useSubscription();
+  const { getUrl } = useButtonLinks();
   const plan = searchParams.get('plan') || 'basic';
 
   useEffect(() => {
@@ -36,6 +38,18 @@ const ThankYou = () => {
   ];
 
   const features = isVip ? vipFeatures : basicFeatures;
+
+  const handleVipUpgrade = () => {
+    const url = getUrl('thankyou_basic_vip_upgrade');
+    if (url.startsWith('/')) navigate(url);
+    else window.open(url, '_blank');
+  };
+
+  const handleDashboard = () => {
+    const url = getUrl('thankyou_basic_dashboard');
+    if (url.startsWith('/')) navigate(url);
+    else window.open(url, '_blank');
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -74,15 +88,15 @@ const ThankYou = () => {
           <div className="space-y-3">
             {!isVip ? (
               <>
-                <Button className="w-full" size="lg" onClick={() => navigate('/vip-upgrade')}>
+                <Button className="w-full" size="lg" onClick={handleVipUpgrade}>
                   <Crown className="h-4 w-4 mr-2" /> Upgrade to VIP
                 </Button>
-                <Button variant="outline" className="w-full" size="lg" onClick={() => navigate('/progress')}>
+                <Button variant="outline" className="w-full" size="lg" onClick={handleDashboard}>
                   Go to Dashboard
                 </Button>
               </>
             ) : (
-              <Button className="w-full" size="lg" onClick={() => navigate('/progress')}>
+              <Button className="w-full" size="lg" onClick={handleDashboard}>
                 Go to Dashboard
               </Button>
             )}
