@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -58,6 +58,54 @@ const OnboardingSurvey = () => {
   const [submitting, setSubmitting] = useState(false);
   const [signupDone, setSignupDone] = useState(false);
   const [emailVerified, setEmailVerified] = useState(false);
+  const [loadingSurvey, setLoadingSurvey] = useState(true);
+
+  // If user arrives here already verified (e.g. from email link redirect),
+  // load their survey data and jump to report
+  useEffect(() => {
+    const loadExistingSurvey = async () => {
+      if (user) {
+        const { data: survey } = await supabase
+          .from('user_survey_responses')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (survey) {
+          setData(prev => ({
+            ...prev,
+            current_weight: survey.current_weight?.toString() || '',
+            goal_weight: survey.goal_weight?.toString() || '',
+            height: survey.height?.toString() || '',
+            age: survey.age?.toString() || '',
+            gender: survey.gender || '',
+            activity_level: survey.activity_level || '',
+            diet_experience: survey.diet_experience || '',
+            exercise_frequency: survey.exercise_frequency || '',
+            health_conditions: Array.isArray(survey.health_conditions) ? survey.health_conditions.join(', ') : '',
+            motivation: survey.motivation || '',
+          }));
+          setSignupDone(true);
+          setEmailVerified(true);
+          setStep(REPORT_STEP);
+        } else {
+          // User verified but no survey — they came from auth page signup
+          // Check if they have a paid plan, if so go to dashboard
+          const { data: sub } = await supabase
+            .from('user_subscriptions')
+            .select('plan_type, is_active')
+            .eq('user_id', user.id)
+            .maybeSingle();
+          if (sub?.is_active) {
+            navigate('/progress');
+            return;
+          }
+        }
+      }
+      setLoadingSurvey(false);
+    };
+    loadExistingSurvey();
+  }, [user]);
 
   const progress = ((step + 1) / TOTAL_STEPS) * 100;
 
@@ -164,7 +212,6 @@ const OnboardingSurvey = () => {
     }
   };
 
-  // Generate a simple 1-week meal plan
   const weeklyPlan = [
     { day: 'Monday', meals: 'Bacon & eggs • Chicken salad • Steak with asparagus' },
     { day: 'Tuesday', meals: 'Keto smoothie • Tuna lettuce wraps • Salmon with broccoli' },
@@ -174,6 +221,14 @@ const OnboardingSurvey = () => {
     { day: 'Saturday', meals: 'Egg muffins • BLT lettuce wraps • Lamb with roasted veggies' },
     { day: 'Sunday', meals: 'Keto waffles • Greek salad • Grilled fish with cauliflower' },
   ];
+
+  if (loadingSurvey) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
 
   // Quiz step rendering
   if (step < QUIZ_STEPS.length) {
@@ -319,7 +374,7 @@ const OnboardingSurvey = () => {
     );
   }
 
-  // Report step - BMI + 1-week plan
+  // Report step - BMI + 1-week plan then redirect to pricing (initial sales)
   if (step === REPORT_STEP) {
     const targets = calcTargets();
     const bmi = parseFloat(calcBMI());
@@ -381,7 +436,7 @@ const OnboardingSurvey = () => {
               className="w-full bg-gradient-to-r from-primary to-primary/80 py-6 text-lg font-bold"
               onClick={() => navigate('/pricing')}
             >
-              Get Full Report & Access — $19.99
+              Get Full Access — $19.99
             </Button>
             <p className="text-xs text-center text-muted-foreground">
               Unlock all recipes, tracker, and complete meal plans
