@@ -5,9 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Star, Shield, Truck, Check, MessageSquare, Package } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import DigiStoreUpsell from '@/components/DigiStoreUpsell';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { useButtonLinks } from '@/hooks/useButtonLinks';
 import supplementImg from '@/assets/supplement-product.png';
 
 const BENEFITS = [
@@ -51,14 +49,15 @@ const REVIEWS = [
 ];
 
 const PRICING_OPTIONS = [
-  { label: 'Sample Option', bottles: 1, pricePerBottle: 39.95, total: 39.95, savings: null, freeShipping: false, popular: false, best: false, linkKey: 'shop_1_bottle' },
-  { label: 'Biggest Savings', bottles: 6, pricePerBottle: 33.25, total: 199.50, savings: 40.20, freeShipping: true, popular: false, best: true, linkKey: 'shop_6_bottles' },
-  { label: 'Most Popular', bottles: 3, pricePerBottle: 35.95, total: 107.85, savings: 12.00, freeShipping: true, popular: true, best: false, linkKey: 'shop_3_bottles' },
+  { label: 'Sample Option', bottles: 1, pricePerBottle: 39.95, total: 39.95, savings: null, freeShipping: false, popular: false, best: false },
+  { label: 'Biggest Savings', bottles: 6, pricePerBottle: 33.25, total: 199.50, savings: 40.20, freeShipping: true, popular: false, best: true },
+  { label: 'Most Popular', bottles: 3, pricePerBottle: 35.95, total: 107.85, savings: 12.00, freeShipping: true, popular: true, best: false },
 ];
+
+const SHOP_ORDER_URL = 'https://www.digistore24.com/product/681168';
 
 const Shop = () => {
   const navigate = useNavigate();
-  const { getUrl } = useButtonLinks();
 
   const scrollToPricing = () => {
     document.getElementById('supplement-pricing')?.scrollIntoView({ behavior: 'smooth' });
@@ -66,7 +65,6 @@ const Shop = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <DigiStoreUpsell />
       <Header />
       <main>
         {/* Product Overview Hero */}
@@ -207,7 +205,7 @@ const Shop = () => {
 
                     <Button
                       className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-5 text-base font-bold"
-                      onClick={() => window.open(getUrl(opt.linkKey), '_blank')}
+                      onClick={() => window.open(SHOP_ORDER_URL, '_blank')}
                     >
                       Add To Cart
                     </Button>
@@ -284,7 +282,7 @@ const Shop = () => {
             <Button
               size="lg"
               className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white text-lg py-7 font-bold"
-              onClick={() => window.open(getUrl('shop_3_bottles'), '_blank')}
+              onClick={() => window.open(SHOP_ORDER_URL, '_blank')}
             >
               Order Now — Best Seller
             </Button>
