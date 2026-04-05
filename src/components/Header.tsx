@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import UserProgressWidget from "@/components/UserProgressWidget";
 import NotificationBell from "@/components/NotificationBell";
+import { useSubscription } from "@/hooks/useSubscription";
 
 const Header = () => {
   const { user, signOut } = useAuth();
@@ -14,6 +15,7 @@ const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDisplayName, setUserDisplayName] = useState<string>("");
   const [isAdmin, setIsAdmin] = useState(false);
+  const { hasPaidPlan, subscription } = useSubscription();
 
   const handleSignOut = async () => {
     await signOut();
@@ -56,20 +58,44 @@ const Header = () => {
     fetchUserProfile();
   }, [user]);
 
-  // Nav for logged-in users
-  const navItems = user ? [
-    { label: 'Home', path: '/' },
-    { label: 'Recipes', path: '/recipes' },
-    { label: 'Tracker', path: '/tracker' },
-    { label: 'Challenges', path: '/challenges' },
-    { label: 'Progress', path: '/progress' },
-    { label: 'Community', path: '/community' },
-    { label: 'Marketplace', path: '/marketplace' },
-    { label: 'Shop', path: '/shop', icon: ShoppingBag },
-  ] : [
-    { label: 'Home', path: '/' },
-    { label: 'Contact', path: '/contact' },
-  ];
+  const isPaid = hasPaidPlan();
+  const isVip = subscription?.plan_type === 'vip';
+
+  // Build nav items based on subscription status
+  const getNavItems = () => {
+    if (!user) {
+      return [
+        { label: 'Home', path: '/' },
+        { label: 'Contact', path: '/contact' },
+      ];
+    }
+    
+    // Admin or paid user gets full nav
+    if (isAdmin || isPaid) {
+      const items = [
+        { label: 'Home', path: '/' },
+        { label: 'Recipes', path: '/recipes' },
+        { label: 'Tracker', path: '/tracker' },
+        { label: 'Progress', path: '/progress' },
+        { label: 'Community', path: '/community' },
+      ];
+      
+      if (isVip || isAdmin) {
+        items.push({ label: 'Challenges', path: '/challenges' });
+        items.push({ label: 'Marketplace', path: '/marketplace' });
+      }
+      
+      items.push({ label: 'Shop', path: '/shop' });
+      return items;
+    }
+    
+    // Unpaid user — minimal nav (they should be on pricing)
+    return [
+      { label: 'Home', path: '/' },
+    ];
+  };
+
+  const navItems = getNavItems();
 
   return (
     <header className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b">
@@ -98,7 +124,7 @@ const Header = () => {
               onClick={() => navigate(item.path)}
               className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
             >
-              {(item as any).icon && <ShoppingBag className="h-3.5 w-3.5" />}
+              {item.label === 'Shop' && <ShoppingBag className="h-3.5 w-3.5" />}
               {item.label}
             </button>
           ))}
@@ -126,31 +152,39 @@ const Header = () => {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <div className="p-2 space-y-3 max-h-96 overflow-y-auto">
-                    <UserProgressWidget />
-                  </div>
+                  {isPaid && (
+                    <div className="p-2 space-y-3 max-h-96 overflow-y-auto">
+                      <UserProgressWidget />
+                    </div>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate('/profile')}>
                     Profile Settings
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/articles')}>
-                    Manage Articles
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/vip-upgrade')}>
-                    <Crown className="mr-2 h-4 w-4 text-amber-500" />
-                    VIP Upgrade
-                  </DropdownMenuItem>
+                  {isPaid && (
+                    <>
+                      <DropdownMenuItem onClick={() => navigate('/articles')}>
+                        Manage Articles
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate('/progress')}>
+                        Progress Dashboard
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate('/tracker')}>
+                        Tracker
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  {isPaid && !isVip && (
+                    <DropdownMenuItem onClick={() => navigate('/vip-upgrade')}>
+                      <Crown className="mr-2 h-4 w-4 text-amber-500" />
+                      VIP Upgrade
+                    </DropdownMenuItem>
+                  )}
                   {isAdmin && (
                     <DropdownMenuItem onClick={() => navigate('/admin')}>
                       Admin Dashboard
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem onClick={() => navigate('/progress')}>
-                    Progress Dashboard
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/tracker')}>
-                    Tracker
-                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="mr-2 h-4 w-4" />
@@ -180,7 +214,7 @@ const Header = () => {
               <button
                 key={item.path}
                 onClick={() => handleNavigation(item.path)}
-                className="block w-full text-left py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
+                className="block w-full text-left py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
               >
                 {item.label}
               </button>
