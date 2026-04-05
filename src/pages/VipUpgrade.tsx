@@ -1,11 +1,7 @@
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Check, Crown, Zap, Target, TrendingUp, Dumbbell, Droplets, Calendar, Star, Shield, Lock } from 'lucide-react';
+import { Check, Crown, Zap, Target, TrendingUp, Dumbbell, Droplets, Calendar, Star, Shield } from 'lucide-react';
 import DigiStoreBadge from '@/components/DigiStoreBadge';
-import DigiStoreUpsell from '@/components/DigiStoreUpsell';
-import { Badge } from '@/components/ui/badge';
 
 const VIP_FEATURES = [
   { icon: Target, label: '30-Day Keto Challenge', desc: 'Structured daily plan to reach ketosis' },
@@ -33,13 +29,18 @@ const VipUpgrade = () => {
   return (
     <div className="min-h-screen bg-background">
       <DigiStoreBadge type="salespage" />
-      <DigiStoreUpsell />
-      <Header />
+      {/* No Header/Footer — this is a funnel upsell page */}
       <main>
         {/* Hero */}
         <section className="relative py-16 md:py-24 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-background to-orange-500/10" />
           <div className="container relative text-center px-4">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+                <span className="text-primary-foreground font-bold text-sm">K</span>
+              </div>
+              <span className="font-bold text-xl text-foreground">Ketopia</span>
+            </div>
             <div className="inline-flex items-center gap-2 bg-amber-500/10 text-amber-600 px-4 py-2 rounded-full text-sm font-semibold mb-6">
               <Crown className="h-5 w-5" />
               VIP Membership
@@ -95,7 +96,7 @@ const VipUpgrade = () => {
           </div>
         </section>
 
-        {/* Pricing with Digistore Upsell Buttons */}
+        {/* Pricing — $29/mo and $199 lifetime */}
         <section className="py-16 bg-gradient-to-b from-amber-500/5 to-background">
           <div className="container px-4">
             <h2 className="text-2xl font-bold text-center mb-2">Choose Your VIP Plan</h2>
@@ -105,7 +106,7 @@ const VipUpgrade = () => {
                 <CardContent className="p-6 text-center space-y-4">
                   <h3 className="text-xl font-bold">Monthly</h3>
                   <div>
-                    <span className="text-5xl font-bold">$49</span>
+                    <span className="text-5xl font-bold">$29</span>
                     <span className="text-muted-foreground">/month</span>
                   </div>
                   <ul className="text-sm space-y-2 text-left">
@@ -115,16 +116,9 @@ const VipUpgrade = () => {
                   </ul>
                   <Button
                     className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-6 text-lg"
-                    onClick={() => window.open('https://www.digistore24.com/answer/yes?template=light', '_blank')}
+                    onClick={() => window.open('https://www.digistore24.com/product/680740', '_blank')}
                   >
-                    Yes, Upgrade Now — $49/mo
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full text-muted-foreground"
-                    onClick={() => window.open('https://www.digistore24.com/answer/no', '_blank')}
-                  >
-                    No thanks, maybe later
+                    Upgrade Now — $29/mo
                   </Button>
                 </CardContent>
               </Card>
@@ -134,7 +128,7 @@ const VipUpgrade = () => {
                 <CardContent className="p-6 text-center space-y-4">
                   <h3 className="text-xl font-bold">Lifetime</h3>
                   <div>
-                    <span className="text-5xl font-bold">$299</span>
+                    <span className="text-5xl font-bold">$199</span>
                     <span className="text-muted-foreground"> one-time</span>
                   </div>
                   <ul className="text-sm space-y-2 text-left">
@@ -145,16 +139,9 @@ const VipUpgrade = () => {
                   </ul>
                   <Button
                     className="w-full bg-gradient-to-r from-primary to-primary/80 text-primary-foreground py-6 text-lg"
-                    onClick={() => window.open('https://www.digistore24.com/answer/yes?template=light', '_blank')}
+                    onClick={() => window.open('https://www.digistore24.com/product/680740', '_blank')}
                   >
-                    Yes, Get Lifetime — $299
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full text-muted-foreground"
-                    onClick={() => window.open('https://www.digistore24.com/answer/no', '_blank')}
-                  >
-                    No thanks, maybe later
+                    Get Lifetime — $199
                   </Button>
                 </CardContent>
               </Card>
@@ -162,7 +149,6 @@ const VipUpgrade = () => {
           </div>
         </section>
       </main>
-      <Footer />
     </div>
   );
 };

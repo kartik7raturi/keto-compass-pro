@@ -1,34 +1,43 @@
 import { useNavigate } from 'react-router-dom';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Check, Crown, ShoppingBag, ArrowRight } from 'lucide-react';
 import DigiStoreBadge from '@/components/DigiStoreBadge';
-import DigiStoreUpsell from '@/components/DigiStoreUpsell';
-import { useButtonLinks } from '@/hooks/useButtonLinks';
 
 const ThankYouVip = () => {
   const navigate = useNavigate();
-  const { getUrl } = useButtonLinks();
+
+  // Inject DigiStore upsell script
+  useEffect(() => {
+    const scriptId = 'digistore-thankyouvip-upsell';
+    if (document.getElementById(scriptId)) return;
+    const s = document.createElement('script');
+    s.id = scriptId;
+    s.src = 'https://www.digistore24-scripts.com/service/digistore.js';
+    document.head.appendChild(s);
+    s.onload = () => {
+      try { (window as any).digistoreUpsell?.(); } catch {}
+    };
+    return () => { document.getElementById(scriptId)?.remove(); };
+  }, []);
 
   const handleBuySupplement = () => {
-    const url = getUrl('thankyou_vip_supplement');
-    if (url.startsWith('/')) navigate(url);
-    else window.open(url, '_blank');
+    // DigiStore yes answer — redirect to shop
+    window.open('https://www.digistore24.com/answer/yes?template=light', '_blank');
+    navigate('/shop');
   };
 
   const handleDashboard = () => {
-    const url = getUrl('thankyou_vip_dashboard');
-    if (url.startsWith('/')) navigate(url);
-    else window.open(url, '_blank');
+    // DigiStore no answer — go to dashboard
+    window.open('https://www.digistore24.com/answer/no', '_blank');
+    navigate('/progress');
   };
 
   return (
     <div className="min-h-screen bg-background">
       <DigiStoreBadge type="thankyoupage" />
-      <DigiStoreUpsell />
-      <Header />
+      {/* No Header/Footer — funnel page */}
       <main className="container mx-auto px-4 py-12">
         <div className="max-w-xl mx-auto text-center space-y-8">
           <div>
@@ -78,7 +87,6 @@ const ThankYouVip = () => {
           </Card>
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

@@ -1,31 +1,40 @@
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Check, Crown, PartyPopper } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
 import DigiStoreBadge from '@/components/DigiStoreBadge';
-import DigiStorePromo from '@/components/DigiStorePromo';
-import { useButtonLinks } from '@/hooks/useButtonLinks';
 
 const ThankYou = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { upgradePlan } = useSubscription();
-  const { getUrl } = useButtonLinks();
   const plan = searchParams.get('plan') || 'basic';
 
   useEffect(() => {
     if (plan === 'basic') {
       upgradePlan('basic', 'one_time', 19.99);
     } else if (plan === 'vip-monthly') {
-      upgradePlan('vip', 'monthly', 49);
+      upgradePlan('vip', 'monthly', 29);
     } else if (plan === 'vip-lifetime') {
-      upgradePlan('vip', 'one_time', 299);
+      upgradePlan('vip', 'one_time', 199);
     }
   }, [plan]);
+
+  // Inject DigiStore upsell script
+  useEffect(() => {
+    const scriptId = 'digistore-thankyou-upsell';
+    if (document.getElementById(scriptId)) return;
+    const s = document.createElement('script');
+    s.id = scriptId;
+    s.src = 'https://www.digistore24-scripts.com/service/digistore.js';
+    document.head.appendChild(s);
+    s.onload = () => {
+      try { (window as any).digistoreUpsell?.(); } catch {}
+    };
+    return () => { document.getElementById(scriptId)?.remove(); };
+  }, []);
 
   const isVip = plan.startsWith('vip');
 
@@ -40,22 +49,21 @@ const ThankYou = () => {
   const features = isVip ? vipFeatures : basicFeatures;
 
   const handleVipUpgrade = () => {
-    const url = getUrl('thankyou_basic_vip_upgrade');
-    if (url.startsWith('/')) navigate(url);
-    else window.open(url, '_blank');
+    // DigiStore yes answer — then redirect to VIP upgrade page
+    window.open('https://www.digistore24.com/answer/yes?template=light', '_blank');
+    navigate('/vip-upgrade');
   };
 
   const handleDashboard = () => {
-    const url = getUrl('thankyou_basic_dashboard');
-    if (url.startsWith('/')) navigate(url);
-    else window.open(url, '_blank');
+    // DigiStore no answer
+    window.open('https://www.digistore24.com/answer/no', '_blank');
+    navigate('/progress');
   };
 
   return (
     <div className="min-h-screen bg-background">
       <DigiStoreBadge type="thankyoupage" />
-      <DigiStorePromo />
-      <Header />
+      {/* No Header/Footer on thank you page — funnel page */}
       <main className="container mx-auto px-4 py-16">
         <div className="max-w-lg mx-auto text-center">
           <div className="mb-6">
@@ -88,7 +96,7 @@ const ThankYou = () => {
           <div className="space-y-3">
             {!isVip ? (
               <>
-                <Button className="w-full" size="lg" onClick={handleVipUpgrade}>
+                <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white" size="lg" onClick={handleVipUpgrade}>
                   <Crown className="h-4 w-4 mr-2" /> Upgrade to VIP
                 </Button>
                 <Button variant="outline" className="w-full" size="lg" onClick={handleDashboard}>
@@ -96,14 +104,13 @@ const ThankYou = () => {
                 </Button>
               </>
             ) : (
-              <Button className="w-full" size="lg" onClick={handleDashboard}>
+              <Button className="w-full" size="lg" onClick={() => navigate('/progress')}>
                 Go to Dashboard
               </Button>
             )}
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 };
