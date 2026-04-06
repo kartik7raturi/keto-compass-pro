@@ -31,10 +31,6 @@ const VipUpgrade = () => {
       <DigiStoreBadge type="salespage" />
       {/* No Header/Footer — this is a funnel upsell page */}
       <main>
-        <script src="https://www.digistore24-scripts.com/service/digistore.js"></script>
-<script type="text/javascript">
-digistorePromocode( { "product_id": 680740, "adjust_domain": true } );
-</script>
         {/* Hero */}
         <section className="relative py-16 md:py-24 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-background to-orange-500/10" />
