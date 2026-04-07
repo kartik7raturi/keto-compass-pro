@@ -1,8 +1,11 @@
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, Star, Zap, TrendingUp, Shield, Award, Crown } from 'lucide-react';
 import { useButtonLinks } from '@/hooks/useButtonLinks';
 import DigiStoreBadge from '@/components/DigiStoreBadge';
+import DigiStorePromo from '@/components/DigiStorePromo';
 
 const FEATURES = [
   '1000+ Keto Recipes',
@@ -31,17 +34,12 @@ const Pricing = () => {
   return (
     <div className="min-h-screen bg-background">
       <DigiStoreBadge type="salespage" />
-      {/* NO Header/Footer — pure sales page, no navigation */}
+      <DigiStorePromo />
+      <Header />
       <main>
         {/* Hero */}
         <section className="py-12 md:py-20 bg-gradient-to-br from-primary/5 via-background to-primary/10">
           <div className="container mx-auto px-4 text-center">
-            <div className="flex items-center justify-center gap-2 mb-6">
-              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">K</span>
-              </div>
-              <span className="font-bold text-xl text-foreground">Ketopia</span>
-            </div>
             <h1 className="text-3xl md:text-5xl font-bold mb-4">
               Start Your Keto Transformation Today
             </h1>
@@ -150,6 +148,7 @@ const Pricing = () => {
           </div>
         </section>
       </main>
+      <Footer />
     </div>
   );
 };

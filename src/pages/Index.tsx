@@ -17,9 +17,8 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Utensils, BarChart3, Target, Dumbbell, Droplets, Calendar } from "lucide-react";
+import { Check, Utensils, BarChart3, Target, Dumbbell, Droplets, Calendar } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { useSubscription } from "@/hooks/useSubscription";
 
 const WhatYouGet = () => {
   const navigate = useNavigate();
@@ -73,7 +72,6 @@ const WhatYouGet = () => {
 const Index = () => {
   const { user } = useAuth();
   const { showWelcome, closeWelcome } = useWelcomeModal();
-  const { hasPaidPlan, loading: subLoading } = useSubscription();
   const [isAdmin, setIsAdmin] = useState(false);
   const [checking, setChecking] = useState(true);
 
@@ -93,53 +91,14 @@ const Index = () => {
     checkAdmin();
   }, [user]);
 
-  // Loading state
-  if (user && (checking || subLoading)) {
-    return null;
-  }
-
-  // Admin sees homepage
-  if (user && isAdmin) {
-    return (
-      <div className="min-h-screen bg-background">
-        <DigiStoreBadge type="salespage" />
-        <DigiStorePromo />
-        <Header />
-        <Hero />
-        <div className="container mx-auto px-4 py-4">
-          <AdvertisementBanner />
-        </div>
-        <HealthBadges />
-        <WhatYouGet />
-        <Transformations />
-        <Testimonials />
-        <FAQSection />
-        <section className="py-16 bg-secondary/30">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold mb-4">Send us a suggestion</h2>
-              <p className="text-muted-foreground">Send us your recipe suggestions, feedback, or report any issues</p>
-            </div>
-            <ContactForm />
-          </div>
-        </section>
-        <Footer />
-        <WelcomeProgressModal open={showWelcome} onClose={closeWelcome} />
-      </div>
-    );
-  }
-
-  // Regular logged-in user with paid plan → go to dashboard
-  if (user && hasPaidPlan()) {
+  if (user && !checking && !isAdmin) {
     return <Navigate to="/progress" replace />;
   }
 
-  // Regular logged-in user WITHOUT paid plan → go to pricing (sales page)
-  if (user && !hasPaidPlan()) {
-    return <Navigate to="/pricing" replace />;
+  if (user && checking) {
+    return null;
   }
 
-  // Not logged in → show marketing homepage
   return (
     <div className="min-h-screen bg-background">
       <DigiStoreBadge type="salespage" />
