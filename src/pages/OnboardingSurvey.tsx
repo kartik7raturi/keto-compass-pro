@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAuth } from '@/components/auth/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { ChevronRight, ChevronLeft, Check, AlertCircle } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Check } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 interface SurveyData {
@@ -40,12 +40,11 @@ const QUIZ_STEPS = [
 ];
 
 const SIGNUP_STEP = QUIZ_STEPS.length;
-const VERIFY_STEP = SIGNUP_STEP + 1;
-const REPORT_STEP = VERIFY_STEP + 1;
+const REPORT_STEP = SIGNUP_STEP + 1;
 const TOTAL_STEPS = REPORT_STEP + 1;
 
 const OnboardingSurvey = () => {
-  const { user, signUp } = useAuth();
+  const { signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [step, setStep] = useState(0);
@@ -57,7 +56,6 @@ const OnboardingSurvey = () => {
   });
   const [submitting, setSubmitting] = useState(false);
   const [signupDone, setSignupDone] = useState(false);
-  const [emailVerified, setEmailVerified] = useState(false);
 
   const progress = ((step + 1) / TOTAL_STEPS) * 100;
 
@@ -114,8 +112,39 @@ const OnboardingSurvey = () => {
         toast({ title: 'Signup Error', description: error.message, variant: 'destructive' });
       } else {
         setSignupDone(true);
-        toast({ title: 'Account created!', description: 'Please check your email to verify your account.' });
-        setStep(VERIFY_STEP);
+        // Save survey data after signup
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (sessionData.session?.user) {
+          const targets = calcTargets();
+          const userId = sessionData.session.user.id;
+          await supabase.from('user_survey_responses').upsert({
+            user_id: userId,
+            current_weight: parseFloat(data.current_weight) || null,
+            goal_weight: parseFloat(data.goal_weight) || null,
+            height: parseFloat(data.height) || null,
+            age: parseInt(data.age) || null,
+            gender: data.gender,
+            activity_level: data.activity_level,
+            diet_experience: data.diet_experience,
+            exercise_frequency: data.exercise_frequency,
+            health_conditions: data.health_conditions ? data.health_conditions.split(',').map(s => s.trim()) : [],
+            motivation: data.motivation,
+            daily_calorie_target: targets.daily_calorie_target,
+            daily_carb_target: targets.daily_carb_target,
+            daily_protein_target: targets.daily_protein_target,
+            daily_fat_target: targets.daily_fat_target,
+          }, { onConflict: 'user_id' });
+
+          await supabase.from('profiles').update({
+            current_weight: parseFloat(data.current_weight) || null,
+            goal_weight: parseFloat(data.goal_weight) || null,
+            height: parseFloat(data.height) || null,
+            age: parseInt(data.age) || null,
+            activity_level: data.activity_level,
+          }).eq('user_id', userId);
+        }
+        toast({ title: 'Account created!' });
+        setStep(REPORT_STEP);
       }
     } catch {
       toast({ title: 'Error', description: 'An unexpected error occurred.', variant: 'destructive' });
@@ -124,47 +153,6 @@ const OnboardingSurvey = () => {
     }
   };
 
-  const checkEmailVerified = async () => {
-    const { data: sessionData } = await supabase.auth.getSession();
-    if (sessionData.session?.user) {
-      setEmailVerified(true);
-      // Save survey data
-      const targets = calcTargets();
-      const userId = sessionData.session.user.id;
-      await supabase.from('user_survey_responses').upsert({
-        user_id: userId,
-        current_weight: parseFloat(data.current_weight) || null,
-        goal_weight: parseFloat(data.goal_weight) || null,
-        height: parseFloat(data.height) || null,
-        age: parseInt(data.age) || null,
-        gender: data.gender,
-        activity_level: data.activity_level,
-        diet_experience: data.diet_experience,
-        exercise_frequency: data.exercise_frequency,
-        health_conditions: data.health_conditions ? data.health_conditions.split(',').map(s => s.trim()) : [],
-        motivation: data.motivation,
-        daily_calorie_target: targets.daily_calorie_target,
-        daily_carb_target: targets.daily_carb_target,
-        daily_protein_target: targets.daily_protein_target,
-        daily_fat_target: targets.daily_fat_target,
-      }, { onConflict: 'user_id' });
-
-      await supabase.from('profiles').update({
-        current_weight: parseFloat(data.current_weight) || null,
-        goal_weight: parseFloat(data.goal_weight) || null,
-        height: parseFloat(data.height) || null,
-        age: parseInt(data.age) || null,
-        activity_level: data.activity_level,
-      }).eq('user_id', userId);
-
-      setStep(REPORT_STEP);
-      toast({ title: 'Email verified! ✅' });
-    } else {
-      toast({ title: 'Not verified yet', description: 'Please check your email and click the verification link, then try again.', variant: 'destructive' });
-    }
-  };
-
-  // Generate a simple 1-week meal plan
   const weeklyPlan = [
     { day: 'Monday', meals: 'Bacon & eggs • Chicken salad • Steak with asparagus' },
     { day: 'Tuesday', meals: 'Keto smoothie • Tuna lettuce wraps • Salmon with broccoli' },
@@ -284,43 +272,8 @@ const OnboardingSurvey = () => {
     );
   }
 
-  // Email verification step
-  if (step === VERIFY_STEP) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/5 flex items-center justify-center p-4">
-        <Card className="w-full max-w-lg">
-          <CardHeader className="text-center">
-            <div className="mb-2">
-              <Progress value={progress} className="h-2" />
-              <p className="text-xs text-muted-foreground mt-1">{step + 1} of {TOTAL_STEPS}</p>
-            </div>
-            <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-              <AlertCircle className="h-8 w-8 text-primary" />
-            </div>
-            <CardTitle className="text-xl">Verify Your Email</CardTitle>
-            <p className="text-sm text-muted-foreground mt-2">
-              We've sent a verification link to <strong>{data.email}</strong>. 
-              Please check your inbox and click the link, then come back and click the button below.
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Button
-              onClick={checkEmailVerified}
-              className="w-full bg-gradient-to-r from-primary to-primary/80 py-6 text-lg"
-            >
-              I've Verified My Email ✓
-            </Button>
-            <p className="text-xs text-center text-muted-foreground">
-              Didn't receive the email? Check your spam folder.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // Report step - BMI + 1-week plan
-  if (step === REPORT_STEP) {
+  // Report step - BMI + 1-week plan (shown immediately after signup, no email verification)
+  if (step === REPORT_STEP || signupDone) {
     const targets = calcTargets();
     const bmi = parseFloat(calcBMI());
     const bmiCat = getBMICategory(bmi);

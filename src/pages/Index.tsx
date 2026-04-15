@@ -17,8 +17,23 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Check, Utensils, BarChart3, Target, Dumbbell, Droplets, Calendar } from "lucide-react";
+import { Check, Utensils, BarChart3, Target, Dumbbell, Droplets, Calendar, Shield } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+
+const MoneyBackGuarantee = () => (
+  <section className="py-12 bg-primary/5">
+    <div className="container mx-auto px-4 text-center max-w-2xl">
+      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+        <Shield className="h-8 w-8 text-primary" />
+      </div>
+      <h2 className="text-2xl font-bold mb-3">60-Day Money Back Guarantee</h2>
+      <p className="text-muted-foreground">
+        We're confident you'll love Ketopia. If you're not 100% satisfied within 60 days, 
+        we'll refund your purchase — no questions asked.
+      </p>
+    </div>
+  </section>
+);
 
 const WhatYouGet = () => {
   const navigate = useNavigate();
@@ -73,30 +88,34 @@ const Index = () => {
   const { user } = useAuth();
   const { showWelcome, closeWelcome } = useWelcomeModal();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [hasPaid, setHasPaid] = useState(false);
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    const checkAdmin = async () => {
+    const checkUserStatus = async () => {
       if (user) {
-        const { data } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
-          .eq('role', 'admin')
-          .maybeSingle();
-        setIsAdmin(!!data);
+        const [{ data: roleData }, { data: subData }] = await Promise.all([
+          supabase.from('user_roles').select('role').eq('user_id', user.id).eq('role', 'admin').maybeSingle(),
+          supabase.from('user_subscriptions').select('plan_type, is_active').eq('user_id', user.id).maybeSingle(),
+        ]);
+        setIsAdmin(!!roleData);
+        setHasPaid(!!(subData && subData.is_active && (subData.plan_type === 'basic' || subData.plan_type === 'vip')));
       }
       setChecking(false);
     };
-    checkAdmin();
+    checkUserStatus();
   }, [user]);
 
-  if (user && !checking && !isAdmin) {
+  if (checking) return null;
+
+  // Logged-in non-admin users with a paid plan go to dashboard
+  if (user && !isAdmin && hasPaid) {
     return <Navigate to="/progress" replace />;
   }
 
-  if (user && checking) {
-    return null;
+  // Logged-in non-admin users WITHOUT a paid plan go to pricing
+  if (user && !isAdmin && !hasPaid) {
+    return <Navigate to="/pricing" replace />;
   }
 
   return (
@@ -110,6 +129,7 @@ const Index = () => {
       </div>
       <HealthBadges />
       <WhatYouGet />
+      <MoneyBackGuarantee />
       <Transformations />
       <Testimonials />
       <FAQSection />

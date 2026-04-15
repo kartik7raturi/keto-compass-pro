@@ -4,8 +4,8 @@ import { Mail, Twitter, Instagram, Facebook } from "lucide-react";
 const Footer = () => {
   return (
     <footer className="bg-secondary/50 pt-16 pb-8">
-      <div className="container">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-12">
+      <div className="container px-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           <div>
             <div className="flex items-center gap-2 mb-4">
               <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-keto-green to-keto-yellow flex items-center justify-center">
@@ -15,7 +15,7 @@ const Footer = () => {
                 Ketopia
               </span>
             </div>
-            <p className="text-muted-foreground mb-4">
+            <p className="text-muted-foreground mb-4 text-sm">
               Your complete companion for a successful keto journey. Track, learn, and thrive with our community.
             </p>
             <div className="flex gap-2">
@@ -67,6 +67,7 @@ const Footer = () => {
               <li><a href="/careers" className="hover:text-keto-green transition-colors">Careers</a></li>
               <li><a href="/privacy" className="hover:text-keto-green transition-colors">Privacy Policy</a></li>
               <li><a href="/terms" className="hover:text-keto-green transition-colors">Terms of Service</a></li>
+              <li><a href="/refund-policy" className="hover:text-keto-green transition-colors">Return & Refund Policy</a></li>
               <li><a href="/imprint" className="hover:text-keto-green transition-colors">Imprint</a></li>
               <li><a href="/contact" className="hover:text-keto-green transition-colors">Contact</a></li>
             </ul>
@@ -79,7 +80,7 @@ const Footer = () => {
           </p>
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-muted-foreground">
-              © 2024 Ketopia. All rights reserved.
+              © 2026 Ketopia. All rights reserved.
             </p>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <span>Made with ❤️ for the keto community</span>
