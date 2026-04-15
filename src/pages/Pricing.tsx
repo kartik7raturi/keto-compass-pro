@@ -1,5 +1,3 @@
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, Star, Zap, TrendingUp, Shield, Award, Crown } from 'lucide-react';
@@ -35,7 +33,6 @@ const Pricing = () => {
     <div className="min-h-screen bg-background">
       <DigiStoreBadge type="salespage" />
       <DigiStorePromo />
-      <Header />
       <main>
         {/* Hero */}
         <section className="py-12 md:py-20 bg-gradient-to-br from-primary/5 via-background to-primary/10">
@@ -43,7 +40,7 @@ const Pricing = () => {
             <h1 className="text-3xl md:text-5xl font-bold mb-4">
               Start Your Keto Transformation Today
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
               Join thousands who have transformed their health with our proven keto system
             </p>
           </div>
@@ -95,7 +92,7 @@ const Pricing = () => {
 
                   <div className="bg-primary/5 rounded-lg p-3 border border-primary/20">
                     <p className="text-xs text-center font-medium text-primary">
-                      ✅ 30-day money back guarantee
+                      ✅ 60-day money back guarantee
                     </p>
                   </div>
 
@@ -118,7 +115,7 @@ const Pricing = () => {
         <section className="py-10 bg-secondary/10">
           <div className="container mx-auto px-4">
             <h2 className="text-2xl font-bold text-center mb-8">What Our Members Say</h2>
-            <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
               {TESTIMONIALS.map(t => (
                 <Card key={t.name}>
                   <CardContent className="p-6 text-center">
@@ -147,8 +144,17 @@ const Pricing = () => {
             </p>
           </div>
         </section>
+
+        {/* Footer links */}
+        <div className="py-6 text-center border-t">
+          <div className="container px-4 flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
+            <a href="/imprint" className="hover:text-primary transition-colors">Imprint</a>
+            <a href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</a>
+            <a href="/terms" className="hover:text-primary transition-colors">Terms of Service</a>
+            <a href="/refund-policy" className="hover:text-primary transition-colors">Refund Policy</a>
+          </div>
+        </div>
       </main>
-      <Footer />
     </div>
   );
 };

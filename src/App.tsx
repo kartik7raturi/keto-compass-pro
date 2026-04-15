@@ -47,6 +47,7 @@ import Shop from "./pages/Shop";
 import Pricing from "./pages/Pricing";
 import Messages from "./pages/Messages";
 import Imprint from "./pages/Imprint";
+import RefundPolicy from "./pages/RefundPolicy";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +70,7 @@ const App = () => (
               <Route path="/thank-you-vip" element={<ThankYouVip />} />
               <Route path="/shop" element={<Shop />} />
               <Route path="/imprint" element={<Imprint />} />
+              <Route path="/refund-policy" element={<RefundPolicy />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/articles" element={<ArticleManager />} />
               <Route path="/admin" element={<Admin />} />
