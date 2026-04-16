@@ -1,10 +1,9 @@
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Check, Crown, PartyPopper } from 'lucide-react';
+import { Check, Crown, PartyPopper, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
 import DigiStoreBadge from '@/components/DigiStoreBadge';
 import DigiStorePromo from '@/components/DigiStorePromo';
@@ -19,11 +18,11 @@ const ThankYou = () => {
 
   useEffect(() => {
     if (plan === 'basic') {
-      upgradePlan('basic', 'one_time', 19.99);
+      upgradePlan('basic', 'one_time', 19);
     } else if (plan === 'vip-monthly') {
-      upgradePlan('vip', 'monthly', 49);
+      upgradePlan('vip', 'monthly', 29);
     } else if (plan === 'vip-lifetime') {
-      upgradePlan('vip', 'one_time', 299);
+      upgradePlan('vip', 'one_time', 99);
     }
   }, [plan]);
 
@@ -56,7 +55,19 @@ const ThankYou = () => {
       <DigiStoreBadge type="thankyoupage" />
       <DigiStorePromo />
       <Header />
-      <main className="container mx-auto px-4 py-16">
+      <main className="container mx-auto px-4 py-12 md:py-16">
+        {/* DigiStore thank you header */}
+        <div className="max-w-xl mx-auto text-center mb-6">
+          <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mb-6">
+            <p className="text-sm font-medium">
+              Thank you for ordering from Ketopia with Digistore24.
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              On your bank statement you will see a charge from Digistore24.
+            </p>
+          </div>
+        </div>
+
         <div className="max-w-lg mx-auto text-center">
           <div className="mb-6">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mb-4">
@@ -68,7 +79,7 @@ const ThankYou = () => {
             </p>
           </div>
 
-          <Card className={`border-2 ${isVip ? 'border-amber-500' : 'border-primary'} mb-8`}>
+          <Card className={`border-2 ${isVip ? 'border-amber-500' : 'border-primary'} mb-6`}>
             <CardContent className="p-6">
               <div className="flex items-center justify-center gap-2 mb-4">
                 {isVip ? <Crown className="h-6 w-6 text-amber-500" /> : null}
@@ -85,14 +96,38 @@ const ThankYou = () => {
             </CardContent>
           </Card>
 
+          {/* Bank statement notice */}
+          <p className="text-xs text-muted-foreground mb-6">
+            The debit will appear as Digistore24 GmbH (Germany) on your bank or card statement.
+          </p>
+
           <div className="space-y-3">
             {!isVip ? (
               <>
-                <Button className="w-full" size="lg" onClick={handleVipUpgrade}>
-                  <Crown className="h-4 w-4 mr-2" /> Upgrade to VIP
-                </Button>
+                {/* VIP Upsell Card */}
+                <Card className="border-2 border-amber-500 shadow-xl overflow-hidden mb-4">
+                  <div className="bg-gradient-to-r from-amber-500 to-orange-600 text-white py-3 text-center font-bold text-sm">
+                    🔥 EXCLUSIVE OFFER — UPGRADE TO VIP 🔥
+                  </div>
+                  <CardContent className="p-6 space-y-4">
+                    <div className="flex items-center gap-3 justify-center">
+                      <Crown className="h-8 w-8 text-amber-500" />
+                      <h2 className="text-xl font-bold">Unlock All Premium Features</h2>
+                    </div>
+                    <p className="text-sm text-muted-foreground text-center">
+                      Get advanced trackers, workout plans, fasting tools, and detailed analytics!
+                    </p>
+                    <Button
+                      className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-6 text-lg font-bold"
+                      onClick={handleVipUpgrade}
+                    >
+                      <Crown className="h-5 w-5 mr-2" /> Yes, Upgrade to VIP
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </CardContent>
+                </Card>
                 <Button variant="outline" className="w-full" size="lg" onClick={handleDashboard}>
-                  Go to Dashboard
+                  No thanks, go to my dashboard
                 </Button>
               </>
             ) : (
@@ -102,8 +137,21 @@ const ThankYou = () => {
             )}
           </div>
         </div>
+
+        {/* Footer links */}
+        <div className="mt-12 text-center">
+          <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
+            <a href="/imprint" className="hover:text-primary transition-colors">Imprint</a>
+            <a href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</a>
+            <a href="/terms" className="hover:text-primary transition-colors">Terms of Service</a>
+            <a href="/refund-policy" className="hover:text-primary transition-colors">Refund Policy</a>
+          </div>
+          <p className="text-xs text-muted-foreground mt-4 max-w-2xl mx-auto px-4">
+            These earnings are not representative for the average participants. The average participant will earn significantly less or no money at all through this product or service.
+            © 2026 Digistore24 Inc. (United States) Inc. and/or its licensors.
+          </p>
+        </div>
       </main>
-      <Footer />
     </div>
   );
 };

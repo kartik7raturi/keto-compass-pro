@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Check, Crown, ShoppingBag, ArrowRight } from 'lucide-react';
@@ -30,6 +29,18 @@ const ThankYouVip = () => {
       <DigiStoreUpsell />
       <Header />
       <main className="container mx-auto px-4 py-12">
+        {/* DigiStore thank you header */}
+        <div className="max-w-xl mx-auto text-center mb-6">
+          <div className="bg-amber-500/5 border border-amber-500/20 rounded-lg p-4 mb-6">
+            <p className="text-sm font-medium">
+              Thank you for ordering from Ketopia with Digistore24.
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              On your bank statement you will see a charge from Digistore24.
+            </p>
+          </div>
+        </div>
+
         <div className="max-w-xl mx-auto text-center space-y-8">
           <div>
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-amber-500/10 mb-4">
@@ -40,6 +51,11 @@ const ThankYouVip = () => {
               Your VIP plan is now active. All premium features are unlocked.
             </p>
           </div>
+
+          {/* Bank statement notice */}
+          <p className="text-xs text-muted-foreground">
+            The debit will appear as Digistore24 GmbH (Germany) on your bank or card statement.
+          </p>
 
           <Card className="border-2 border-primary shadow-xl overflow-hidden">
             <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground py-3 text-center font-bold">
@@ -77,8 +93,21 @@ const ThankYouVip = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Footer links */}
+        <div className="mt-12 text-center">
+          <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
+            <a href="/imprint" className="hover:text-primary transition-colors">Imprint</a>
+            <a href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</a>
+            <a href="/terms" className="hover:text-primary transition-colors">Terms of Service</a>
+            <a href="/refund-policy" className="hover:text-primary transition-colors">Refund Policy</a>
+          </div>
+          <p className="text-xs text-muted-foreground mt-4 max-w-2xl mx-auto px-4">
+            These earnings are not representative for the average participants. The average participant will earn significantly less or no money at all through this product or service.
+            © 2026 Digistore24 Inc. (United States) Inc. and/or its licensors.
+          </p>
+        </div>
       </main>
-      <Footer />
     </div>
   );
 };

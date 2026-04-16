@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, Star, Zap, TrendingUp, Shield, Award, Crown } from 'lucide-react';
+import { Check, Star, Zap, TrendingUp, Shield, Award, Crown, FileText, Mail, Download } from 'lucide-react';
 import { useButtonLinks } from '@/hooks/useButtonLinks';
 import DigiStoreBadge from '@/components/DigiStoreBadge';
 import DigiStorePromo from '@/components/DigiStorePromo';
@@ -40,9 +40,55 @@ const Pricing = () => {
             <h1 className="text-3xl md:text-5xl font-bold mb-4">
               Start Your Keto Transformation Today
             </h1>
-            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-4">
               Join thousands who have transformed their health with our proven keto system
             </p>
+          </div>
+        </section>
+
+        {/* What is Ketopia */}
+        <section className="py-10 bg-secondary/10">
+          <div className="container mx-auto px-4 max-w-3xl">
+            <h2 className="text-2xl font-bold text-center mb-4">What is Ketopia?</h2>
+            <p className="text-muted-foreground text-center mb-6">
+              Ketopia is a digital weight-loss program designed to help users reduce cravings, improve metabolism, and follow a structured diet plan.
+            </p>
+            <div className="space-y-3 max-w-md mx-auto">
+              <h3 className="font-semibold">When you purchase Ketopia, you will receive:</h3>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary flex-shrink-0" /> A complete diet plan (PDF guide)</li>
+                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary flex-shrink-0" /> Step-by-step weight loss system</li>
+                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary flex-shrink-0" /> Meal plans and food recommendations</li>
+                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary flex-shrink-0" /> Training materials (if included)</li>
+              </ul>
+              <p className="text-xs text-muted-foreground italic">
+                This is a digital product. No physical items or supplements will be shipped.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* How You Receive */}
+        <section className="py-10">
+          <div className="container mx-auto px-4 max-w-3xl">
+            <h2 className="text-2xl font-bold text-center mb-4">How You Will Receive Your Product</h2>
+            <p className="text-muted-foreground text-center mb-6">
+              After your purchase, you will get instant access to Ketopia via:
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg mx-auto">
+              <div className="text-center p-4">
+                <Mail className="h-8 w-8 text-primary mx-auto mb-2" />
+                <p className="text-sm font-medium">Email with login details</p>
+              </div>
+              <div className="text-center p-4">
+                <Shield className="h-8 w-8 text-primary mx-auto mb-2" />
+                <p className="text-sm font-medium">Secure member area</p>
+              </div>
+              <div className="text-center p-4">
+                <Download className="h-8 w-8 text-primary mx-auto mb-2" />
+                <p className="text-sm font-medium">Immediate access to all materials</p>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -77,8 +123,9 @@ const Pricing = () => {
                   <CardTitle className="text-2xl">Keto Starter Plan</CardTitle>
                   <div className="mt-3">
                     <span className="text-5xl font-bold text-primary">$19</span>
-                    <span className="text-2xl font-bold text-primary">.99</span>
+                    <span className="text-muted-foreground">/month</span>
                   </div>
+                  <p className="text-xs text-muted-foreground mt-1">Cancel anytime • No recurring charges • No hidden fees</p>
                 </CardHeader>
                 <CardContent className="space-y-4 pt-4">
                   <ul className="space-y-3">
@@ -92,7 +139,7 @@ const Pricing = () => {
 
                   <div className="bg-primary/5 rounded-lg p-3 border border-primary/20">
                     <p className="text-xs text-center font-medium text-primary">
-                      ✅ 60-day money back guarantee
+                      ✅ 60-Day Money Back Guarantee
                     </p>
                   </div>
 
@@ -100,14 +147,27 @@ const Pricing = () => {
                     className="w-full bg-gradient-to-r from-primary to-primary/80 text-lg py-7 shadow-lg hover:shadow-xl transition-all"
                     onClick={() => window.open(getUrl('keto_starter'), '_blank')}
                   >
-                    Get Started Now — $19.99
+                    Get Started Now — $19/month
                   </Button>
                   <p className="text-xs text-center text-muted-foreground">
-                    Secure payment • Instant access • No hidden fees
+                    Secure payment • Instant access
                   </p>
                 </CardContent>
               </Card>
             </div>
+          </div>
+        </section>
+
+        {/* 60-Day Guarantee */}
+        <section className="py-10 bg-primary/5">
+          <div className="container mx-auto px-4 text-center max-w-2xl">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+              <Shield className="h-8 w-8 text-primary" />
+            </div>
+            <h2 className="text-2xl font-bold mb-3">100% Risk-Free — 60-Day Guarantee</h2>
+            <p className="text-muted-foreground">
+              Try Ketopia completely risk-free. If you are not satisfied for any reason, you can request a full refund within 60 days. No questions asked.
+            </p>
           </div>
         </section>
 
@@ -153,6 +213,10 @@ const Pricing = () => {
             <a href="/terms" className="hover:text-primary transition-colors">Terms of Service</a>
             <a href="/refund-policy" className="hover:text-primary transition-colors">Refund Policy</a>
           </div>
+          <p className="text-xs text-muted-foreground mt-4 max-w-2xl mx-auto px-4">
+            These earnings are not representative for the average participants. The average participant will earn significantly less or no money at all through this product or service.
+            © 2026 Digistore24 Inc. (United States) Inc. and/or its licensors.
+          </p>
         </div>
       </main>
     </div>
