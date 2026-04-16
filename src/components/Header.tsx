@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Menu, User, LogOut, X, ChevronDown, Trophy, Crown, ShoppingBag } from "lucide-react";
+import { Menu, User, LogOut, X, ChevronDown, Crown } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -26,6 +26,15 @@ const Header = () => {
   };
 
   const handleNavigation = (path: string) => {
+    // If user is logged in but hasn't paid, redirect feature pages to pricing
+    if (user && !hasPaid && !isAdmin) {
+      const freePages = ['/', '/contact', '/pricing', '/onboarding', '/auth', '/imprint', '/privacy', '/terms', '/refund-policy', '/about', '/faq', '/blog'];
+      if (!freePages.includes(path)) {
+        navigate('/pricing');
+        setMobileMenuOpen(false);
+        return;
+      }
+    }
     navigate(path);
     setMobileMenuOpen(false);
   };
@@ -61,21 +70,21 @@ const Header = () => {
     fetchUserProfile();
   }, [user]);
 
-  // Build nav items based on subscription status
   const getNavItems = () => {
     if (!user) {
       return [
         { label: 'Home', path: '/' },
+        { label: 'Pricing', path: '/pricing' },
         { label: 'Contact', path: '/contact' },
       ];
     }
     if (!hasPaid) {
       return [
         { label: 'Home', path: '/' },
+        { label: 'Pricing', path: '/pricing' },
         { label: 'Contact', path: '/contact' },
       ];
     }
-    // Paid users get full nav
     const items = [
       { label: 'Home', path: '/' },
       { label: 'Recipes', path: '/recipes' },
@@ -115,7 +124,7 @@ const Header = () => {
           {navItems.map(item => (
             <button
               key={item.path}
-              onClick={() => navigate(item.path)}
+              onClick={() => handleNavigation(item.path)}
               className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
             >
               {item.label}
@@ -155,7 +164,7 @@ const Header = () => {
                   <DropdownMenuItem onClick={() => navigate('/articles')}>
                     Manage Articles
                   </DropdownMenuItem>
-                  {!isVip && (
+                  {!isVip && hasPaid && (
                     <DropdownMenuItem onClick={() => navigate('/vip-upgrade')}>
                       <Crown className="mr-2 h-4 w-4 text-amber-500" />
                       VIP Upgrade

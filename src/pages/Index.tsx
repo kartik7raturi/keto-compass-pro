@@ -1,4 +1,3 @@
-import { Navigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import Testimonials from "@/components/Testimonials";
@@ -10,14 +9,11 @@ import { AdvertisementBanner } from "@/components/AdvertisementBanner";
 import ContactForm from "@/components/ContactForm";
 import WelcomeProgressModal from "@/components/WelcomeProgressModal";
 import { useWelcomeModal } from "@/hooks/useWelcomeModal";
-import { useAuth } from "@/components/auth/AuthContext";
 import DigiStoreBadge from "@/components/DigiStoreBadge";
 import DigiStorePromo from "@/components/DigiStorePromo";
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Check, Utensils, BarChart3, Target, Dumbbell, Droplets, Calendar, Shield } from "lucide-react";
+import { Utensils, BarChart3, Target, Dumbbell, Droplets, Calendar, Shield } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 const MoneyBackGuarantee = () => (
@@ -85,38 +81,7 @@ const WhatYouGet = () => {
 };
 
 const Index = () => {
-  const { user } = useAuth();
   const { showWelcome, closeWelcome } = useWelcomeModal();
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [hasPaid, setHasPaid] = useState(false);
-  const [checking, setChecking] = useState(true);
-
-  useEffect(() => {
-    const checkUserStatus = async () => {
-      if (user) {
-        const [{ data: roleData }, { data: subData }] = await Promise.all([
-          supabase.from('user_roles').select('role').eq('user_id', user.id).eq('role', 'admin').maybeSingle(),
-          supabase.from('user_subscriptions').select('plan_type, is_active').eq('user_id', user.id).maybeSingle(),
-        ]);
-        setIsAdmin(!!roleData);
-        setHasPaid(!!(subData && subData.is_active && (subData.plan_type === 'basic' || subData.plan_type === 'vip')));
-      }
-      setChecking(false);
-    };
-    checkUserStatus();
-  }, [user]);
-
-  if (checking) return null;
-
-  // Logged-in non-admin users with a paid plan go to dashboard
-  if (user && !isAdmin && hasPaid) {
-    return <Navigate to="/progress" replace />;
-  }
-
-  // Logged-in non-admin users WITHOUT a paid plan go to pricing
-  if (user && !isAdmin && !hasPaid) {
-    return <Navigate to="/pricing" replace />;
-  }
 
   return (
     <div className="min-h-screen bg-background">
