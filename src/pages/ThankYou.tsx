@@ -12,7 +12,7 @@ import { useButtonLinks } from '@/hooks/useButtonLinks';
 const ThankYou = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { upgradePlan } = useSubscription();
+  const { upgradePlan, refetch } = useSubscription();
   const { getUrl } = useButtonLinks();
   const plan = searchParams.get('plan') || 'basic';
 
@@ -21,9 +21,14 @@ const ThankYou = () => {
       upgradePlan('basic', 'one_time', 19);
     } else if (plan === 'vip-monthly') {
       upgradePlan('vip', 'monthly', 29);
-    } else if (plan === 'vip-lifetime') {
-      upgradePlan('vip', 'one_time', 99);
+    } else if (plan === 'vip-lifetime' || plan === 'vip-yearly') {
+      // $99 yearly plan — stored as vip_lifetime internally; expiry now 365 days
+      upgradePlan('vip_lifetime', 'one_time', 99);
     }
+    // Re-poll a few times so the IPN processor's update lands.
+    const tries = [2000, 5000, 10000];
+    const timers = tries.map(t => setTimeout(() => refetch(), t));
+    return () => timers.forEach(clearTimeout);
   }, [plan]);
 
   const isVip = plan.startsWith('vip');

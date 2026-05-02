@@ -26,6 +26,22 @@ export const useSubscription = () => {
     }
   }, [user?.id]);
 
+  // Refetch subscription whenever the user returns to the tab
+  // (e.g. after completing Digistore checkout in another tab/window)
+  useEffect(() => {
+    if (!user?.id) return;
+    const onFocus = () => { fetchSubscription(); };
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') fetchSubscription();
+    };
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [user?.id]);
+
   const fetchSubscription = async () => {
     if (!user?.id) return;
     const { data } = await supabase

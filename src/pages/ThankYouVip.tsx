@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -6,10 +7,19 @@ import { Check, Crown, ShoppingBag, ArrowRight } from 'lucide-react';
 import DigiStoreBadge from '@/components/DigiStoreBadge';
 import DigiStoreUpsell from '@/components/DigiStoreUpsell';
 import { useButtonLinks } from '@/hooks/useButtonLinks';
+import { useSubscription } from '@/hooks/useSubscription';
 
 const ThankYouVip = () => {
   const navigate = useNavigate();
   const { getUrl } = useButtonLinks();
+  const { refetch } = useSubscription();
+
+  // Re-poll subscription a few times so the IPN-updated plan shows up immediately.
+  useEffect(() => {
+    const tries = [1000, 3000, 6000, 12000];
+    const timers = tries.map(t => setTimeout(() => refetch(), t));
+    return () => timers.forEach(clearTimeout);
+  }, [refetch]);
 
   const handleBuySupplement = () => {
     const url = getUrl('thankyou_vip_supplement');
