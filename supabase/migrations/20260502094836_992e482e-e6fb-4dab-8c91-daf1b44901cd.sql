@@ -1,0 +1,1 @@
+SELECT public.grant_ketopia_subscription('sankhobusiness@gmail.com', 'vip_lifetime', 0, '680740', 'admin-grant');
