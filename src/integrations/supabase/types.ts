@@ -611,24 +611,33 @@ export type Database = {
         Row: {
           content: string
           created_at: string
+          deleted_at: string | null
           id: string
           is_read: boolean | null
+          message_type: string | null
+          read_at: string | null
           receiver_id: string
           sender_id: string
         }
         Insert: {
           content: string
           created_at?: string
+          deleted_at?: string | null
           id?: string
           is_read?: boolean | null
+          message_type?: string | null
+          read_at?: string | null
           receiver_id: string
           sender_id: string
         }
         Update: {
           content?: string
           created_at?: string
+          deleted_at?: string | null
           id?: string
           is_read?: boolean | null
+          message_type?: string | null
+          read_at?: string | null
           receiver_id?: string
           sender_id?: string
         }
@@ -711,8 +720,11 @@ export type Database = {
           carbs: number | null
           category: string
           city: string | null
+          contact_email: string | null
+          contact_whatsapp: string | null
           country: string | null
           created_at: string
+          delivery_radius_km: number | null
           delivery_type: string
           description: string | null
           fat: number | null
@@ -724,8 +736,11 @@ export type Database = {
           is_available: boolean | null
           is_sold_out: boolean | null
           is_vegetarian: boolean | null
+          is_verified: boolean | null
+          keto_certified: boolean | null
           latitude: number | null
           longitude: number | null
+          min_order_amount: number | null
           price: number
           protein: number | null
           quantity: number
@@ -734,14 +749,19 @@ export type Database = {
           title: string
           town: string | null
           updated_at: string
+          view_count: number | null
+          views_count: number | null
         }
         Insert: {
           calories?: number | null
           carbs?: number | null
           category?: string
           city?: string | null
+          contact_email?: string | null
+          contact_whatsapp?: string | null
           country?: string | null
           created_at?: string
+          delivery_radius_km?: number | null
           delivery_type?: string
           description?: string | null
           fat?: number | null
@@ -753,8 +773,11 @@ export type Database = {
           is_available?: boolean | null
           is_sold_out?: boolean | null
           is_vegetarian?: boolean | null
+          is_verified?: boolean | null
+          keto_certified?: boolean | null
           latitude?: number | null
           longitude?: number | null
+          min_order_amount?: number | null
           price?: number
           protein?: number | null
           quantity?: number
@@ -763,14 +786,19 @@ export type Database = {
           title: string
           town?: string | null
           updated_at?: string
+          view_count?: number | null
+          views_count?: number | null
         }
         Update: {
           calories?: number | null
           carbs?: number | null
           category?: string
           city?: string | null
+          contact_email?: string | null
+          contact_whatsapp?: string | null
           country?: string | null
           created_at?: string
+          delivery_radius_km?: number | null
           delivery_type?: string
           description?: string | null
           fat?: number | null
@@ -782,8 +810,11 @@ export type Database = {
           is_available?: boolean | null
           is_sold_out?: boolean | null
           is_vegetarian?: boolean | null
+          is_verified?: boolean | null
+          keto_certified?: boolean | null
           latitude?: number | null
           longitude?: number | null
+          min_order_amount?: number | null
           price?: number
           protein?: number | null
           quantity?: number
@@ -792,6 +823,38 @@ export type Database = {
           title?: string
           town?: string | null
           updated_at?: string
+          view_count?: number | null
+          views_count?: number | null
+        }
+        Relationships: []
+      }
+      funnel_events: {
+        Row: {
+          created_at: string | null
+          event_name: string
+          id: string
+          metadata: Json | null
+          page: string | null
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_name: string
+          id?: string
+          metadata?: Json | null
+          page?: string | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_name?: string
+          id?: string
+          metadata?: Json | null
+          page?: string | null
+          session_id?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -896,6 +959,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ipn_logs: {
+        Row: {
+          amount: number | null
+          created_at: string | null
+          currency: string | null
+          customer_email: string | null
+          customer_name: string | null
+          error_message: string | null
+          event_type: string
+          id: string
+          order_id: string | null
+          plan_type: string | null
+          processed_at: string | null
+          product_id: string | null
+          raw_payload: Json | null
+          status: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string | null
+          currency?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          error_message?: string | null
+          event_type: string
+          id?: string
+          order_id?: string | null
+          plan_type?: string | null
+          processed_at?: string | null
+          product_id?: string | null
+          raw_payload?: Json | null
+          status?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string | null
+          currency?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          error_message?: string | null
+          event_type?: string
+          id?: string
+          order_id?: string | null
+          plan_type?: string | null
+          processed_at?: string | null
+          product_id?: string | null
+          raw_payload?: Json | null
+          status?: string | null
+        }
+        Relationships: []
       }
       keto_streaks: {
         Row: {
@@ -1206,31 +1320,40 @@ export type Database = {
       }
       notifications: {
         Row: {
+          action_url: string | null
           created_at: string
           id: string
+          image_url: string | null
           is_read: boolean
           link: string | null
           message: string
+          notification_type: string | null
           title: string
           type: string
           user_id: string
         }
         Insert: {
+          action_url?: string | null
           created_at?: string
           id?: string
+          image_url?: string | null
           is_read?: boolean
           link?: string | null
           message: string
+          notification_type?: string | null
           title: string
           type?: string
           user_id: string
         }
         Update: {
+          action_url?: string | null
           created_at?: string
           id?: string
+          image_url?: string | null
           is_read?: boolean
           link?: string | null
           message?: string
+          notification_type?: string | null
           title?: string
           type?: string
           user_id?: string
@@ -1438,6 +1561,33 @@ export type Database = {
         }
         Relationships: []
       }
+      push_tokens: {
+        Row: {
+          created_at: string | null
+          id: string
+          platform: string | null
+          token: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          platform?: string | null
+          token: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          platform?: string | null
+          token?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       recipe_favorites: {
         Row: {
           created_at: string
@@ -1471,6 +1621,35 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      recipe_of_the_day: {
+        Row: {
+          created_at: string | null
+          featured_date: string
+          id: string
+          recipe_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          featured_date?: string
+          id?: string
+          recipe_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          featured_date?: string
+          id?: string
+          recipe_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipe_of_the_day_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1593,6 +1772,42 @@ export type Database = {
           servings?: number | null
           social_shares?: number | null
           title?: string
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          converted_at: string | null
+          created_at: string | null
+          id: string
+          referral_code: string
+          referred_email: string | null
+          referred_user_id: string | null
+          referrer_id: string | null
+          reward_granted: boolean | null
+          status: string | null
+        }
+        Insert: {
+          converted_at?: string | null
+          created_at?: string | null
+          id?: string
+          referral_code: string
+          referred_email?: string | null
+          referred_user_id?: string | null
+          referrer_id?: string | null
+          reward_granted?: boolean | null
+          status?: string | null
+        }
+        Update: {
+          converted_at?: string | null
+          created_at?: string | null
+          id?: string
+          referral_code?: string
+          referred_email?: string | null
+          referred_user_id?: string | null
+          referrer_id?: string | null
+          reward_granted?: boolean | null
+          status?: string | null
         }
         Relationships: []
       }
@@ -2060,36 +2275,54 @@ export type Database = {
       user_subscriptions: {
         Row: {
           amount_paid: number | null
+          cancelled_at: string | null
           created_at: string | null
           expires_at: string | null
           id: string
           is_active: boolean | null
+          notes: string | null
+          order_id: string | null
+          payment_status: string | null
           payment_type: string | null
           plan_type: string
+          product_id: string | null
+          refunded_at: string | null
           started_at: string | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
           amount_paid?: number | null
+          cancelled_at?: string | null
           created_at?: string | null
           expires_at?: string | null
           id?: string
           is_active?: boolean | null
+          notes?: string | null
+          order_id?: string | null
+          payment_status?: string | null
           payment_type?: string | null
           plan_type?: string
+          product_id?: string | null
+          refunded_at?: string | null
           started_at?: string | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
           amount_paid?: number | null
+          cancelled_at?: string | null
           created_at?: string | null
           expires_at?: string | null
           id?: string
           is_active?: boolean | null
+          notes?: string | null
+          order_id?: string | null
+          payment_status?: string | null
           payment_type?: string | null
           plan_type?: string
+          product_id?: string | null
+          refunded_at?: string | null
           started_at?: string | null
           updated_at?: string | null
           user_id?: string
@@ -2264,6 +2497,19 @@ export type Database = {
         Args: { recipe_id: string }
         Returns: undefined
       }
+      ensure_recipe_of_the_day: { Args: never; Returns: Json }
+      generate_referral_code: { Args: { p_user_id: string }; Returns: string }
+      get_user_plan: { Args: { p_user_id: string }; Returns: string }
+      grant_ketopia_subscription: {
+        Args: {
+          p_amount?: number
+          p_email: string
+          p_order_id?: string
+          p_plan: string
+          p_product_id?: string
+        }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2276,6 +2522,23 @@ export type Database = {
         Returns: undefined
       }
       is_admin: { Args: never; Returns: boolean }
+      process_digistore_ipn: {
+        Args: {
+          p_amount: number
+          p_currency: string
+          p_customer_email: string
+          p_customer_name: string
+          p_event_type: string
+          p_order_id: string
+          p_product_id: string
+          p_raw_payload: Json
+        }
+        Returns: Json
+      }
+      user_has_feature: {
+        Args: { p_feature: string; p_user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
