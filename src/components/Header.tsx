@@ -93,7 +93,6 @@ const Header = () => {
       { label: 'Progress', path: '/progress' },
       { label: 'Community', path: '/community' },
       { label: 'Marketplace', path: '/marketplace' },
-      { label: 'Shop', path: '/shop' },
     ];
     return items;
   };
