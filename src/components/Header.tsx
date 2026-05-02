@@ -17,8 +17,8 @@ const Header = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const { subscription } = useSubscription();
 
-  const hasPaid = subscription && subscription.is_active && (subscription.plan_type === 'basic' || subscription.plan_type === 'vip');
-  const isVip = subscription && subscription.is_active && subscription.plan_type === 'vip';
+  const hasPaid = subscription && subscription.is_active && ['basic', 'vip', 'vip_lifetime'].includes(subscription.plan_type);
+  const isVip = subscription && subscription.is_active && (subscription.plan_type === 'vip' || subscription.plan_type === 'vip_lifetime');
 
   const handleSignOut = async () => {
     await signOut();

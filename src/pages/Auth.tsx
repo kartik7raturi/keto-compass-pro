@@ -23,7 +23,7 @@ const Auth = () => {
       .select('plan_type, is_active')
       .eq('user_id', userId)
       .maybeSingle();
-    return data && data.is_active && (data.plan_type === 'basic' || data.plan_type === 'vip');
+    return data && data.is_active && ['basic', 'vip', 'vip_lifetime'].includes(data.plan_type);
   };
 
   const handleSignIn = async (e: React.FormEvent) => {

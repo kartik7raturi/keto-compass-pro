@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthContext';
 
-export type PlanType = 'free' | 'basic' | 'vip';
+export type PlanType = 'free' | 'basic' | 'vip' | 'vip_lifetime';
 
 interface Subscription {
   plan_type: PlanType;
@@ -61,16 +61,16 @@ export const useSubscription = () => {
       'weekly_report', 'challenges', 'marketplace', 'advanced_progress'
     ];
 
-    // VIP gets everything
-    if (plan === 'vip') return true;
-    // Basic gets basic features + all basic features
+    // VIP (monthly or lifetime) gets everything
+    if (plan === 'vip' || plan === 'vip_lifetime') return true;
+    // Basic gets basic features only
     if (plan === 'basic') return basicFeatures.includes(feature);
     return false;
   };
 
   const hasPaidPlan = (): boolean => {
     if (!subscription) return false;
-    return subscription.is_active && (subscription.plan_type === 'basic' || subscription.plan_type === 'vip');
+    return subscription.is_active && ['basic', 'vip', 'vip_lifetime'].includes(subscription.plan_type);
   };
 
   const upgradePlan = async (planType: PlanType, paymentType: string, amount: number) => {
