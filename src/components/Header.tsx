@@ -134,9 +134,30 @@ const Header = () => {
         <div className="flex items-center gap-2">
           {user ? (
             <div className="flex items-center gap-1 md:gap-2">
+              {/* Role-based CTA: basic users see VIP upgrade, unpaid logged-in users see pricing */}
+              {!hasPaid && (
+                <Button
+                  size="sm"
+                  className="hidden sm:inline-flex bg-gradient-to-r from-primary to-primary/80 text-primary-foreground"
+                  onClick={() => navigate('/pricing')}
+                >
+                  Choose Plan
+                </Button>
+              )}
+              {hasPaid && !isVip && (
+                <Button
+                  size="sm"
+                  className="hidden sm:inline-flex bg-gradient-to-r from-amber-500 to-orange-600 text-white"
+                  onClick={() => navigate('/vip-upgrade')}
+                >
+                  <Crown className="mr-1 h-4 w-4" />
+                  Upgrade to VIP
+                </Button>
+              )}
               <NotificationBell />
               <span className="text-sm text-muted-foreground hidden lg:block">
                 Welcome, {userDisplayName}
+                {isVip && <Crown className="inline ml-1 h-3 w-3 text-amber-500" />}
               </span>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -150,6 +171,8 @@ const Header = () => {
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4" />
                       My Account
+                      {isVip && <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 font-semibold">VIP</span>}
+                      {hasPaid && !isVip && <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">Basic</span>}
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
@@ -167,6 +190,11 @@ const Header = () => {
                     <DropdownMenuItem onClick={() => navigate('/vip-upgrade')}>
                       <Crown className="mr-2 h-4 w-4 text-amber-500" />
                       VIP Upgrade
+                    </DropdownMenuItem>
+                  )}
+                  {!hasPaid && (
+                    <DropdownMenuItem onClick={() => navigate('/pricing')}>
+                      Choose a Plan
                     </DropdownMenuItem>
                   )}
                   {isAdmin && (
