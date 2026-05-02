@@ -204,11 +204,11 @@ const VipUpgrade = () => {
                   <h3 className="text-xl font-bold">12-Month Access</h3>
                   <div>
                     <span className="text-5xl font-bold">$99</span>
-                    <span className="text-muted-foreground"> one-time</span>
+                    <span className="text-muted-foreground">/year</span>
                   </div>
                   <ul className="text-sm space-y-2 text-left">
-                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />All VIP features for 12 months</li>
-                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />No recurring fees</li>
+                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />All VIP features for a full year</li>
+                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />Single yearly payment — save vs monthly</li>
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />Priority support</li>
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />Future updates included</li>
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />60-day money back guarantee</li>
