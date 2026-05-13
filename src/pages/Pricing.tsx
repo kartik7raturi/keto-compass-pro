@@ -29,8 +29,6 @@ const Pricing = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <DigiStoreBadge type="salespage" />
-      <DigiStorePromo />
       <main>
         {/* Hero */}
         <section className="py-12 md:py-20 bg-gradient-to-br from-primary/5 via-background to-primary/10">
