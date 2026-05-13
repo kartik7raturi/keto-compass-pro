@@ -66,7 +66,6 @@ const Shop = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <DigiStoreUpsell />
       <Header />
       <main>
         {/* Product Overview Hero */}
