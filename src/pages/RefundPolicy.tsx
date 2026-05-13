@@ -120,7 +120,7 @@ const RefundPolicy = () => {
                 <li>Contact our support team through the <a href="/contact" className="text-primary hover:underline">Contact page</a> or via email.</li>
                 <li>Include your order number and the email address used for purchase.</li>
                 <li>Briefly describe why you'd like a refund (optional but helpful).</li>
-                <li>Refunds are processed within 5-10 business days through the original payment method (Digistore24).</li>
+                <li>Refunds are processed within 5-10 business days through the original payment method.</li>
               </ol>
               <p className="text-xs text-muted-foreground mt-4">
                 Last updated: April 2026
