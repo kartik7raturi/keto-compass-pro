@@ -4,8 +4,6 @@ import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Check, Crown, ShoppingBag, ArrowRight } from 'lucide-react';
-import DigiStoreBadge from '@/components/DigiStoreBadge';
-import DigiStoreUpsell from '@/components/DigiStoreUpsell';
 import { useButtonLinks } from '@/hooks/useButtonLinks';
 import { useSubscription } from '@/hooks/useSubscription';
 
