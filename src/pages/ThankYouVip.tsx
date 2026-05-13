@@ -54,9 +54,8 @@ const ThankYouVip = () => {
             </p>
           </div>
 
-          {/* Bank statement notice */}
           <p className="text-xs text-muted-foreground">
-            The debit will appear as Digistore24 GmbH (Germany) on your bank or card statement.
+            A receipt has been emailed to you.
           </p>
 
           <Card className="border-2 border-primary shadow-xl overflow-hidden">
