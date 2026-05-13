@@ -1,5 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; codex/add-link-to-19-dollar-sales-page-vcswzk
+import { Check, Star, Zap, TrendingUp, Shield, Award, Crown } from 'lucide-react';
 import { Check, Star, Zap, TrendingUp, Shield, Award, Crown, FileText, Mail, Download } from 'lucide-react';
+ main
 
 const FEATURES = [
   '1000+ Keto Recipes',
@@ -60,29 +62,6 @@ const Pricing = () => {
           </div>
         </section>
 
-        {/* How You Receive */}
-        <section className="py-10">
-          <div className="container mx-auto px-4 max-w-3xl">
-            <h2 className="text-2xl font-bold text-center mb-4">How You Will Receive Your Product</h2>
-            <p className="text-muted-foreground text-center mb-6">
-              After your purchase, you will get instant access to Ketopia via:
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg mx-auto">
-              <div className="text-center p-4">
-                <Mail className="h-8 w-8 text-primary mx-auto mb-2" />
-                <p className="text-sm font-medium">Email with login details</p>
-              </div>
-              <div className="text-center p-4">
-                <Shield className="h-8 w-8 text-primary mx-auto mb-2" />
-                <p className="text-sm font-medium">Secure member area</p>
-              </div>
-              <div className="text-center p-4">
-                <Download className="h-8 w-8 text-primary mx-auto mb-2" />
-                <p className="text-sm font-medium">Immediate access to all materials</p>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* Results */}
         <section className="py-10 bg-secondary/20">
