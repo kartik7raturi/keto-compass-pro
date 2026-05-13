@@ -13,7 +13,7 @@ import { usePointsSystem, POINT_VALUES } from "@/hooks/usePointsSystem";
 
 const SEO = () => {
   useEffect(() => {
-    const title = "Free Intermittent Fasting Tracker | Ketopia - Fasting Timer";
+    const title = "Intermittent Fasting Tracker | Ketopia";
     const description = "Track your intermittent fasting with our free fasting tracker. Start and monitor fasting windows with countdown timer, presets, and reminders.";
     const keywords = "free fasting tracker, intermittent fasting, fasting timer, IF tracker, 16:8 fasting, keto fasting";
     
