@@ -83,8 +83,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <DigiStoreBadge type="salespage" />
-      <DigiStorePromo />
       <Header />
       <Hero />
       <div className="container mx-auto px-4 py-4">
