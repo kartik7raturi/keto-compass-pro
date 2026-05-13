@@ -33,18 +33,12 @@ const ThankYouVip = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <DigiStoreBadge type="thankyoupage" />
-      <DigiStoreUpsell />
       <Header />
       <main className="container mx-auto px-4 py-12">
-        {/* DigiStore thank you header */}
         <div className="max-w-xl mx-auto text-center mb-6">
           <div className="bg-amber-500/5 border border-amber-500/20 rounded-lg p-4 mb-6">
             <p className="text-sm font-medium">
-              Thank you for ordering from Ketopia with Digistore24.
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              On your bank statement you will see a charge from Digistore24.
+              Thank you for your VIP purchase!
             </p>
           </div>
         </div>
