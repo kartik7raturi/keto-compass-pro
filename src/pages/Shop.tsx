@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Star, Shield, Truck, Check, MessageSquare, Package } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import DigiStoreUpsell from '@/components/DigiStoreUpsell';
+
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useButtonLinks } from '@/hooks/useButtonLinks';
 import supplementImg from '@/assets/supplement-product.png';
