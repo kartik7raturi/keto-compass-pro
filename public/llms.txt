@@ -1,0 +1,41 @@
+# Ketopia
+
+> Your all-in-one keto companion: track macros, fasting, water, and weight, follow meal plans, and discover keto recipes.
+
+Ketopia helps users start and sustain a ketogenic lifestyle with personalized tracking, recipes, community support, and curated meal plans.
+
+## Pages
+
+- [Home](/): Overview of Ketopia and getting started.
+- [Pricing](/pricing): Subscription plans (Basic $19, VIP $99/year).
+- [Recipes](/recipes): Keto recipe library.
+- [Tracker](/tracker): Daily macro and food tracker.
+- [Progress](/progress): Weight, body composition, and analytics dashboard.
+- [Marketplace](/marketplace): Keto food marketplace.
+- [Community](/community): Member community and messaging.
+- [Challenges](/challenges): Keto challenges and leaderboards.
+- [Guide](/guide): Keto starter guide.
+- [Blog](/blog): Articles on keto, fasting, and wellness.
+- [Stories](/stories): Member transformation stories.
+- [FAQ](/faq): Frequently asked questions.
+- [Quick Meals](/quick-meals): Fast keto meal ideas.
+- [Weekly Plan](/weekly-plan): VIP 7-day meal plans.
+- [Custom Plan](/custom-plan): VIP personalized meal plans.
+- [30-Day Keto](/tracker/30-day-keto): 30-day keto streak tracker.
+- [Fasting Tracker](/tracker/fasting): Intermittent fasting timer.
+- [Workout Tracker](/tracker/workout): Workout logging.
+- [Water Tracker](/tracker/water): Daily water intake.
+- [Period Tracker](/tracker/period): Cycle tracking.
+- [VIP Upgrade](/vip-upgrade): Upgrade to VIP yearly plan.
+- [Shop](/shop): Supplements and merchandise.
+- [About](/about): About Ketopia.
+- [Contact](/contact): Contact form.
+- [Support](/support): Help and support.
+
+## Optional
+
+- [Careers](/careers): Open roles.
+- [Privacy](/privacy): Privacy policy.
+- [Terms](/terms): Terms of service.
+- [Imprint](/imprint): Legal imprint.
+- [Refund Policy](/refund-policy): Refund terms.
