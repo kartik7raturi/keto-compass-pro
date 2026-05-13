@@ -33,8 +33,7 @@ const RefundPolicy = () => {
               </p>
               <p className="text-muted-foreground">
                 To request a refund, please contact our support team at{' '}
-                <a href="/contact" className="text-primary hover:underline">our contact page</a> or 
-                through the Digistore24 platform where your purchase was processed.
+                <a href="/contact" className="text-primary hover:underline">our contact page</a>.
               </p>
             </CardContent>
           </Card>
