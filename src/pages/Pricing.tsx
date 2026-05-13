@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, Star, Zap, TrendingUp, Shield, Award, Crown, FileText } from 'lucide-react';
+import { Check, Star, Zap, TrendingUp, Shield, Award, Crown } from 'lucide-react';
 
 const FEATURES = [
   '1000+ Keto Recipes',
