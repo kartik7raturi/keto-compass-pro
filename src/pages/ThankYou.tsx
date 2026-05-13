@@ -93,9 +93,8 @@ const ThankYou = () => {
             </CardContent>
           </Card>
 
-          {/* Bank statement notice */}
           <p className="text-xs text-muted-foreground mb-6">
-            The debit will appear as Digistore24 GmbH (Germany) on your bank or card statement.
+            A receipt has been emailed to you.
           </p>
 
           <div className="space-y-3">
