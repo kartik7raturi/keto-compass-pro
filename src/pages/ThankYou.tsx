@@ -144,7 +144,6 @@ const ThankYou = () => {
           </div>
           <p className="text-xs text-muted-foreground mt-4 max-w-2xl mx-auto px-4">
             These earnings are not representative for the average participants. The average participant will earn significantly less or no money at all through this product or service.
-            © 2026 Digistore24 Inc. (United States) Inc. and/or its licensors.
           </p>
         </div>
       </main>
