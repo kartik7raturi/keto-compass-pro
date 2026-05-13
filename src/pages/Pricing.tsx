@@ -1,5 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; codex/add-link-to-19-dollar-sales-page-vcswzk
 import { Check, Star, Zap, TrendingUp, Shield, Award, Crown } from 'lucide-react';
+import { Check, Star, Zap, TrendingUp, Shield, Award, Crown, FileText, Mail, Download } from 'lucide-react';
+ main
 
 const FEATURES = [
   '1000+ Keto Recipes',
