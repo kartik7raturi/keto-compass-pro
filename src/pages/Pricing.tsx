@@ -1,7 +1,5 @@
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, Star, Zap, TrendingUp, Shield, Award, Crown, FileText, Mail, Download } from 'lucide-react';
-import { useButtonLinks } from '@/hooks/useButtonLinks';
+import { Check, Star, Zap, TrendingUp, Shield, Award, Crown, FileText } from 'lucide-react';
 
 const FEATURES = [
   '1000+ Keto Recipes',
@@ -25,8 +23,6 @@ const TESTIMONIALS = [
 ];
 
 const Pricing = () => {
-  const { getUrl } = useButtonLinks();
-
   return (
     <div className="min-h-screen bg-background">
       <main>
@@ -64,29 +60,6 @@ const Pricing = () => {
           </div>
         </section>
 
-        {/* How You Receive */}
-        <section className="py-10">
-          <div className="container mx-auto px-4 max-w-3xl">
-            <h2 className="text-2xl font-bold text-center mb-4">How You Will Receive Your Product</h2>
-            <p className="text-muted-foreground text-center mb-6">
-              After your purchase, you will get instant access to Ketopia via:
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg mx-auto">
-              <div className="text-center p-4">
-                <Mail className="h-8 w-8 text-primary mx-auto mb-2" />
-                <p className="text-sm font-medium">Email with login details</p>
-              </div>
-              <div className="text-center p-4">
-                <Shield className="h-8 w-8 text-primary mx-auto mb-2" />
-                <p className="text-sm font-medium">Secure member area</p>
-              </div>
-              <div className="text-center p-4">
-                <Download className="h-8 w-8 text-primary mx-auto mb-2" />
-                <p className="text-sm font-medium">Immediate access to all materials</p>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* Results */}
         <section className="py-10 bg-secondary/20">
@@ -139,12 +112,9 @@ const Pricing = () => {
                     </p>
                   </div>
 
-                  <Button
-                    className="w-full bg-gradient-to-r from-primary to-primary/80 text-lg py-7 shadow-lg hover:shadow-xl transition-all"
-                    onClick={() => window.open(getUrl('keto_starter'), '_blank')}
-                  >
-                    Get Started Now — $19/month
-                  </Button>
+                  <a href="https://warriorplus.com/o2/buy/xtpnsb/gf37tm/h8p8sl" target="_blank" rel="noopener noreferrer" className="block">
+                    <img src="https://warriorplus.com/o2/btn/fn100011001/xtpnsb/gf37tm/458023" alt="Buy now" className="w-full" />
+                  </a>
                   <p className="text-xs text-center text-muted-foreground">
                     Secure payment • Instant access
                   </p>
