@@ -40,31 +40,11 @@ const TESTIMONIALS = [
   { name: 'Maria L.', text: 'Best investment for my keto journey.', stars: 5 },
 ];
 
-const VIP_LINK = 'https://www.digistore24.com/product/680740';
+const VIP_LINK = '/pricing';
 
 const VipUpgrade = () => {
-  useEffect(() => {
-    const scriptId = 'digistore-vip-promo-script';
-    if (document.getElementById(scriptId)) return;
-    const s = document.createElement('script');
-    s.id = scriptId;
-    s.src = 'https://www.digistore24-scripts.com/service/digistore.js';
-    document.head.appendChild(s);
-    s.onload = () => {
-      try {
-        (window as any).digistorePromocode?.({ product_id: 680740, adjust_domain: true });
-      } catch (e) { /* ignore */ }
-    };
-    return () => {
-      const el = document.getElementById(scriptId);
-      if (el) el.remove();
-    };
-  }, []);
-
   return (
     <div className="min-h-screen bg-background">
-      <DigiStoreBadge type="salespage" />
-      <DigiStoreUpsell />
       <main>
         {/* Hero */}
         <section className="relative py-16 md:py-24 overflow-hidden">
