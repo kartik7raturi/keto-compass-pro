@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://ketopia.online/sitemap.xml
+Sitemap: https://keto-compass-pro.lovable.app/sitemap.xml
