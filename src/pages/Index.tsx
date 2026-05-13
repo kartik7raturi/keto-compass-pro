@@ -9,8 +9,6 @@ import { AdvertisementBanner } from "@/components/AdvertisementBanner";
 import ContactForm from "@/components/ContactForm";
 import WelcomeProgressModal from "@/components/WelcomeProgressModal";
 import { useWelcomeModal } from "@/hooks/useWelcomeModal";
-import DigiStoreBadge from "@/components/DigiStoreBadge";
-import DigiStorePromo from "@/components/DigiStorePromo";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Utensils, BarChart3, Target, Dumbbell, Droplets, Calendar, Shield } from "lucide-react";
