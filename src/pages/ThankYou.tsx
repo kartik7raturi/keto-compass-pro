@@ -5,8 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Check, Crown, PartyPopper, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
-import DigiStoreBadge from '@/components/DigiStoreBadge';
-import DigiStorePromo from '@/components/DigiStorePromo';
 import { useButtonLinks } from '@/hooks/useButtonLinks';
 
 const ThankYou = () => {
@@ -57,18 +55,12 @@ const ThankYou = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <DigiStoreBadge type="thankyoupage" />
-      <DigiStorePromo />
       <Header />
       <main className="container mx-auto px-4 py-12 md:py-16">
-        {/* DigiStore thank you header */}
         <div className="max-w-xl mx-auto text-center mb-6">
           <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mb-6">
             <p className="text-sm font-medium">
-              Thank you for ordering from Ketopia with Digistore24.
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              On your bank statement you will see a charge from Digistore24.
+              Thank you for your purchase!
             </p>
           </div>
         </div>
@@ -101,9 +93,8 @@ const ThankYou = () => {
             </CardContent>
           </Card>
 
-          {/* Bank statement notice */}
           <p className="text-xs text-muted-foreground mb-6">
-            The debit will appear as Digistore24 GmbH (Germany) on your bank or card statement.
+            A receipt has been emailed to you.
           </p>
 
           <div className="space-y-3">
@@ -153,7 +144,6 @@ const ThankYou = () => {
           </div>
           <p className="text-xs text-muted-foreground mt-4 max-w-2xl mx-auto px-4">
             These earnings are not representative for the average participants. The average participant will earn significantly less or no money at all through this product or service.
-            © 2026 Digistore24 Inc. (United States) Inc. and/or its licensors.
           </p>
         </div>
       </main>

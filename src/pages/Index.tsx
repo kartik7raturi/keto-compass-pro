@@ -9,8 +9,6 @@ import { AdvertisementBanner } from "@/components/AdvertisementBanner";
 import ContactForm from "@/components/ContactForm";
 import WelcomeProgressModal from "@/components/WelcomeProgressModal";
 import { useWelcomeModal } from "@/hooks/useWelcomeModal";
-import DigiStoreBadge from "@/components/DigiStoreBadge";
-import DigiStorePromo from "@/components/DigiStorePromo";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Utensils, BarChart3, Target, Dumbbell, Droplets, Calendar, Shield } from "lucide-react";
@@ -85,8 +83,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <DigiStoreBadge type="salespage" />
-      <DigiStorePromo />
       <Header />
       <Hero />
       <div className="container mx-auto px-4 py-4">

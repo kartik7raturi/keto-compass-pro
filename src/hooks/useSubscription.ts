@@ -27,7 +27,7 @@ export const useSubscription = () => {
   }, [user?.id]);
 
   // Refetch subscription whenever the user returns to the tab
-  // (e.g. after completing Digistore checkout in another tab/window)
+  // (e.g. after completing checkout in another tab/window)
   useEffect(() => {
     if (!user?.id) return;
     const onFocus = () => { fetchSubscription(); };

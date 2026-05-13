@@ -2,8 +2,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, Star, Zap, TrendingUp, Shield, Award, Crown, FileText, Mail, Download } from 'lucide-react';
 import { useButtonLinks } from '@/hooks/useButtonLinks';
-import DigiStoreBadge from '@/components/DigiStoreBadge';
-import DigiStorePromo from '@/components/DigiStorePromo';
 
 const FEATURES = [
   '1000+ Keto Recipes',
@@ -31,8 +29,6 @@ const Pricing = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <DigiStoreBadge type="salespage" />
-      <DigiStorePromo />
       <main>
         {/* Hero */}
         <section className="py-12 md:py-20 bg-gradient-to-br from-primary/5 via-background to-primary/10">
@@ -215,7 +211,6 @@ const Pricing = () => {
           </div>
           <p className="text-xs text-muted-foreground mt-4 max-w-2xl mx-auto px-4">
             These earnings are not representative for the average participants. The average participant will earn significantly less or no money at all through this product or service.
-            © 2026 Digistore24 Inc. (United States) Inc. and/or its licensors.
           </p>
         </div>
       </main>

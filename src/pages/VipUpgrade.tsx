@@ -1,9 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Check, Crown, Zap, Target, TrendingUp, Dumbbell, Droplets, Calendar, Star, Shield, FileText, Mail, Download } from 'lucide-react';
-import DigiStoreBadge from '@/components/DigiStoreBadge';
-import DigiStoreUpsell from '@/components/DigiStoreUpsell';
-import { useEffect } from 'react';
 
 const VIP_FEATURES = [
   { icon: Target, label: '30-Day Keto Challenge', desc: 'Structured daily plan to reach ketosis' },
@@ -43,31 +40,11 @@ const TESTIMONIALS = [
   { name: 'Maria L.', text: 'Best investment for my keto journey.', stars: 5 },
 ];
 
-const VIP_LINK = 'https://www.digistore24.com/product/680740';
+const VIP_LINK = '/pricing';
 
 const VipUpgrade = () => {
-  useEffect(() => {
-    const scriptId = 'digistore-vip-promo-script';
-    if (document.getElementById(scriptId)) return;
-    const s = document.createElement('script');
-    s.id = scriptId;
-    s.src = 'https://www.digistore24-scripts.com/service/digistore.js';
-    document.head.appendChild(s);
-    s.onload = () => {
-      try {
-        (window as any).digistorePromocode?.({ product_id: 680740, adjust_domain: true });
-      } catch (e) { /* ignore */ }
-    };
-    return () => {
-      const el = document.getElementById(scriptId);
-      if (el) el.remove();
-    };
-  }, []);
-
   return (
     <div className="min-h-screen bg-background">
-      <DigiStoreBadge type="salespage" />
-      <DigiStoreUpsell />
       <main>
         {/* Hero */}
         <section className="relative py-16 md:py-24 overflow-hidden">
@@ -313,7 +290,6 @@ const VipUpgrade = () => {
           </div>
           <p className="text-xs text-muted-foreground mt-4 max-w-2xl mx-auto px-4">
             These earnings are not representative for the average participants. The average participant will earn significantly less or no money at all through this product or service.
-            © 2026 Digistore24 Inc. (United States) Inc. and/or its licensors.
           </p>
         </div>
       </main>
