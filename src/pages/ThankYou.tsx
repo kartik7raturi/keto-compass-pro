@@ -55,18 +55,12 @@ const ThankYou = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <DigiStoreBadge type="thankyoupage" />
-      <DigiStorePromo />
       <Header />
       <main className="container mx-auto px-4 py-12 md:py-16">
-        {/* DigiStore thank you header */}
         <div className="max-w-xl mx-auto text-center mb-6">
           <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mb-6">
             <p className="text-sm font-medium">
-              Thank you for ordering from Ketopia with Digistore24.
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              On your bank statement you will see a charge from Digistore24.
+              Thank you for your purchase!
             </p>
           </div>
         </div>
