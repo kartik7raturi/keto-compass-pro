@@ -30,4 +30,9 @@
   <url><loc>https://keto-compass-pro.lovable.app/pricing</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://keto-compass-pro.lovable.app/imprint</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
   <url><loc>https://keto-compass-pro.lovable.app/onboarding</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://keto-compass-pro.lovable.app/auth</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://keto-compass-pro.lovable.app/profile</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://keto-compass-pro.lovable.app/thank-you</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://keto-compass-pro.lovable.app/thank-you-vip</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
+  <url><loc>https://keto-compass-pro.lovable.app/refund-policy</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
 </urlset>
