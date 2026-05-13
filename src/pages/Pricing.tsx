@@ -2,8 +2,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, Star, Zap, TrendingUp, Shield, Award, Crown, FileText, Mail, Download } from 'lucide-react';
 import { useButtonLinks } from '@/hooks/useButtonLinks';
-import DigiStoreBadge from '@/components/DigiStoreBadge';
-import DigiStorePromo from '@/components/DigiStorePromo';
 
 const FEATURES = [
   '1000+ Keto Recipes',
