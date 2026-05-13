@@ -1,7 +1,5 @@
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, Star, Zap, TrendingUp, Shield, Award, Crown, FileText, Mail, Download } from 'lucide-react';
-import { useButtonLinks } from '@/hooks/useButtonLinks';
 
 const FEATURES = [
   '1000+ Keto Recipes',
@@ -25,8 +23,6 @@ const TESTIMONIALS = [
 ];
 
 const Pricing = () => {
-  const { getUrl } = useButtonLinks();
-
   return (
     <div className="min-h-screen bg-background">
       <main>
@@ -139,12 +135,9 @@ const Pricing = () => {
                     </p>
                   </div>
 
-                  <Button
-                    className="w-full bg-gradient-to-r from-primary to-primary/80 text-lg py-7 shadow-lg hover:shadow-xl transition-all"
-                    onClick={() => window.open(getUrl('keto_starter'), '_blank')}
-                  >
-                    Get Started Now — $19/month
-                  </Button>
+                  <a href="https://warriorplus.com/o2/buy/xtpnsb/gf37tm/h8p8sl" target="_blank" rel="noopener noreferrer" className="block">
+                    <img src="https://warriorplus.com/o2/btn/fn100011001/xtpnsb/gf37tm/458023" alt="Buy now" className="w-full" />
+                  </a>
                   <p className="text-xs text-center text-muted-foreground">
                     Secure payment • Instant access
                   </p>
