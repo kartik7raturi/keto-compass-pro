@@ -960,57 +960,6 @@ export type Database = {
           },
         ]
       }
-      ipn_logs: {
-        Row: {
-          amount: number | null
-          created_at: string | null
-          currency: string | null
-          customer_email: string | null
-          customer_name: string | null
-          error_message: string | null
-          event_type: string
-          id: string
-          order_id: string | null
-          plan_type: string | null
-          processed_at: string | null
-          product_id: string | null
-          raw_payload: Json | null
-          status: string | null
-        }
-        Insert: {
-          amount?: number | null
-          created_at?: string | null
-          currency?: string | null
-          customer_email?: string | null
-          customer_name?: string | null
-          error_message?: string | null
-          event_type: string
-          id?: string
-          order_id?: string | null
-          plan_type?: string | null
-          processed_at?: string | null
-          product_id?: string | null
-          raw_payload?: Json | null
-          status?: string | null
-        }
-        Update: {
-          amount?: number | null
-          created_at?: string | null
-          currency?: string | null
-          customer_email?: string | null
-          customer_name?: string | null
-          error_message?: string | null
-          event_type?: string
-          id?: string
-          order_id?: string | null
-          plan_type?: string | null
-          processed_at?: string | null
-          product_id?: string | null
-          raw_payload?: Json | null
-          status?: string | null
-        }
-        Relationships: []
-      }
       keto_streaks: {
         Row: {
           completed: boolean
@@ -2522,19 +2471,6 @@ export type Database = {
         Returns: undefined
       }
       is_admin: { Args: never; Returns: boolean }
-      process_digistore_ipn: {
-        Args: {
-          p_amount: number
-          p_currency: string
-          p_customer_email: string
-          p_customer_name: string
-          p_event_type: string
-          p_order_id: string
-          p_product_id: string
-          p_raw_payload: Json
-        }
-        Returns: Json
-      }
       user_has_feature: {
         Args: { p_feature: string; p_user_id: string }
         Returns: boolean
