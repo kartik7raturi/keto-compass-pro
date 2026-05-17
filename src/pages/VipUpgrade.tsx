@@ -41,9 +41,16 @@ const TESTIMONIALS = [
   { name: 'Maria L.', text: 'Best investment for my keto journey.', stars: 5 },
 ];
 
-const VIP_LINK = '/pricing';
-
 const VipUpgrade = () => {
+  useEffect(() => {
+    const s = document.createElement('script');
+    s.type = 'text/javascript';
+    s.src = 'https://warriorplus.com/o2/js/tc9pxg';
+    s.defer = true;
+    document.body.appendChild(s);
+    return () => { document.body.removeChild(s); };
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <main>
