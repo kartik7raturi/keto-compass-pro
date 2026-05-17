@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Check, Crown, Zap, Target, TrendingUp, Dumbbell, Droplets, Calendar, Star, Shield } from 'lucide-react';
@@ -42,15 +41,6 @@ const TESTIMONIALS = [
 ];
 
 const VipUpgrade = () => {
-  useEffect(() => {
-    const s = document.createElement('script');
-    s.type = 'text/javascript';
-    s.src = 'https://warriorplus.com/o2/js/tc9pxg';
-    s.defer = true;
-    document.body.appendChild(s);
-    return () => { document.body.removeChild(s); };
-  }, []);
-
   return (
     <div className="min-h-screen bg-background">
       <main>
@@ -133,7 +123,7 @@ const VipUpgrade = () => {
         </section>
 
         {/* WarriorPlus view tracking pixel */}
-        <img src="https://warriorplus.com/o2/v/xtpnsb/tc9pxg" alt="" width="1" height="1" style={{ position: 'absolute', left: -9999, top: -9999 }} />
+        <img src="https://warriorplus.com/o2/v/xtpnsb/z91gcv" alt="" width="1" height="1" style={{ position: 'absolute', left: -9999, top: -9999 }} />
 
         {/* Pricing */}
         <section id="pricing" className="py-16 bg-gradient-to-b from-amber-500/5 to-background">
@@ -154,12 +144,18 @@ const VipUpgrade = () => {
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-amber-500" />Priority support</li>
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-amber-500" />60-day money back guarantee</li>
                   </ul>
-                  <Button
-                    className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-6 text-lg"
-                    onClick={() => window.location.assign('/pricing')}
+                  <a href="https://warriorplus.com/o2/buy/xtpnsb/z91gcv/mtf1m1" target="_blank" rel="noopener noreferrer" className="block transition-transform hover:scale-[1.02]">
+                    <img src="https://warriorplus.com/o2/btn/fn160011001/xtpnsb/z91gcv/464930" alt="Get Monthly VIP Access" className="w-full" />
+                  </a>
+
+                  <div className="wplus_spdisclaimer" />
+
+                  <a
+                    href="https://warriorplus.com/o/nothanks/z91gcv"
+                    className="block text-sm text-muted-foreground hover:text-foreground underline mt-2"
                   >
-                    Upgrade Now — $29/mo
-                  </Button>
+                    No Thanks
+                  </a>
                 </CardContent>
               </Card>
 
@@ -179,15 +175,15 @@ const VipUpgrade = () => {
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />60-day money back guarantee</li>
                   </ul>
 
-                  <a href="https://warriorplus.com/o2/buy/xtpnsb/tc9pxg/brp9cq" target="_blank" rel="noopener noreferrer" className="block transition-transform hover:scale-[1.02]">
-                    <img src="https://warriorplus.com/o2/btn/fn100011001/xtpnsb/tc9pxg/464642" alt="Get 12-Month VIP Access" className="w-full" />
+                  <a href="https://warriorplus.com/o2/buy/xtpnsb/z91gcv/brp9cq" target="_blank" rel="noopener noreferrer" className="block transition-transform hover:scale-[1.02]">
+                    <img src="https://warriorplus.com/o2/btn/fn100011001/xtpnsb/z91gcv/464642" alt="Get 12-Month VIP Access" className="w-full" />
                   </a>
 
                   {/* WarriorPlus Disclaimer */}
                   <div className="wplus_spdisclaimer text-sm text-foreground" />
 
                   <a
-                    href="https://warriorplus.com/o/nothanks/tc9pxg"
+                    href="https://warriorplus.com/o/nothanks/z91gcv"
                     className="block text-sm text-muted-foreground hover:text-foreground underline mt-2"
                   >
                     No Thanks

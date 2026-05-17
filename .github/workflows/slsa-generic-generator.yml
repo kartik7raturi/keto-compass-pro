@@ -1,0 +1,40 @@
+name: "🔐 SLSA Generic Generator"
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+  id-token: write
+
+jobs:
+  build-artifact:
+    runs-on: ubuntu-latest
+    outputs:
+      subjects: ${{ steps.hash.outputs.subjects }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Package source artifact
+        run: |
+          tar --sort=name \
+              --mtime='UTC 1970-01-01' \
+              --owner=0 --group=0 --numeric-owner \
+              -czf keto-compass-pro-source.tgz .
+
+      - name: Compute artifact digest
+        id: hash
+        run: |
+          DIGEST=$(sha256sum keto-compass-pro-source.tgz | awk '{print $1}')
+          echo "subjects=$(printf '{\"name\":\"keto-compass-pro-source.tgz\",\"digest\":{\"sha256\":\"%s\"}}' "$DIGEST" | base64 -w 0)" >> "$GITHUB_OUTPUT"
+
+  provenance:
+    needs: build-artifact
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.1.0
+    with:
+      base64-subjects: ${{ needs.build-artifact.outputs.subjects }}
+    secrets: inherit
