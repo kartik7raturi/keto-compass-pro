@@ -132,31 +132,11 @@ const VipUpgrade = () => {
           </div>
         </section>
 
-        {/* Instant Access */}
-        <section className="py-10 bg-secondary/10">
-          <div className="container mx-auto px-4 max-w-3xl text-center">
-            <h2 className="text-2xl font-bold mb-4">Instant Access After Purchase</h2>
-            <p className="text-muted-foreground mb-6">Once your payment is complete, you will receive:</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-lg mx-auto">
-              <div className="text-center p-4">
-                <Mail className="h-8 w-8 text-amber-500 mx-auto mb-2" />
-                <p className="text-sm font-medium">Instant access via email</p>
-              </div>
-              <div className="text-center p-4">
-                <Download className="h-8 w-8 text-amber-500 mx-auto mb-2" />
-                <p className="text-sm font-medium">Download links or login credentials</p>
-              </div>
-              <div className="text-center p-4">
-                <Shield className="h-8 w-8 text-amber-500 mx-auto mb-2" />
-                <p className="text-sm font-medium">Full access to all VIP materials</p>
-              </div>
-            </div>
-            <p className="text-sm text-muted-foreground mt-4">You can start immediately.</p>
-          </div>
-        </section>
+        {/* WarriorPlus view tracking pixel */}
+        <img src="https://warriorplus.com/o2/v/xtpnsb/tc9pxg" alt="" width="1" height="1" style={{ position: 'absolute', left: -9999, top: -9999 }} />
 
         {/* Pricing */}
-        <section className="py-16 bg-gradient-to-b from-amber-500/5 to-background">
+        <section id="pricing" className="py-16 bg-gradient-to-b from-amber-500/5 to-background">
           <div className="container px-4">
             <h2 className="text-2xl md:text-3xl font-bold text-center mb-2">Choose Your VIP Plan</h2>
             <p className="text-center text-muted-foreground mb-8">Unlock everything. No restrictions.</p>
@@ -176,7 +156,7 @@ const VipUpgrade = () => {
                   </ul>
                   <Button
                     className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white py-6 text-lg"
-                    onClick={() => window.open(VIP_LINK, '_blank')}
+                    onClick={() => window.location.assign('/pricing')}
                   >
                     Upgrade Now — $29/mo
                   </Button>
@@ -198,12 +178,20 @@ const VipUpgrade = () => {
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />Future updates included</li>
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />60-day money back guarantee</li>
                   </ul>
-                  <Button
-                    className="w-full bg-gradient-to-r from-primary to-primary/80 text-primary-foreground py-6 text-lg"
-                    onClick={() => window.open(VIP_LINK, '_blank')}
+
+                  <a href="https://warriorplus.com/o2/buy/xtpnsb/tc9pxg/brp9cq" target="_blank" rel="noopener noreferrer" className="block transition-transform hover:scale-[1.02]">
+                    <img src="https://warriorplus.com/o2/btn/fn100011001/xtpnsb/tc9pxg/464642" alt="Get 12-Month VIP Access" className="w-full" />
+                  </a>
+
+                  {/* WarriorPlus Disclaimer */}
+                  <div className="wplus_spdisclaimer text-sm text-foreground" />
+
+                  <a
+                    href="https://warriorplus.com/o/nothanks/tc9pxg"
+                    className="block text-sm text-muted-foreground hover:text-foreground underline mt-2"
                   >
-                    Get 12-Month Access — $99
-                  </Button>
+                    No Thanks
+                  </a>
                 </CardContent>
               </Card>
             </div>
@@ -218,7 +206,7 @@ const VipUpgrade = () => {
             </div>
             <h2 className="text-2xl font-bold mb-3">100% Risk-Free – 60-Day Guarantee</h2>
             <p className="text-muted-foreground">
-              Try Ketopia VIP completely risk-free. If you are not satisfied for any reason, 
+              Try Ketopia VIP completely risk-free. If you are not satisfied for any reason,
               you can request a full refund within 60 days. No questions asked.
             </p>
           </div>
@@ -238,28 +226,6 @@ const VipUpgrade = () => {
           </div>
         </section>
 
-        {/* Testimonials */}
-        <section className="py-12 bg-secondary/20">
-          <div className="container px-4">
-            <h2 className="text-2xl font-bold text-center mb-8">What VIP Members Say</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-              {TESTIMONIALS.map(t => (
-                <Card key={t.name}>
-                  <CardContent className="p-6 text-center">
-                    <div className="flex justify-center gap-1 mb-3">
-                      {Array.from({ length: t.stars }).map((_, i) => (
-                        <Star key={i} className="h-4 w-4 text-amber-500 fill-amber-500" />
-                      ))}
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">"{t.text}"</p>
-                    <p className="font-semibold text-sm">{t.name}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* CTA */}
         <section className="py-12 bg-gradient-to-r from-amber-500/10 to-orange-500/10">
           <div className="container mx-auto px-4 text-center max-w-2xl">
@@ -270,7 +236,7 @@ const VipUpgrade = () => {
             <Button
               size="lg"
               className="bg-gradient-to-r from-amber-500 to-orange-600 text-white text-lg py-7 px-10"
-              onClick={() => window.open(VIP_LINK, '_blank')}
+              onClick={() => { document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }); }}
             >
               👉 Upgrade to Ketopia VIP Now
             </Button>
