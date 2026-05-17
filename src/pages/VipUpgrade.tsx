@@ -1,4 +1,8 @@
+ codex/update-vip-upgrade-sales-page-buttons-wfhfng
 import { Button } from '@/components/ui/button';
+
+import { useEffect } from 'react';
+ main
 import { Card, CardContent } from '@/components/ui/card';
 import { Check, Crown, Zap, Target, TrendingUp, Dumbbell, Droplets, Calendar, Star, Shield } from 'lucide-react';
 
@@ -41,6 +45,22 @@ const TESTIMONIALS = [
 ];
 
 const VipUpgrade = () => {
+ codex/update-vip-upgrade-sales-page-buttons-wfhfng
+
+  useEffect(() => {
+    const s = document.createElement('script');
+    s.type = 'text/javascript';
+    s.src = 'https://warriorplus.com/o2/js/z91gcv';
+    s.defer = true;
+    document.body.appendChild(s);
+    return () => {
+      if (s.parentNode) {
+        s.parentNode.removeChild(s);
+      }
+    };
+  }, []);
+
+ main
   return (
     <div className="min-h-screen bg-background">
       <main>
