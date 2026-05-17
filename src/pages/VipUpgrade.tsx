@@ -47,7 +47,11 @@ const VipUpgrade = () => {
     s.src = 'https://warriorplus.com/o2/js/z91gcv';
     s.defer = true;
     document.body.appendChild(s);
-    return () => { document.body.removeChild(s); };
+    return () => {
+      if (s.parentNode) {
+        s.parentNode.removeChild(s);
+      }
+    };
   }, []);
 
   return (
