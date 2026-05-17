@@ -261,6 +261,7 @@ const VipUpgrade = () => {
             <a href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</a>
             <a href="/terms" className="hover:text-primary transition-colors">Terms of Service</a>
             <a href="/refund-policy" className="hover:text-primary transition-colors">Refund Policy</a>
+            <a href="/contact" className="hover:text-primary transition-colors">Contact</a>
           </div>
           <p className="text-xs text-muted-foreground mt-4 max-w-2xl mx-auto px-4">
             These earnings are not representative for the average participants. The average participant will earn significantly less or no money at all through this product or service.
