@@ -1,0 +1,78 @@
+name: "🐕 Datadog Synthetics 🦕 Deno"
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+jobs:
+  browser-test:
+    runs-on: ubuntu-latest
+    env:
+      WEBSITE_URL: ${{ vars.WEBSITE_URL || 'https://keto-compass-pro.lovable.app' }}
+      DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+      DATADOG_APP_KEY: ${{ secrets.DATADOG_APP_KEY }}
+      DD_SITE: ${{ vars.DD_SITE || 'datadoghq.com' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v1.x
+
+      - name: Run Datadog Synthetic API test against website
+        run: |
+          deno run --allow-net --allow-env - <<'EOF'
+          const url = Deno.env.get("WEBSITE_URL");
+          const apiKey = Deno.env.get("DATADOG_API_KEY");
+          const appKey = Deno.env.get("DATADOG_APP_KEY");
+          const site = Deno.env.get("DD_SITE") ?? "datadoghq.com";
+
+          if (!url) throw new Error("WEBSITE_URL is not configured");
+          if (!apiKey || !appKey) {
+            throw new Error("DATADOG_API_KEY and DATADOG_APP_KEY secrets are required");
+          }
+
+          const testPayload = {
+            config: {
+              assertions: [
+                { type: "statusCode", operator: "is", target: 200 },
+                { type: "responseTime", operator: "lessThan", target: 5000 }
+              ],
+              request: { method: "GET", url },
+              variables: []
+            },
+            locations: ["aws:us-east-1"],
+            message: `Automated check for ${url}`,
+            name: `Website uptime check - ${url}`,
+            options: {
+              tick_every: 1800,
+              min_location_failed: 1,
+              min_failure_duration: 0,
+              monitor_options: { renotify_interval: 0 }
+            },
+            subtype: "http",
+            type: "api"
+          };
+
+          const endpoint = `https://api.${site}/api/v1/synthetics/tests/api`;
+          const resp = await fetch(endpoint, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "DD-API-KEY": apiKey,
+              "DD-APPLICATION-KEY": appKey
+            },
+            body: JSON.stringify(testPayload)
+          });
+
+          const data = await resp.json().catch(() => ({}));
+          if (!resp.ok && resp.status !== 409) {
+            console.error("Datadog API error", resp.status, data);
+            throw new Error("Failed to create/update synthetic test");
+          }
+
+          console.log("Datadog synthetic workflow connected for:", url);
+          EOF
