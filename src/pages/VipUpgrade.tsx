@@ -142,37 +142,9 @@ const VipUpgrade = () => {
         {/* Pricing */}
         <section id="pricing" className="py-16 bg-gradient-to-b from-amber-500/5 to-background">
           <div className="container px-4">
-            <h2 className="text-2xl md:text-3xl font-bold text-center mb-2">Choose Your VIP Plan</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-2">VIP Access</h2>
             <p className="text-center text-muted-foreground mb-8">Unlock everything. No restrictions.</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-              <Card className="border-2 border-amber-500/30 shadow-lg">
-                <CardContent className="p-6 text-center space-y-4">
-                  <h3 className="text-xl font-bold">Monthly</h3>
-                  <div>
-                    <span className="text-5xl font-bold">$29</span>
-                    <span className="text-muted-foreground">/month</span>
-                  </div>
-                  <ul className="text-sm space-y-2 text-left">
-                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-amber-500" />All VIP features</li>
-                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-amber-500" />Cancel anytime</li>
-                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-amber-500" />Priority support</li>
-                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-amber-500" />60-day money back guarantee</li>
-                  </ul>
-                  <a href="https://warriorplus.com/o2/buy/xtpnsb/z91gcv/mtf1m1" target="_blank" rel="noopener noreferrer" className="block transition-transform hover:scale-[1.02]">
-                    <img src="https://warriorplus.com/o2/btn/fn160011001/xtpnsb/z91gcv/464930" alt="Get Monthly VIP Access" className="w-full" />
-                  </a>
-
-                  <div className="wplus_spdisclaimer" />
-
-                  <a
-                    href="https://warriorplus.com/o/nothanks/z91gcv"
-                    className="block text-sm text-muted-foreground hover:text-foreground underline mt-2"
-                  >
-                    No Thanks
-                  </a>
-                </CardContent>
-              </Card>
-
+            <div className="max-w-md mx-auto">
               <Card className="border-2 border-primary shadow-xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-xs font-bold rounded-bl-lg">BEST VALUE</div>
                 <CardContent className="p-6 text-center space-y-4">
@@ -189,9 +161,13 @@ const VipUpgrade = () => {
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />60-day money back guarantee</li>
                   </ul>
 
-                  <a href="https://warriorplus.com/o2/buy/xtpnsb/z91gcv/brp9cq" target="_blank" rel="noopener noreferrer" className="block transition-transform hover:scale-[1.02]">
-                    <img src="https://warriorplus.com/o2/btn/fn100011001/xtpnsb/z91gcv/464642" alt="Get 12-Month VIP Access" className="w-full" />
-                  </a>
+                  <Button
+                    size="lg"
+                    className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white text-lg py-6"
+                    onClick={() => window.open('https://warriorplus.com/o2/buy/xtpnsb/z91gcv/brp9cq', '_blank')}
+                  >
+                    Get 12-Month VIP Access
+                  </Button>
 
                   {/* WarriorPlus Disclaimer */}
                   <div className="wplus_spdisclaimer text-sm text-foreground" />
