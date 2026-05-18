@@ -96,20 +96,20 @@ const Pricing = () => {
         {/* Pricing Card */}
         <section className="py-14 bg-gradient-to-b from-primary/5 to-background">
           <div className="container mx-auto px-4">
-            <div className="max-w-md mx-auto">
+            <div className="max-w-md md:max-w-lg mx-auto">
               <Card className="border-2 border-primary shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-primary to-amber-500 text-primary-foreground py-2.5 text-center text-sm font-bold tracking-wide">
                   🔥 START YOUR KETO JOURNEY TODAY 🔥
                 </div>
-                <CardHeader className="text-center pb-2 pt-14">
+                <CardHeader className="text-center pb-2 pt-12 sm:pt-14">
                   <div className="flex items-center justify-center gap-1 mb-2">
                     {[1,2,3,4,5].map(i => (
                       <Star key={i} className="h-5 w-5 text-amber-500 fill-amber-500" />
                     ))}
                   </div>
-                  <CardTitle className="text-2xl">Keto Starter Plan</CardTitle>
+                  <CardTitle className="text-xl sm:text-2xl">Keto Starter Plan</CardTitle>
                   <div className="mt-4">
-                    <span className="text-6xl font-bold bg-gradient-to-r from-primary to-amber-500 bg-clip-text text-transparent">$19</span>
+                    <span className="text-5xl sm:text-6xl font-bold bg-gradient-to-r from-primary to-amber-500 bg-clip-text text-transparent">$19</span>
                     <span className="text-muted-foreground text-lg">/month</span>
                   </div>
                   <p className="text-xs text-muted-foreground mt-2">Cancel anytime • No hidden fees</p>
@@ -130,7 +130,7 @@ const Pricing = () => {
                     </p>
                   </div>
 
-                  <a href="https://warriorplus.com/o2/buy/xtpnsb/gf37tm/h8p8sl" target="_blank" rel="noopener noreferrer" className="block transition-transform hover:scale-[1.02]">
+                  <a href="https://warriorplus.com/o2/buy/xtpnsb/gf37tm/h8p8sl" target="_blank" rel="noopener noreferrer" aria-label="Buy Keto Starter Plan for $19/month" data-offer="keto-starter-19" className="block transition-transform hover:scale-[1.02]">
                     <img src="https://warriorplus.com/o2/btn/fn100011001/xtpnsb/gf37tm/458023" alt="Buy now" className="w-full" />
                   </a>
 

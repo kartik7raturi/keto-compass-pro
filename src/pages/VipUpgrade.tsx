@@ -45,7 +45,7 @@ const VipUpgrade = () => {
   useEffect(() => {
     const s = document.createElement('script');
     s.type = 'text/javascript';
-    s.src = 'https://warriorplus.com/o2/js/z91gcv';
+    s.src = 'https://warriorplus.com/o2/js/tc9pxg';
     s.defer = true;
     document.body.appendChild(s);
     return () => {
@@ -137,23 +137,23 @@ const VipUpgrade = () => {
         </section>
 
         {/* WarriorPlus view tracking pixel */}
-        <img src="https://warriorplus.com/o2/v/xtpnsb/z91gcv" alt="" width="1" height="1" style={{ position: 'absolute', left: -9999, top: -9999 }} />
+        <img src="https://warriorplus.com/o2/v/xtpnsb/tc9pxg" alt="" width="1" height="1" style={{ position: 'absolute', left: -9999, top: -9999 }} />
 
         {/* Pricing */}
         <section id="pricing" className="py-16 bg-gradient-to-b from-amber-500/5 to-background">
           <div className="container px-4">
             <h2 className="text-2xl md:text-3xl font-bold text-center mb-2">VIP Access</h2>
             <p className="text-center text-muted-foreground mb-8">Unlock everything. No restrictions.</p>
-            <div className="max-w-md mx-auto">
+            <div className="max-w-md md:max-w-lg mx-auto">
               <Card className="border-2 border-primary shadow-xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-xs font-bold rounded-bl-lg">BEST VALUE</div>
-                <CardContent className="p-6 text-center space-y-4">
-                  <h3 className="text-xl font-bold">12-Month Access</h3>
+                <CardContent className="p-4 sm:p-6 md:p-8 text-center space-y-5">
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold">12-Month Access</h3>
                   <div>
-                    <span className="text-5xl font-bold">$99</span>
+                    <span className="text-4xl sm:text-5xl md:text-6xl font-bold">$99</span>
                     <span className="text-muted-foreground">/year</span>
                   </div>
-                  <ul className="text-sm space-y-2 text-left">
+                  <ul className="text-sm sm:text-base space-y-2.5 text-left">
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />All VIP features for a full year</li>
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />Single yearly payment — save vs monthly</li>
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />Priority support</li>
@@ -161,20 +161,16 @@ const VipUpgrade = () => {
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />60-day money back guarantee</li>
                   </ul>
 
-                  <Button
-                    size="lg"
-                    className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white text-lg py-6"
-                    onClick={() => window.open('https://warriorplus.com/o2/buy/xtpnsb/z91gcv/brp9cq', '_blank')}
-                  >
-                    Get 12-Month VIP Access
-                  </Button>
+                  <a href="https://warriorplus.com/o2/buy/xtpnsb/tc9pxg/brp9cq" target="_blank" rel="noopener noreferrer" aria-label="Get 12-Month VIP Access for $99/year" data-offer="vip-upgrade-99" className="block transition-transform hover:scale-[1.02]">
+                    <img src="https://warriorplus.com/o2/btn/fn160011001/xtpnsb/tc9pxg/464642" alt="Get 12-Month VIP Access" className="mx-auto w-full max-w-[320px] sm:max-w-full" />
+                  </a>
 
                   {/* WarriorPlus Disclaimer */}
-                  <div className="wplus_spdisclaimer text-sm text-foreground" />
+                  <div className="wplus_spdisclaimer" />
 
                   <a
-                    href="https://warriorplus.com/o/nothanks/z91gcv"
-                    className="block text-sm text-muted-foreground hover:text-foreground underline mt-2"
+                    href="https://warriorplus.com/o/nothanks/tc9pxg"
+                    className="block text-sm text-muted-foreground hover:text-foreground underline mt-1"
                   >
                     No Thanks
                   </a>
