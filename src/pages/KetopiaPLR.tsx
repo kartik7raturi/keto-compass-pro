@@ -148,7 +148,11 @@ const KetopiaPLR = () => {
               </ul>
               <div className="space-y-3">
                 <a href={CTA} target="_blank" rel="noopener noreferrer" className="inline-block">
+codex/update-sales-page-with-new-content-jylvi4
+                  <img src="https://warriorplus.com/o2/btn/fn100011000/xtpnsb/dpgrn7/465093" alt="Buy Now" />
+                  
                   <img src="https://warriorplus.com/o2/btn/fn110011001/xtpnsb/dpgrn7/465093" alt="Buy Now" />
+ main
                 </a>
                 <div className="wplus_spdisclaimer" />
                 <a href={NO_THANKS_LINK} target="_blank" rel="noopener noreferrer" className="inline-block text-yellow-200 underline">No Thanks</a>
@@ -344,7 +348,11 @@ const KetopiaPLR = () => {
             <p className="text-red-300 font-bold mb-8">⚠️ This PLR License Will Not Be Available Forever</p>
             <div className="space-y-3 mt-2">
               <a href={CTA} target="_blank" rel="noopener noreferrer" className="inline-block">
+ codex/update-sales-page-with-new-content-jylvi4
+                <img src="https://warriorplus.com/o2/btn/fn100011000/xtpnsb/dpgrn7/465093" alt="Buy Now" />
+
                 <img src="https://warriorplus.com/o2/btn/fn110011001/xtpnsb/dpgrn7/465093" alt="Buy Now" />
+ main
               </a>
               <div className="wplus_spdisclaimer" />
               <a href={NO_THANKS_LINK} target="_blank" rel="noopener noreferrer" className="block text-yellow-200 underline">No Thanks</a>
