@@ -66,6 +66,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/pricing" element={<Pricing />} />
+              <Route path="/ketopia-plr" element={<KetopiaPLR />} />
               <Route path="/onboarding" element={<OnboardingSurvey />} />
               <Route path="/vip-upgrade" element={<VipUpgrade />} />
               <Route path="/thank-you" element={<ThankYou />} />
