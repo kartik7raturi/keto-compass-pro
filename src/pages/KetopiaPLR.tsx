@@ -125,12 +125,12 @@ const KetopiaPLR = () => {
 
           <div className="grid md:grid-cols-2 gap-10 items-center">
             <div className="relative">
-              <div className="aspect-[4/3] rounded-2xl bg-gradient-to-br from-green-900 via-green-800 to-emerald-700 border-4 border-yellow-400/40 shadow-2xl flex items-center justify-center overflow-hidden">
-                <div className="text-center p-8">
-                  <Crown className="h-24 w-24 text-yellow-400 mx-auto mb-4" />
-                  <p className="display text-3xl font-bold text-yellow-300">KETOPIA</p>
-                  <p className="text-yellow-100/70 mt-2 text-sm tracking-widest">PLR EDITION</p>
-                </div>
+              <div className="aspect-[4/3] rounded-2xl bg-gradient-to-br from-green-900 via-green-800 to-emerald-700 border-4 border-yellow-400/40 shadow-2xl overflow-hidden">
+                <img
+                  src="/lovable-uploads/322d5eba-ae67-42e5-aa81-3d7061a693bd.png"
+                  alt="Ketopia PLR product image"
+                  className="h-full w-full object-cover"
+                />
               </div>
               <div className="absolute -top-4 -right-4 bg-red-600 text-white font-black px-4 py-2 rounded-lg shadow-xl rotate-6">
                 $999 ONLY
