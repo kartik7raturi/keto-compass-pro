@@ -45,6 +45,7 @@ import ThankYouVip from "./pages/ThankYouVip";
 import OnboardingSurvey from "./pages/OnboardingSurvey";
 import Shop from "./pages/Shop";
 import Pricing from "./pages/Pricing";
+import KetopiaPLR from "./pages/KetopiaPLR";
 import Messages from "./pages/Messages";
 import Imprint from "./pages/Imprint";
 import RefundPolicy from "./pages/RefundPolicy";
@@ -65,6 +66,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/pricing" element={<Pricing />} />
+              <Route path="/ketopia-plr" element={<KetopiaPLR />} />
               <Route path="/onboarding" element={<OnboardingSurvey />} />
               <Route path="/vip-upgrade" element={<VipUpgrade />} />
               <Route path="/thank-you" element={<ThankYou />} />
