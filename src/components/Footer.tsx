@@ -54,6 +54,7 @@ const Footer = () => {
               <li><a href="/stories" className="hover:text-keto-green transition-colors">Success Stories</a></li>
               <li><a href="/pricing" className="hover:text-keto-green transition-colors">Pricing</a></li>
               <li><a href="/vip-upgrade" className="hover:text-keto-green transition-colors">VIP Upgrade</a></li>
+              <li><a href="/ketopia-plr" className="hover:text-keto-green transition-colors">Ketopia PLR</a></li>
               <li><a href="/shop" className="hover:text-keto-green transition-colors">Shop</a></li>
               <li><a href="/faq" className="hover:text-keto-green transition-colors">FAQ</a></li>
               <li><a href="/support" className="hover:text-keto-green transition-colors">Support</a></li>
