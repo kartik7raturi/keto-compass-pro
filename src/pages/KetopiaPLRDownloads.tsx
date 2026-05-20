@@ -1,5 +1,6 @@
 import { Download, FileArchive, FileText, ShieldCheck } from "lucide-react";
 
+codex/update-sales-page-with-new-content-w352xc
 type DownloadFile = {
   name: string;
   href: string;
@@ -16,6 +17,19 @@ const files: DownloadFile[] = [
   { name: "Ketopia_PLR_License.pdf", href: "" },
   { name: "Ketopia_SetupInstructions.pdf", href: "" },
   { name: "Ketopia_OnboardingGuide.pdf", href: "" },
+
+const files = [
+  "Ketopia_MealPlans.docx",
+  "Ketopia_RecipeGuide.docx",
+  "Ketopia_WorkoutPlan.docx",
+  "Ketopia_EmailSequence.docx",
+  "Ketopia_SalesPageCopy.docx",
+  "Ketopia_Logo_EditableFiles.zip",
+  "Ketopia_Graphics_Pack.zip",
+  "Ketopia_PLR_License.pdf",
+  "Ketopia_SetupInstructions.pdf",
+  "Ketopia_OnboardingGuide.pdf",
+ main
 ];
 
 const KetopiaPLRDownloads = () => {
@@ -31,6 +45,7 @@ const KetopiaPLRDownloads = () => {
         </div>
 
         <div className="space-y-3">
+ codex/update-sales-page-with-new-content-w352xc
           {files.map((file) => (
             <div key={file.name} className="p-4 rounded-xl bg-green-900/40 border border-yellow-400/20 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 min-w-0">
@@ -49,6 +64,20 @@ const KetopiaPLRDownloads = () => {
                   <Download className="h-4 w-4" /> File URL pending
                 </button>
               )}
+
+          {files.map((name) => (
+            <div key={name} className="p-4 rounded-xl bg-green-900/40 border border-yellow-400/20 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3 min-w-0">
+                {name.endsWith(".zip") ? <FileArchive className="h-6 w-6 text-yellow-400" /> : <FileText className="h-6 w-6 text-yellow-400" />}
+                <div>
+                  <p className="font-semibold truncate">{name}</p>
+                  <p className="text-xs text-yellow-100/70">Ready to download</p>
+                </div>
+              </div>
+              <button className="px-3 py-2 rounded bg-yellow-400/20 text-yellow-300 text-sm inline-flex items-center gap-2" disabled>
+                <Download className="h-4 w-4" /> Awaiting file URL
+              </button>
+ main
             </div>
           ))}
         </div>

@@ -148,11 +148,24 @@ const KetopiaPLR = () => {
               </ul>
               <div className="space-y-3">
                 <a href={CTA} target="_blank" rel="noopener noreferrer" className="inline-block">
+codex/update-sales-page-with-new-content-w352xc
                   <img src="https://warriorplus.com/o2/btn/fn100011000/xtpnsb/dpgrn7/465093" alt="Buy Now" />
                 </a>
                 <div className="wplus_spdisclaimer" />
                 <a href={NO_THANKS_LINK} target="_blank" rel="noopener noreferrer" className="inline-block text-yellow-200 underline">No Thanks</a>
                               </div>
+
+codex/update-sales-page-with-new-content-jylvi4
+                  <img src="https://warriorplus.com/o2/btn/fn100011000/xtpnsb/dpgrn7/465093" alt="Buy Now" />
+                  
+                  <img src="https://warriorplus.com/o2/btn/fn110011001/xtpnsb/dpgrn7/465093" alt="Buy Now" />
+ main
+                </a>
+                <div className="wplus_spdisclaimer" />
+                <a href={NO_THANKS_LINK} target="_blank" rel="noopener noreferrer" className="inline-block text-yellow-200 underline">No Thanks</a>
+                <a href={TRACKING_LINK} target="_blank" rel="noopener noreferrer" className="block text-xs text-yellow-100/70">Tracking Link</a>
+              </div>
+main
               <p className="text-sm text-yellow-100/60">🔒 Secure WarriorPlus Checkout · Instant Access</p>
             </div>
           </div>
@@ -343,11 +356,24 @@ const KetopiaPLR = () => {
             <p className="text-red-300 font-bold mb-8">⚠️ This PLR License Will Not Be Available Forever</p>
             <div className="space-y-3 mt-2">
               <a href={CTA} target="_blank" rel="noopener noreferrer" className="inline-block">
+ codex/update-sales-page-with-new-content-w352xc
                 <img src="https://warriorplus.com/o2/btn/fn100011000/xtpnsb/dpgrn7/465093" alt="Buy Now" />
               </a>
               <div className="wplus_spdisclaimer" />
               <a href={NO_THANKS_LINK} target="_blank" rel="noopener noreferrer" className="block text-yellow-200 underline">No Thanks</a>
                           </div>
+
+ codex/update-sales-page-with-new-content-jylvi4
+                <img src="https://warriorplus.com/o2/btn/fn100011000/xtpnsb/dpgrn7/465093" alt="Buy Now" />
+
+                <img src="https://warriorplus.com/o2/btn/fn110011001/xtpnsb/dpgrn7/465093" alt="Buy Now" />
+ main
+              </a>
+              <div className="wplus_spdisclaimer" />
+              <a href={NO_THANKS_LINK} target="_blank" rel="noopener noreferrer" className="block text-yellow-200 underline">No Thanks</a>
+              <a href={TRACKING_LINK} target="_blank" rel="noopener noreferrer" className="block text-xs text-yellow-100/70">Tracking Link</a>
+            </div>
+ main
             <p className="text-sm text-yellow-100/70 mt-6">🔒 Secure Checkout · Instant Access · WarriorPlus Protected</p>
           </div>
         </div>
