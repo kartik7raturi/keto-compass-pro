@@ -11,6 +11,8 @@ interface Props {
   required?: RequiredPlan;
 }
 
+const ADMIN_EMAIL = 'sankhobusiness@gmail.com';
+
 /**
  * Server-side plan guard.
  * Calls the SECURITY DEFINER `get_user_plan` RPC (which auto-expires stale subs)
@@ -55,6 +57,10 @@ const RequirePlan = ({ children, required = "any_paid" }: Props) => {
 
   if (!user) {
     return <Navigate to="/auth" state={{ from: location.pathname }} replace />;
+  }
+
+  if (user.email?.toLowerCase() === ADMIN_EMAIL) {
+    return <>{children}</>;
   }
 
   const paidPlans = ["basic", "vip", "vip_lifetime"];

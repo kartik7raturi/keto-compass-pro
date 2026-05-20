@@ -9,6 +9,8 @@ import UserProgressWidget from "@/components/UserProgressWidget";
 import NotificationBell from "@/components/NotificationBell";
 import { useSubscription } from "@/hooks/useSubscription";
 
+const ADMIN_EMAIL = 'sankhobusiness@gmail.com';
+
 const Header = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -17,7 +19,8 @@ const Header = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const { subscription } = useSubscription();
 
-  const hasPaid = subscription && subscription.is_active && ['basic', 'vip', 'vip_lifetime'].includes(subscription.plan_type);
+  const isAdminEmail = user?.email?.toLowerCase() === ADMIN_EMAIL;
+  const hasPaid = isAdminEmail || (subscription && subscription.is_active && ['basic', 'vip', 'vip_lifetime'].includes(subscription.plan_type));
   const isVip = subscription && subscription.is_active && (subscription.plan_type === 'vip' || subscription.plan_type === 'vip_lifetime');
 
   const handleSignOut = async () => {
@@ -63,12 +66,12 @@ const Header = () => {
           .eq('role', 'admin')
           .maybeSingle();
         
-        setIsAdmin(!!roleData);
+        setIsAdmin(!!roleData || isAdminEmail);
       }
     };
 
     fetchUserProfile();
-  }, [user]);
+  }, [user, isAdminEmail]);
 
   const getNavItems = () => {
     if (!user) {

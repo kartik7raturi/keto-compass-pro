@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import {
-  Check, X, Download, FileText, FileArchive, Shield, Zap, Lock,
+  Check, X, Download, FileText, FileArchive, Shield, Zap,
   Star, Crown, Rocket, Edit3, DollarSign, Users, Award, Package,
   Upload, Settings, ShoppingCart, ChevronDown, ChevronUp
 } from "lucide-react";
 
-const CTA = "https://warriorplus.com/o2/buy/xtpnsb/plr999/ketopia";
+const CTA = "https://warriorplus.com/o2/buy/xtpnsb/dpgrn7/gw3yh9";
+const TRACKING_LINK = "https://warriorplus.com/o2/v/xtpnsb/dpgrn7";
+const NO_THANKS_LINK = "https://warriorplus.com/o/nothanks/dpgrn7";
 
 const includes = [
   "Full Private Label Rights — rebrand & sell as your own, keep 100% of profits",
@@ -62,23 +64,20 @@ const KetopiaPLR = () => {
     document.title = "Ketopia PLR — Done-For-You Keto Membership Site | $999";
     const onScroll = () => setScrolled(window.scrollY > 400);
     window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
+
+    const script = document.createElement("script");
+    script.src = "https://warriorplus.com/o2/js/dpgrn7";
+    script.defer = true;
+    script.type = "text/javascript";
+    script.dataset.wplus = "ketopia-plr";
+    document.body.appendChild(script);
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      script.remove();
+    };
   }, []);
 
-  const CtaButton = ({ id, label }: { id: string; label: string }) => (
-    <a
-      id={id}
-      href={CTA}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-block w-full md:w-auto px-10 py-5 rounded-xl text-lg md:text-xl font-extrabold tracking-wide
-                 bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-2xl
-                 hover:scale-[1.03] hover:shadow-orange-500/50 transition-all duration-200
-                 border-2 border-yellow-300/40"
-    >
-      {label}
-    </a>
-  );
 
   return (
     <div className="min-h-screen bg-[#0a1f14] text-[#f5f1e6]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
@@ -86,6 +85,8 @@ const KetopiaPLR = () => {
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
         .display { font-family: 'Playfair Display', serif; }
       `}</style>
+
+      <img src={TRACKING_LINK} alt="" width="1" height="1" style={{ position: "absolute", left: -9999, top: -9999 }} />
 
       {/* Sticky header */}
       <div className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"}`}>
@@ -124,12 +125,12 @@ const KetopiaPLR = () => {
 
           <div className="grid md:grid-cols-2 gap-10 items-center">
             <div className="relative">
-              <div className="aspect-[4/3] rounded-2xl bg-gradient-to-br from-green-900 via-green-800 to-emerald-700 border-4 border-yellow-400/40 shadow-2xl flex items-center justify-center overflow-hidden">
-                <div className="text-center p-8">
-                  <Crown className="h-24 w-24 text-yellow-400 mx-auto mb-4" />
-                  <p className="display text-3xl font-bold text-yellow-300">KETOPIA</p>
-                  <p className="text-yellow-100/70 mt-2 text-sm tracking-widest">PLR EDITION</p>
-                </div>
+              <div className="aspect-[4/3] rounded-2xl bg-gradient-to-br from-green-900 via-green-800 to-emerald-700 border-4 border-yellow-400/40 shadow-2xl overflow-hidden">
+                <img
+                  src="/lovable-uploads/322d5eba-ae67-42e5-aa81-3d7061a693bd.png"
+                  alt="Ketopia PLR product image"
+                  className="h-full w-full object-cover"
+                />
               </div>
               <div className="absolute -top-4 -right-4 bg-red-600 text-white font-black px-4 py-2 rounded-lg shadow-xl rotate-6">
                 $999 ONLY
@@ -145,26 +146,18 @@ const KetopiaPLR = () => {
                   </li>
                 ))}
               </ul>
-              <CtaButton id="buyButton" label="🔥 GET INSTANT ACCESS FOR $999" />
+              <div className="space-y-3">
+                <a href={CTA} target="_blank" rel="noopener noreferrer" className="inline-block">
+                  <img src="https://warriorplus.com/o2/btn/fn100011000/xtpnsb/dpgrn7/465093" alt="Buy Now" />
+                </a>
+                <div className="wplus_spdisclaimer" />
+                <a href={NO_THANKS_LINK} target="_blank" rel="noopener noreferrer" className="inline-block text-yellow-200 underline">No Thanks</a>
+                              </div>
               <p className="text-sm text-yellow-100/60">🔒 Secure WarriorPlus Checkout · Instant Access</p>
             </div>
           </div>
         </div>
       </header>
-
-      {/* 2. VIDEO PLACEHOLDER */}
-      <section className="py-16 px-4">
-        <div className="container mx-auto max-w-4xl">
-          <div className="aspect-video rounded-2xl bg-black/60 border-2 border-dashed border-yellow-400/40 flex items-center justify-center">
-            <div className="text-center">
-              <div className="h-20 w-20 rounded-full bg-yellow-400/20 flex items-center justify-center mx-auto mb-4">
-                <div className="w-0 h-0 border-l-[20px] border-l-yellow-400 border-t-[14px] border-t-transparent border-b-[14px] border-b-transparent ml-2" />
-              </div>
-              <p className="text-yellow-200 text-xl font-semibold">Insert Your Sales Video Here</p>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* 3. THIS OFFER INCLUDES */}
       <section className="py-16 px-4 bg-[#0d2818]/60">
@@ -348,10 +341,14 @@ const KetopiaPLR = () => {
             </div>
             <p className="text-yellow-100/80 text-lg mb-2 font-semibold">ONE-TIME PAYMENT</p>
             <p className="text-red-300 font-bold mb-8">⚠️ This PLR License Will Not Be Available Forever</p>
-            <CtaButton id="warriorplusButton" label="✅ YES! I WANT KETOPIA PLR FOR $999" />
-            <p className="text-sm text-yellow-100/70 mt-6">
-              🔒 Secure Checkout · Instant Access · WarriorPlus Protected
-            </p>
+            <div className="space-y-3 mt-2">
+              <a href={CTA} target="_blank" rel="noopener noreferrer" className="inline-block">
+                <img src="https://warriorplus.com/o2/btn/fn100011000/xtpnsb/dpgrn7/465093" alt="Buy Now" />
+              </a>
+              <div className="wplus_spdisclaimer" />
+              <a href={NO_THANKS_LINK} target="_blank" rel="noopener noreferrer" className="block text-yellow-200 underline">No Thanks</a>
+                          </div>
+            <p className="text-sm text-yellow-100/70 mt-6">🔒 Secure Checkout · Instant Access · WarriorPlus Protected</p>
           </div>
         </div>
       </section>
