@@ -65,6 +65,7 @@ const KetopiaPLR = () => {
     document.title = "Ketopia PLR — Done-For-You Keto Membership Site | $999";
     const onScroll = () => setScrolled(window.scrollY > 400);
     window.addEventListener("scroll", onScroll);
+ codex/update-sales-page-with-new-content-kkd6au
 
     const script = document.createElement("script");
     script.src = "https://warriorplus.com/o2/js/dpgrn7";
@@ -78,6 +79,22 @@ const KetopiaPLR = () => {
       script.remove();
     };
   }, []);
+
+
+
+    const script = document.createElement("script");
+    script.src = "https://warriorplus.com/o2/js/dpgrn7";
+    script.defer = true;
+    script.type = "text/javascript";
+    script.dataset.wplus = "ketopia-plr";
+    document.body.appendChild(script);
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      script.remove();
+    };
+  }, []);
+main
 
   return (
     <div className="min-h-screen bg-[#0a1f14] text-[#f5f1e6]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
@@ -123,6 +140,15 @@ const KetopiaPLR = () => {
             </p>
           </div>
 
+ codex/update-sales-page-with-new-content-kkd6au
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+            <div className="relative">
+              <div className="aspect-[4/3] rounded-2xl bg-gradient-to-br from-green-900 via-green-800 to-emerald-700 border-4 border-yellow-400/40 shadow-2xl overflow-hidden">
+                <img
+                  src="/lovable-uploads/322d5eba-ae67-42e5-aa81-3d7061a693bd.png"
+                  alt="Ketopia PLR product image"
+                  className="h-full w-full object-cover"
+
           <div className="grid md:grid-cols-2 gap-8 sm:gap-10 items-center">
             <div className="relative mx-auto w-full max-w-md md:max-w-none">
               <div className="rounded-2xl bg-gradient-to-br from-green-900 via-green-800 to-emerald-700 border-4 border-yellow-400/40 shadow-2xl overflow-hidden">
@@ -131,6 +157,7 @@ const KetopiaPLR = () => {
                   alt="Ketopia PLR — Keto Meal Plans, Coaching Guides, and full PLR business toolkit"
                   className="w-full h-auto object-contain"
                   loading="eager"
+ main
                 />
               </div>
               <div className="absolute -top-3 -right-3 sm:-top-4 sm:-right-4 bg-red-600 text-white font-black px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg shadow-xl rotate-6 text-sm sm:text-base">
@@ -147,6 +174,16 @@ const KetopiaPLR = () => {
                   </li>
                 ))}
               </ul>
+ codex/update-sales-page-with-new-content-kkd6au
+              <div className="space-y-3">
+                <a href={CTA} target="_blank" rel="noopener noreferrer" className="inline-block">
+                  <img src="https://warriorplus.com/o2/btn/fn100011000/xtpnsb/dpgrn7/465093" alt="Buy Now" />
+                </a>
+                <div className="wplus_spdisclaimer" />
+                <a href={NO_THANKS_LINK} target="_blank" rel="noopener noreferrer" className="inline-block text-yellow-200 underline">No Thanks</a>
+                              </div>
+              <p className="text-sm text-yellow-100/60">🔒 Secure WarriorPlus Checkout · Instant Access</p>
+
               <div className="flex flex-col items-start gap-3">
                 <a href={CTA} target="_blank" rel="noopener noreferrer" className="inline-block">
                   <img src="https://warriorplus.com/o2/btn/fn100011000/xtpnsb/dpgrn7/465093" alt="Buy Now — $999" className="max-w-full h-auto" />
@@ -155,6 +192,7 @@ const KetopiaPLR = () => {
                 <a href={NO_THANKS_LINK} target="_blank" rel="noopener noreferrer" className="text-sm text-yellow-200 underline">No Thanks</a>
               </div>
               <p className="text-xs sm:text-sm text-yellow-100/60">🔒 Secure WarriorPlus Checkout · Instant Access</p>
+              main
             </div>
           </div>
         </div>
@@ -343,6 +381,18 @@ const KetopiaPLR = () => {
               <span className="text-2xl sm:text-3xl md:text-4xl text-yellow-100/50 line-through font-bold">$2,999</span>
               <span className="text-5xl sm:text-6xl md:text-7xl font-black bg-gradient-to-r from-yellow-300 to-yellow-500 bg-clip-text text-transparent">$999</span>
             </div>
+ codex/update-sales-page-with-new-content-kkd6au
+            <p className="text-yellow-100/80 text-lg mb-2 font-semibold">ONE-TIME PAYMENT</p>
+            <p className="text-red-300 font-bold mb-8">⚠️ This PLR License Will Not Be Available Forever</p>
+            <div className="space-y-3 mt-2">
+              <a href={CTA} target="_blank" rel="noopener noreferrer" className="inline-block">
+                <img src="https://warriorplus.com/o2/btn/fn100011000/xtpnsb/dpgrn7/465093" alt="Buy Now" />
+              </a>
+              <div className="wplus_spdisclaimer" />
+              <a href={NO_THANKS_LINK} target="_blank" rel="noopener noreferrer" className="block text-yellow-200 underline">No Thanks</a>
+                          </div>
+            <p className="text-sm text-yellow-100/70 mt-6">🔒 Secure Checkout · Instant Access · WarriorPlus Protected</p>
+
             <p className="text-yellow-100/80 text-base sm:text-lg mb-2 font-semibold">ONE-TIME PAYMENT</p>
             <p className="text-red-300 text-sm sm:text-base font-bold mb-6 sm:mb-8">⚠️ This PLR License Will Not Be Available Forever</p>
             <div className="flex flex-col items-center gap-3">
@@ -353,6 +403,7 @@ const KetopiaPLR = () => {
               <a href={NO_THANKS_LINK} target="_blank" rel="noopener noreferrer" className="text-sm text-yellow-200 underline">No Thanks</a>
             </div>
             <p className="text-xs sm:text-sm text-yellow-100/70 mt-6">🔒 Secure Checkout · Instant Access · WarriorPlus Protected</p>
+main
           </div>
         </div>
       </section>
