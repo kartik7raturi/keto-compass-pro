@@ -38,9 +38,22 @@ const Pricing = () => {
             <h1 className="text-4xl md:text-6xl font-bold mb-5 leading-tight">
               Start Your <span className="bg-gradient-to-r from-primary to-amber-500 bg-clip-text text-transparent">Keto Transformation</span> Today
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-2">
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-6">
               The complete keto system — recipes, trackers, meal plans, and a supportive community in one place.
             </p>
+            <a
+              href="https://www.producthunt.com/products/ketopia?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-ketopia"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex transition-transform hover:scale-[1.02]"
+            >
+              <img
+                alt="Ketopia  - ALL IN ONE KETO PLATFORM | Product Hunt"
+                width="250"
+                height="54"
+                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1158629&amp;theme=light&amp;t=1780051410186"
+              />
+            </a>
           </div>
         </section>
 
