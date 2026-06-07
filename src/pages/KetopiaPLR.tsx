@@ -5,10 +5,9 @@ import {
   Upload, Settings, ShoppingCart, ChevronDown, ChevronUp
 } from "lucide-react";
 import productImage from "@/assets/ketopia-plr-product.png";
+import SalesDisclaimer from "@/components/SalesDisclaimer";
 
-const CTA = "https://warriorplus.com/o2/buy/xtpnsb/ht6cz0/gw3yh9";
-const TRACKING_LINK = "https://warriorplus.com/o2/v/xtpnsb/ht6cz0";
-const NO_THANKS_LINK = "https://warriorplus.com/o/nothanks/ht6cz0";
+const CTA = "/onboarding";
 
 const includes = [
   "Full Private Label Rights — rebrand & sell as your own, keep 100% of profits",
