@@ -368,6 +368,11 @@ const KetopiaPLR = () => {
         </div>
       </section>
 
+      {/* DISCLAIMER */}
+      <div className="bg-[#f5f1e6] text-[#0a1f14]">
+        <SalesDisclaimer />
+      </div>
+
       {/* 12. FOOTER */}
       <footer className="py-10 sm:py-12 px-4 border-t border-yellow-400/20">
         <div className="container mx-auto max-w-5xl text-center space-y-4">
@@ -376,9 +381,6 @@ const KetopiaPLR = () => {
             <span className="display text-2xl font-bold text-yellow-400">Ketopia PLR</span>
           </div>
           <p className="text-yellow-100/60 text-sm">© 2025 Ketopia PLR. All rights reserved.</p>
-          <p className="text-yellow-100/50 text-xs max-w-2xl mx-auto">
-            <strong>Earnings Disclaimer:</strong> Results are not typical and depend on your effort, experience, and market. This product is sold for educational and informational purposes; no income is guaranteed.
-          </p>
           <div className="flex flex-wrap justify-center gap-4 text-sm text-yellow-100/70 pt-2">
             <a href="/privacy" className="hover:text-yellow-400">Privacy Policy</a>
             <a href="/terms" className="hover:text-yellow-400">Terms of Service</a>
