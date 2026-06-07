@@ -15,9 +15,6 @@ const Pricing = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* WarriorPlus view tracking pixel */}
-      <img src="https://warriorplus.com/o2/v/xtpnsb/gf37tm" alt="" width="1" height="1" style={{ position: 'absolute', left: -9999, top: -9999 }} />
-
       <main>
         {/* Hero */}
         <section className="relative py-20 md:py-28 overflow-hidden">
