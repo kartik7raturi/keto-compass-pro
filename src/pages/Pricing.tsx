@@ -133,12 +133,16 @@ const Pricing = () => {
                     </p>
                   </div>
 
-                  <a href="https://warriorplus.com/o2/buy/xtpnsb/gf37tm/h8p8sl" target="_blank" rel="noopener noreferrer" aria-label="Buy Keto Starter Plan for $19/month" data-offer="keto-starter-19" className="block transition-transform hover:scale-[1.02]">
-                    <img src="https://warriorplus.com/o2/btn/fn100011001/xtpnsb/gf37tm/458023" alt="Buy now" className="w-full" />
-                  </a>
+                  <Button
+                    asChild
+                    size="lg"
+                    className="w-full bg-gradient-to-r from-primary to-amber-500 text-primary-foreground text-base font-bold py-6 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all"
+                  >
+                    <a href="/onboarding" aria-label="Get Keto Starter Plan">
+                      Get Instant Access — $19/month
+                    </a>
+                  </Button>
 
-                  {/* WarriorPlus Disclaimer */}
-                  <div className="wplus_spdisclaimer text-sm text-foreground" />
 
                   <p className="text-xs text-center text-muted-foreground">
                     Secure payment • Instant access
