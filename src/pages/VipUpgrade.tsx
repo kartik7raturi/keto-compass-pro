@@ -207,16 +207,7 @@ const VipUpgrade = () => {
           </div>
         </section>
 
-        {/* Disclaimer */}
-        <section className="py-6 bg-secondary/10">
-          <div className="container mx-auto px-4 text-center max-w-2xl">
-            <h3 className="font-semibold text-sm mb-2">Disclaimer</h3>
-            <p className="text-xs text-muted-foreground">
-              This product is for educational purposes only. Results may vary from person to person.
-              This is not medical advice. Please consult a professional before making dietary changes.
-            </p>
-          </div>
-        </section>
+        <SalesDisclaimer />
 
         {/* Footer links */}
         <div className="py-6 text-center border-t">
@@ -227,9 +218,6 @@ const VipUpgrade = () => {
             <a href="/refund-policy" className="hover:text-primary transition-colors">Refund Policy</a>
             <a href="/contact" className="hover:text-primary transition-colors">Contact</a>
           </div>
-          <p className="text-xs text-muted-foreground mt-4 max-w-2xl mx-auto px-4">
-            These earnings are not representative for the average participants. The average participant will earn significantly less or no money at all through this product or service.
-          </p>
         </div>
       </main>
     </div>
