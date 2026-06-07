@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, Star, Shield, Crown, Sparkles, Clock, Lock, Flame, BookOpen, Utensils, LineChart } from 'lucide-react';
+import SalesDisclaimer from '@/components/SalesDisclaimer';
 
 const FEATURES = [
   { icon: BookOpen, text: '1000+ Keto Recipes' },
@@ -11,20 +12,9 @@ const FEATURES = [
 ];
 
 const Pricing = () => {
-  useEffect(() => {
-    const s = document.createElement('script');
-    s.type = 'text/javascript';
-    s.src = 'https://warriorplus.com/o2/js/gf37tm';
-    s.defer = true;
-    document.body.appendChild(s);
-    return () => { document.body.removeChild(s); };
-  }, []);
 
   return (
     <div className="min-h-screen bg-background">
-      {/* WarriorPlus view tracking pixel */}
-      <img src="https://warriorplus.com/o2/v/xtpnsb/gf37tm" alt="" width="1" height="1" style={{ position: 'absolute', left: -9999, top: -9999 }} />
-
       <main>
         {/* Hero */}
         <section className="relative py-20 md:py-28 overflow-hidden">
@@ -143,12 +133,16 @@ const Pricing = () => {
                     </p>
                   </div>
 
-                  <a href="https://warriorplus.com/o2/buy/xtpnsb/gf37tm/h8p8sl" target="_blank" rel="noopener noreferrer" aria-label="Buy Keto Starter Plan for $19/month" data-offer="keto-starter-19" className="block transition-transform hover:scale-[1.02]">
-                    <img src="https://warriorplus.com/o2/btn/fn100011001/xtpnsb/gf37tm/458023" alt="Buy now" className="w-full" />
-                  </a>
+                  <Button
+                    asChild
+                    size="lg"
+                    className="w-full bg-gradient-to-r from-primary to-amber-500 text-primary-foreground text-base font-bold py-6 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all"
+                  >
+                    <a href="/onboarding" aria-label="Get Keto Starter Plan">
+                      Get Instant Access — $19/month
+                    </a>
+                  </Button>
 
-                  {/* WarriorPlus Disclaimer */}
-                  <div className="wplus_spdisclaimer text-sm text-foreground" />
 
                   <p className="text-xs text-center text-muted-foreground">
                     Secure payment • Instant access
@@ -187,6 +181,8 @@ const Pricing = () => {
           </div>
         </section>
 
+        <SalesDisclaimer />
+
         {/* Footer links */}
         <div className="py-8 text-center border-t">
           <div className="container px-4 flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
@@ -196,9 +192,6 @@ const Pricing = () => {
             <a href="/refund-policy" className="hover:text-primary transition-colors">Refund Policy</a>
             <a href="/contact" className="hover:text-primary transition-colors">Contact</a>
           </div>
-          <p className="text-xs text-muted-foreground mt-4 max-w-2xl mx-auto px-4">
-            These earnings are not representative for the average participants. The average participant will earn significantly less or no money at all through this product or service.
-          </p>
         </div>
       </main>
     </div>

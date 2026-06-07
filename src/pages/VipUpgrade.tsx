@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
-import { useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Check, Crown, Zap, Target, TrendingUp, Dumbbell, Droplets, Calendar, Star, Shield } from 'lucide-react';
+import SalesDisclaimer from '@/components/SalesDisclaimer';
 
 const VIP_FEATURES = [
   { icon: Target, label: '30-Day Keto Challenge', desc: 'Structured daily plan to reach ketosis' },
@@ -42,18 +42,6 @@ const TESTIMONIALS = [
 ];
 
 const VipUpgrade = () => {
-  useEffect(() => {
-    const s = document.createElement('script');
-    s.type = 'text/javascript';
-    s.src = 'https://warriorplus.com/o2/js/tc9pxg';
-    s.defer = true;
-    document.body.appendChild(s);
-    return () => {
-      if (s.parentNode) {
-        s.parentNode.removeChild(s);
-      }
-    };
-  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -136,9 +124,6 @@ const VipUpgrade = () => {
           </div>
         </section>
 
-        {/* WarriorPlus view tracking pixel */}
-        <img src="https://warriorplus.com/o2/v/xtpnsb/tc9pxg" alt="" width="1" height="1" style={{ position: 'absolute', left: -9999, top: -9999 }} />
-
         {/* Pricing */}
         <section id="pricing" className="py-16 bg-gradient-to-b from-amber-500/5 to-background">
           <div className="container px-4">
@@ -161,24 +146,21 @@ const VipUpgrade = () => {
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />60-day money back guarantee</li>
                   </ul>
 
-                  <a href="https://warriorplus.com/o2/buy/xtpnsb/tc9pxg/brp9cq" target="_blank" rel="noopener noreferrer" aria-label="Get 12-Month VIP Access for $99/year" data-offer="vip-upgrade-99" className="block transition-transform hover:scale-[1.02]">
-                    <img src="https://warriorplus.com/o2/btn/fn160011001/xtpnsb/tc9pxg/464642" alt="Get 12-Month VIP Access" className="mx-auto w-full max-w-[320px] sm:max-w-full" />
-                  </a>
-
-                  {/* WarriorPlus Disclaimer */}
-                  <div className="wplus_spdisclaimer" />
-
-                  <a
-                    href="https://warriorplus.com/o/nothanks/tc9pxg"
-                    className="block text-sm text-muted-foreground hover:text-foreground underline mt-1"
+                  <Button
+                    asChild
+                    size="lg"
+                    className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white text-base font-bold py-6 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all"
                   >
-                    No Thanks
-                  </a>
+                    <a href="/onboarding" aria-label="Get 12-Month VIP Access">
+                      Get 12-Month VIP Access — $99
+                    </a>
+                  </Button>
                 </CardContent>
               </Card>
             </div>
           </div>
         </section>
+
 
         {/* 60-Day Guarantee */}
         <section className="py-12 bg-amber-500/5">
@@ -225,16 +207,7 @@ const VipUpgrade = () => {
           </div>
         </section>
 
-        {/* Disclaimer */}
-        <section className="py-6 bg-secondary/10">
-          <div className="container mx-auto px-4 text-center max-w-2xl">
-            <h3 className="font-semibold text-sm mb-2">Disclaimer</h3>
-            <p className="text-xs text-muted-foreground">
-              This product is for educational purposes only. Results may vary from person to person.
-              This is not medical advice. Please consult a professional before making dietary changes.
-            </p>
-          </div>
-        </section>
+        <SalesDisclaimer />
 
         {/* Footer links */}
         <div className="py-6 text-center border-t">
@@ -245,9 +218,6 @@ const VipUpgrade = () => {
             <a href="/refund-policy" className="hover:text-primary transition-colors">Refund Policy</a>
             <a href="/contact" className="hover:text-primary transition-colors">Contact</a>
           </div>
-          <p className="text-xs text-muted-foreground mt-4 max-w-2xl mx-auto px-4">
-            These earnings are not representative for the average participants. The average participant will earn significantly less or no money at all through this product or service.
-          </p>
         </div>
       </main>
     </div>

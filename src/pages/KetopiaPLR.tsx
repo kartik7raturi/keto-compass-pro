@@ -5,10 +5,9 @@ import {
   Upload, Settings, ShoppingCart, ChevronDown, ChevronUp
 } from "lucide-react";
 import productImage from "@/assets/ketopia-plr-product.png";
+import SalesDisclaimer from "@/components/SalesDisclaimer";
 
-const CTA = "https://warriorplus.com/o2/buy/xtpnsb/ht6cz0/gw3yh9";
-const TRACKING_LINK = "https://warriorplus.com/o2/v/xtpnsb/ht6cz0";
-const NO_THANKS_LINK = "https://warriorplus.com/o/nothanks/ht6cz0";
+const CTA = "/onboarding";
 
 const includes = [
   "Full Private Label Rights — rebrand & sell as your own, keep 100% of profits",
@@ -65,17 +64,8 @@ const KetopiaPLR = () => {
     document.title = "Ketopia PLR — Done-For-You Keto Membership Site | $999";
     const onScroll = () => setScrolled(window.scrollY > 400);
     window.addEventListener("scroll", onScroll);
-
-    const script = document.createElement("script");
-    script.src = "https://warriorplus.com/o2/js/ht6cz0";
-    script.defer = true;
-    script.type = "text/javascript";
-    script.dataset.wplus = "ketopia-plr";
-    document.body.appendChild(script);
-
     return () => {
       window.removeEventListener("scroll", onScroll);
-      script.remove();
     };
   }, []);
 
@@ -86,7 +76,6 @@ const KetopiaPLR = () => {
         .display { font-family: 'Playfair Display', serif; }
       `}</style>
 
-      <img src={TRACKING_LINK} alt="" width="1" height="1" style={{ position: "absolute", left: -9999, top: -9999 }} />
 
       {/* Sticky header */}
       <div className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"}`}>
@@ -95,7 +84,7 @@ const KetopiaPLR = () => {
             <Crown className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-400 flex-shrink-0" />
             <span className="display text-base sm:text-xl font-bold text-yellow-400 truncate">Ketopia PLR</span>
           </div>
-          <a href={CTA} target="_blank" rel="noopener noreferrer"
+          <a href={CTA}
             className="px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold text-xs sm:text-sm shadow-lg hover:scale-105 transition whitespace-nowrap">
             Get Access — $999
           </a>
@@ -149,13 +138,11 @@ const KetopiaPLR = () => {
               </ul>
 
               <div className="flex flex-col items-start gap-3">
-                <a href={CTA} target="_blank" rel="noopener noreferrer" className="inline-block">
-                  <img src="https://warriorplus.com/o2/btn/fn100011000/xtpnsb/ht6cz0/465093" alt="Buy Now — $999" className="max-w-full h-auto" />
+                <a href={CTA} className="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 text-white font-black text-lg shadow-xl hover:scale-[1.03] transition-all w-full sm:w-auto text-center">
+                  Buy Now — $999
                 </a>
-                <div className="wplus_spdisclaimer" />
-                <a href={NO_THANKS_LINK} target="_blank" rel="noopener noreferrer" className="text-sm text-yellow-200 underline">No Thanks</a>
               </div>
-              <p className="text-xs sm:text-sm text-yellow-100/60">🔒 Secure WarriorPlus Checkout · Instant Access</p>
+              <p className="text-xs sm:text-sm text-yellow-100/60">🔒 Secure Checkout · Instant Access</p>
             </div>
           </div>
         </div>
@@ -347,13 +334,11 @@ const KetopiaPLR = () => {
             <p className="text-yellow-100/80 text-base sm:text-lg mb-2 font-semibold">ONE-TIME PAYMENT</p>
             <p className="text-red-300 text-sm sm:text-base font-bold mb-6 sm:mb-8">⚠️ This PLR License Will Not Be Available Forever</p>
             <div className="flex flex-col items-center gap-3">
-              <a href={CTA} target="_blank" rel="noopener noreferrer" className="inline-block">
-                <img src="https://warriorplus.com/o2/btn/fn100011000/xtpnsb/ht6cz0/465093" alt="Buy Now — $999" className="max-w-full h-auto" />
+              <a href={CTA} className="inline-flex items-center justify-center px-10 py-5 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 text-white font-black text-xl shadow-2xl hover:scale-[1.03] transition-all w-full sm:w-auto text-center">
+                Get Instant Access — $999
               </a>
-              <div className="wplus_spdisclaimer" />
-              <a href={NO_THANKS_LINK} target="_blank" rel="noopener noreferrer" className="text-sm text-yellow-200 underline">No Thanks</a>
             </div>
-            <p className="text-xs sm:text-sm text-yellow-100/70 mt-6">🔒 Secure Checkout · Instant Access · WarriorPlus Protected</p>
+            <p className="text-xs sm:text-sm text-yellow-100/70 mt-6">🔒 Secure Checkout · Instant Access</p>
           </div>
         </div>
       </section>
@@ -383,6 +368,11 @@ const KetopiaPLR = () => {
         </div>
       </section>
 
+      {/* DISCLAIMER */}
+      <div className="bg-[#f5f1e6] text-[#0a1f14]">
+        <SalesDisclaimer />
+      </div>
+
       {/* 12. FOOTER */}
       <footer className="py-10 sm:py-12 px-4 border-t border-yellow-400/20">
         <div className="container mx-auto max-w-5xl text-center space-y-4">
@@ -391,9 +381,6 @@ const KetopiaPLR = () => {
             <span className="display text-2xl font-bold text-yellow-400">Ketopia PLR</span>
           </div>
           <p className="text-yellow-100/60 text-sm">© 2025 Ketopia PLR. All rights reserved.</p>
-          <p className="text-yellow-100/50 text-xs max-w-2xl mx-auto">
-            <strong>Earnings Disclaimer:</strong> Results are not typical and depend on your effort, experience, and market. This product is sold for educational and informational purposes; no income is guaranteed.
-          </p>
           <div className="flex flex-wrap justify-center gap-4 text-sm text-yellow-100/70 pt-2">
             <a href="/privacy" className="hover:text-yellow-400">Privacy Policy</a>
             <a href="/terms" className="hover:text-yellow-400">Terms of Service</a>
