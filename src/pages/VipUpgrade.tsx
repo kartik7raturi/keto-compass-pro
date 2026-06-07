@@ -42,18 +42,6 @@ const TESTIMONIALS = [
 ];
 
 const VipUpgrade = () => {
-  useEffect(() => {
-    const s = document.createElement('script');
-    s.type = 'text/javascript';
-    s.src = 'https://warriorplus.com/o2/js/tc9pxg';
-    s.defer = true;
-    document.body.appendChild(s);
-    return () => {
-      if (s.parentNode) {
-        s.parentNode.removeChild(s);
-      }
-    };
-  }, []);
 
   return (
     <div className="min-h-screen bg-background">
