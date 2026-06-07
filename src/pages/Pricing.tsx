@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, Star, Shield, Crown, Sparkles, Clock, Lock, Flame, BookOpen, Utensils, LineChart } from 'lucide-react';
+import SalesDisclaimer from '@/components/SalesDisclaimer';
 
 const FEATURES = [
   { icon: BookOpen, text: '1000+ Keto Recipes' },
@@ -11,14 +12,6 @@ const FEATURES = [
 ];
 
 const Pricing = () => {
-  useEffect(() => {
-    const s = document.createElement('script');
-    s.type = 'text/javascript';
-    s.src = 'https://warriorplus.com/o2/js/gf37tm';
-    s.defer = true;
-    document.body.appendChild(s);
-    return () => { document.body.removeChild(s); };
-  }, []);
 
   return (
     <div className="min-h-screen bg-background">
