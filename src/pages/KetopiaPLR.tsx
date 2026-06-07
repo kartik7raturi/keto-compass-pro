@@ -64,17 +64,8 @@ const KetopiaPLR = () => {
     document.title = "Ketopia PLR — Done-For-You Keto Membership Site | $999";
     const onScroll = () => setScrolled(window.scrollY > 400);
     window.addEventListener("scroll", onScroll);
-
-    const script = document.createElement("script");
-    script.src = "https://warriorplus.com/o2/js/ht6cz0";
-    script.defer = true;
-    script.type = "text/javascript";
-    script.dataset.wplus = "ketopia-plr";
-    document.body.appendChild(script);
-
     return () => {
       window.removeEventListener("scroll", onScroll);
-      script.remove();
     };
   }, []);
 
@@ -85,7 +76,6 @@ const KetopiaPLR = () => {
         .display { font-family: 'Playfair Display', serif; }
       `}</style>
 
-      <img src={TRACKING_LINK} alt="" width="1" height="1" style={{ position: "absolute", left: -9999, top: -9999 }} />
 
       {/* Sticky header */}
       <div className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"}`}>
