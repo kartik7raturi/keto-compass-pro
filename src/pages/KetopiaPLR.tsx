@@ -334,13 +334,11 @@ const KetopiaPLR = () => {
             <p className="text-yellow-100/80 text-base sm:text-lg mb-2 font-semibold">ONE-TIME PAYMENT</p>
             <p className="text-red-300 text-sm sm:text-base font-bold mb-6 sm:mb-8">⚠️ This PLR License Will Not Be Available Forever</p>
             <div className="flex flex-col items-center gap-3">
-              <a href={CTA} target="_blank" rel="noopener noreferrer" className="inline-block">
-                <img src="https://warriorplus.com/o2/btn/fn100011000/xtpnsb/ht6cz0/465093" alt="Buy Now — $999" className="max-w-full h-auto" />
+              <a href={CTA} className="inline-flex items-center justify-center px-10 py-5 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 text-white font-black text-xl shadow-2xl hover:scale-[1.03] transition-all w-full sm:w-auto text-center">
+                Get Instant Access — $999
               </a>
-              <div className="wplus_spdisclaimer" />
-              <a href={NO_THANKS_LINK} target="_blank" rel="noopener noreferrer" className="text-sm text-yellow-200 underline">No Thanks</a>
             </div>
-            <p className="text-xs sm:text-sm text-yellow-100/70 mt-6">🔒 Secure Checkout · Instant Access · WarriorPlus Protected</p>
+            <p className="text-xs sm:text-sm text-yellow-100/70 mt-6">🔒 Secure Checkout · Instant Access</p>
           </div>
         </div>
       </section>
