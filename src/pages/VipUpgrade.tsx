@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
-import { useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Check, Crown, Zap, Target, TrendingUp, Dumbbell, Droplets, Calendar, Star, Shield } from 'lucide-react';
+import SalesDisclaimer from '@/components/SalesDisclaimer';
 
 const VIP_FEATURES = [
   { icon: Target, label: '30-Day Keto Challenge', desc: 'Structured daily plan to reach ketosis' },
