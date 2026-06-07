@@ -181,6 +181,8 @@ const Pricing = () => {
           </div>
         </section>
 
+        <SalesDisclaimer />
+
         {/* Footer links */}
         <div className="py-8 text-center border-t">
           <div className="container px-4 flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
@@ -190,9 +192,6 @@ const Pricing = () => {
             <a href="/refund-policy" className="hover:text-primary transition-colors">Refund Policy</a>
             <a href="/contact" className="hover:text-primary transition-colors">Contact</a>
           </div>
-          <p className="text-xs text-muted-foreground mt-4 max-w-2xl mx-auto px-4">
-            These earnings are not representative for the average participants. The average participant will earn significantly less or no money at all through this product or service.
-          </p>
         </div>
       </main>
     </div>
