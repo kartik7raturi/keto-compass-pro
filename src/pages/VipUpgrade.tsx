@@ -124,9 +124,6 @@ const VipUpgrade = () => {
           </div>
         </section>
 
-        {/* WarriorPlus view tracking pixel */}
-        <img src="https://warriorplus.com/o2/v/xtpnsb/tc9pxg" alt="" width="1" height="1" style={{ position: 'absolute', left: -9999, top: -9999 }} />
-
         {/* Pricing */}
         <section id="pricing" className="py-16 bg-gradient-to-b from-amber-500/5 to-background">
           <div className="container px-4">
@@ -149,24 +146,21 @@ const VipUpgrade = () => {
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />60-day money back guarantee</li>
                   </ul>
 
-                  <a href="https://warriorplus.com/o2/buy/xtpnsb/tc9pxg/brp9cq" target="_blank" rel="noopener noreferrer" aria-label="Get 12-Month VIP Access for $99/year" data-offer="vip-upgrade-99" className="block transition-transform hover:scale-[1.02]">
-                    <img src="https://warriorplus.com/o2/btn/fn160011001/xtpnsb/tc9pxg/464642" alt="Get 12-Month VIP Access" className="mx-auto w-full max-w-[320px] sm:max-w-full" />
-                  </a>
-
-                  {/* WarriorPlus Disclaimer */}
-                  <div className="wplus_spdisclaimer" />
-
-                  <a
-                    href="https://warriorplus.com/o/nothanks/tc9pxg"
-                    className="block text-sm text-muted-foreground hover:text-foreground underline mt-1"
+                  <Button
+                    asChild
+                    size="lg"
+                    className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white text-base font-bold py-6 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all"
                   >
-                    No Thanks
-                  </a>
+                    <a href="/onboarding" aria-label="Get 12-Month VIP Access">
+                      Get 12-Month VIP Access — $99
+                    </a>
+                  </Button>
                 </CardContent>
               </Card>
             </div>
           </div>
         </section>
+
 
         {/* 60-Day Guarantee */}
         <section className="py-12 bg-amber-500/5">
