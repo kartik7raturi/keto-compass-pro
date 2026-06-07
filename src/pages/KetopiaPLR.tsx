@@ -84,7 +84,7 @@ const KetopiaPLR = () => {
             <Crown className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-400 flex-shrink-0" />
             <span className="display text-base sm:text-xl font-bold text-yellow-400 truncate">Ketopia PLR</span>
           </div>
-          <a href={CTA} target="_blank" rel="noopener noreferrer"
+          <a href={CTA}
             className="px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold text-xs sm:text-sm shadow-lg hover:scale-105 transition whitespace-nowrap">
             Get Access — $999
           </a>
