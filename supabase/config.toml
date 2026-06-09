@@ -2,3 +2,7 @@ project_id = "xnfgauzspvonuklviyfg"
 
 [functions.send-notification-email]
 verify_jwt = false
+
+[functions.jvzoo-ipn]
+verify_jwt = false
+
