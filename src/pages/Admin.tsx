@@ -7,7 +7,8 @@ import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, Loader2, ChefHat, FileText, BookOpen, Image, Target, MessageSquare, Award, Headphones, Layout, Crown, Package, Pencil } from "lucide-react";
+import { Shield, Loader2, ChefHat, FileText, BookOpen, Image, Target, MessageSquare, Award, Headphones, Layout, Crown, Package, Pencil, Webhook } from "lucide-react";
+import { AdminWebhookLogs } from "@/components/admin/AdminWebhookLogs";
 import { AdminRecipes } from "@/components/admin/AdminRecipes";
 import { AdminArticles } from "@/components/admin/AdminArticles";
 import { AdminStories } from "@/components/admin/AdminStories";
@@ -266,6 +267,9 @@ const Admin = () => {
             <TabsTrigger value="subscriptions" className="flex items-center gap-1 text-xs">
               <Crown className="h-3.5 w-3.5" /><span className="hidden sm:inline">Subs</span>
             </TabsTrigger>
+            <TabsTrigger value="webhooks" className="flex items-center gap-1 text-xs">
+              <Webhook className="h-3.5 w-3.5" /><span className="hidden sm:inline">Webhooks</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="recipes"><AdminRecipes /></TabsContent>
@@ -280,6 +284,7 @@ const Admin = () => {
           <TabsContent value="products"><AdminProducts /></TabsContent>
           <TabsContent value="pages"><AdminPages /></TabsContent>
           <TabsContent value="subscriptions"><AdminSubscriptions /></TabsContent>
+          <TabsContent value="webhooks"><AdminWebhookLogs /></TabsContent>
         </Tabs>
       </main>
       <Footer />
