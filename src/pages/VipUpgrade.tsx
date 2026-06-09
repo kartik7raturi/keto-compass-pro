@@ -19,22 +19,6 @@ const VIP_FEATURES = [
   { icon: Shield, label: 'Marketplace Access', desc: 'Buy & sell keto food locally' },
 ];
 
-const WHY_VIP = [
-  'Faster results with structured system',
-  'No guesswork — everything planned',
-  'Proven strategies for fat loss',
-  'Designed for beginners & busy people',
-  'Works from home without gym',
-];
-
-const PERFECT_FOR = [
-  'You struggle with cravings and fat loss',
-  'You want a clear diet plan',
-  'You need structured guidance',
-  'You want faster and visible results',
-  'You prefer a simple system to follow',
-];
-
 const TESTIMONIALS = [
   { name: 'Sarah M.', text: 'Lost 20 lbs in 2 months with VIP features!', stars: 5 },
   { name: 'James K.', text: 'The fasting tracker changed my routine completely.', stars: 5 },
@@ -61,43 +45,6 @@ const VipUpgrade = () => {
               Take your keto journey to the next level with advanced trackers, personalized meal plans, 
               workout logging, fasting protocols, and detailed analytics.
             </p>
-          </div>
-        </section>
-
-        {/* What is Ketopia VIP */}
-        <section className="py-10 bg-secondary/10">
-          <div className="container mx-auto px-4 max-w-3xl">
-            <h2 className="text-2xl font-bold text-center mb-4">What is Ketopia VIP?</h2>
-            <p className="text-muted-foreground text-center mb-6">
-              Ketopia VIP is a premium digital upgrade that gives you full access to advanced weight-loss strategies, structured plans, and exclusive content.
-            </p>
-            <div className="space-y-3 max-w-md mx-auto">
-              <h3 className="font-semibold">When you upgrade, you will receive:</h3>
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-amber-500 flex-shrink-0" /> Advanced fat-loss diet plans (PDF)</li>
-                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-amber-500 flex-shrink-0" /> Exclusive meal plans & recipes</li>
-                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-amber-500 flex-shrink-0" /> Step-by-step transformation system</li>
-                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-amber-500 flex-shrink-0" /> Premium training content (videos/guides)</li>
-                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-amber-500 flex-shrink-0" /> Bonus resources for faster results</li>
-              </ul>
-              <p className="text-xs text-muted-foreground italic">
-                This is a digital product. No physical items or supplements will be shipped.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Why Choose VIP */}
-        <section className="py-10">
-          <div className="container mx-auto px-4 max-w-3xl">
-            <h2 className="text-2xl font-bold text-center mb-6">Why Choose VIP Access?</h2>
-            <div className="max-w-md mx-auto space-y-2">
-              {WHY_VIP.map(item => (
-                <div key={item} className="flex items-center gap-2 text-sm">
-                  <Check className="h-4 w-4 text-amber-500 flex-shrink-0" /> {item}
-                </div>
-              ))}
-            </div>
           </div>
         </section>
 
@@ -173,37 +120,6 @@ const VipUpgrade = () => {
               Try Ketopia VIP completely risk-free. If you are not satisfied for any reason,
               you can request a full refund within 60 days. No questions asked.
             </p>
-          </div>
-        </section>
-
-        {/* Perfect For You */}
-        <section className="py-10">
-          <div className="container mx-auto px-4 max-w-3xl">
-            <h2 className="text-2xl font-bold text-center mb-6">This is Perfect For You If:</h2>
-            <div className="max-w-md mx-auto space-y-2">
-              {PERFECT_FOR.map(item => (
-                <div key={item} className="flex items-center gap-2 text-sm">
-                  <Check className="h-4 w-4 text-amber-500 flex-shrink-0" /> {item}
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* CTA */}
-        <section className="py-12 bg-gradient-to-r from-amber-500/10 to-orange-500/10">
-          <div className="container mx-auto px-4 text-center max-w-2xl">
-            <h2 className="text-2xl font-bold mb-3">Upgrade Now & Start Your Transformation</h2>
-            <p className="text-muted-foreground mb-6">
-              Click the button below to unlock full VIP access and take control of your fitness journey today.
-            </p>
-            <Button
-              size="lg"
-              className="bg-gradient-to-r from-amber-500 to-orange-600 text-white text-lg py-7 px-10"
-              onClick={() => { document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }); }}
-            >
-              👉 Upgrade to Ketopia VIP Now
-            </Button>
           </div>
         </section>
 
