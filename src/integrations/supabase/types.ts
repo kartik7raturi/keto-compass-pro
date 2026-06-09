@@ -960,6 +960,57 @@ export type Database = {
           },
         ]
       }
+      jvzoo_webhook_logs: {
+        Row: {
+          amount: number | null
+          created_at: string
+          customer_email: string | null
+          duplicate: boolean
+          error_message: string | null
+          id: string
+          processed: boolean
+          product_id: string | null
+          raw_payload: Json
+          response_body: string | null
+          response_status: number | null
+          signature_valid: boolean
+          transaction_receipt: string | null
+          transaction_type: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          customer_email?: string | null
+          duplicate?: boolean
+          error_message?: string | null
+          id?: string
+          processed?: boolean
+          product_id?: string | null
+          raw_payload: Json
+          response_body?: string | null
+          response_status?: number | null
+          signature_valid?: boolean
+          transaction_receipt?: string | null
+          transaction_type?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          customer_email?: string | null
+          duplicate?: boolean
+          error_message?: string | null
+          id?: string
+          processed?: boolean
+          product_id?: string | null
+          raw_payload?: Json
+          response_body?: string | null
+          response_status?: number | null
+          signature_valid?: boolean
+          transaction_receipt?: string | null
+          transaction_type?: string | null
+        }
+        Relationships: []
+      }
       keto_streaks: {
         Row: {
           completed: boolean
