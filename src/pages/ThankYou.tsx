@@ -122,8 +122,8 @@ const ThankYou = () => {
                     </Button>
                   </CardContent>
                 </Card>
-                <Button variant="outline" className="w-full" size="lg" onClick={handleDashboard}>
-                  No thanks, go to my dashboard
+                <Button variant="outline" className="w-full" size="lg" asChild>
+                  <a href="https://www.jvzoo.com/nothanks/423665">No Thanks</a>
                 </Button>
               </>
             ) : (
@@ -133,6 +133,14 @@ const ThankYou = () => {
             )}
           </div>
         </div>
+
+        <img
+          src="https://i.jvzoo.com/117081/423665/99"
+          alt="ketopia #1 custom keto diet platform"
+          border="0"
+          width="1"
+          height="1"
+        />
 
         {/* Footer links */}
         <div className="mt-12 text-center">
