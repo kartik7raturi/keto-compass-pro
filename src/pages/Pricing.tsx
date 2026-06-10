@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, Star, Shield, Crown, Sparkles, Clock, Lock, Flame, BookOpen, Utensils, LineChart } from 'lucide-react';
 import SalesDisclaimer from '@/components/SalesDisclaimer';
@@ -133,15 +132,17 @@ const Pricing = () => {
                     </p>
                   </div>
 
-                  <Button
-                    asChild
-                    size="lg"
-                    className="w-full bg-gradient-to-r from-primary to-amber-500 text-primary-foreground text-base font-bold py-6 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all"
+                  <a
+                    href="https://www.jvzoo.com/b/117081/423665/5"
+                    aria-label="Get Keto Starter Plan"
+                    className="flex justify-center transition-transform hover:scale-[1.02]"
                   >
-                    <a href="/onboarding" aria-label="Get Keto Starter Plan">
-                      Get Instant Access — $19/month
-                    </a>
-                  </Button>
+                    <img
+                      src="https://i.jvzoo.com/117081/423665/5"
+                      alt="ketopia #1 custom keto diet platform"
+                      border="0"
+                    />
+                  </a>
 
 
                   <p className="text-xs text-center text-muted-foreground">
@@ -182,6 +183,14 @@ const Pricing = () => {
         </section>
 
         <SalesDisclaimer />
+
+        <img
+          src="https://i.jvzoo.com/117081/423665/99"
+          alt="ketopia #1 custom keto diet platform"
+          border="0"
+          width="1"
+          height="1"
+        />
 
         {/* Footer links */}
         <div className="py-8 text-center border-t">

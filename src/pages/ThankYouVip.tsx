@@ -98,13 +98,21 @@ const ThankYouVip = () => {
               <Button
                 variant="outline"
                 className="w-full text-muted-foreground"
-                onClick={handleDashboard}
+                asChild
               >
-                No thanks, go to my dashboard
+                <a href="https://www.jvzoo.com/nothanks/443435">No Thanks</a>
               </Button>
             </CardContent>
           </Card>
         </div>
+
+        <img
+          src="https://i.jvzoo.com/0/443435/99"
+          alt="VIP Upgrade ketopia #1 custom keto diet platform"
+          border="0"
+          width="1"
+          height="1"
+        />
 
         {/* Footer links */}
         <div className="mt-12 text-center">

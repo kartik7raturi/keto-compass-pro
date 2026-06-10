@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Check, Crown, Zap, Target, TrendingUp, Dumbbell, Droplets, Calendar, Star, Shield } from 'lucide-react';
 import SalesDisclaimer from '@/components/SalesDisclaimer';
@@ -93,15 +92,17 @@ const VipUpgrade = () => {
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />60-day money back guarantee</li>
                   </ul>
 
-                  <Button
-                    asChild
-                    size="lg"
-                    className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white text-base font-bold py-6 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all"
+                  <a
+                    href="https://www.jvzoo.com/b/0/443435/5"
+                    aria-label="Get 12-Month VIP Access"
+                    className="flex justify-center transition-transform hover:scale-[1.02]"
                   >
-                    <a href="/onboarding" aria-label="Get 12-Month VIP Access">
-                      Get 12-Month VIP Access — $99
-                    </a>
-                  </Button>
+                    <img
+                      src="https://i.jvzoo.com/0/443435/5"
+                      alt="VIP Upgrade ketopia #1 custom keto diet platform"
+                      border="0"
+                    />
+                  </a>
                 </CardContent>
               </Card>
             </div>
@@ -124,6 +125,14 @@ const VipUpgrade = () => {
         </section>
 
         <SalesDisclaimer />
+
+        <img
+          src="https://i.jvzoo.com/0/443435/99"
+          alt="VIP Upgrade ketopia #1 custom keto diet platform"
+          border="0"
+          width="1"
+          height="1"
+        />
 
         {/* Footer links */}
         <div className="py-6 text-center border-t">
