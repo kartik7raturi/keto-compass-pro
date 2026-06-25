@@ -51,6 +51,9 @@ import Messages from "./pages/Messages";
 import Imprint from "./pages/Imprint";
 import RefundPolicy from "./pages/RefundPolicy";
 import RequirePlan from "./components/auth/RequirePlan";
+import Course from "./pages/Course";
+import CourseLesson from "./pages/CourseLesson";
+import CourseSales from "./pages/CourseSales";
 
 const queryClient = new QueryClient();
 
@@ -74,6 +77,9 @@ const App = () => (
               <Route path="/thank-you" element={<ThankYou />} />
               <Route path="/thank-you-vip" element={<ThankYouVip />} />
               <Route path="/shop" element={<Shop />} />
+              <Route path="/course" element={<Course />} />
+              <Route path="/course/:moduleSlug/:lessonSlug" element={<CourseLesson />} />
+              <Route path="/course-sales" element={<CourseSales />} />
               <Route path="/imprint" element={<Imprint />} />
               <Route path="/refund-policy" element={<RefundPolicy />} />
               <Route path="/profile" element={<Profile />} />
