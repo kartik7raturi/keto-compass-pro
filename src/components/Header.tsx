@@ -92,6 +92,7 @@ const Header = () => {
       { label: 'Home', path: '/' },
       { label: 'Recipes', path: '/recipes' },
       { label: 'Tracker', path: '/tracker' },
+      { label: 'Course', path: '/course' },
       { label: 'Challenges', path: '/challenges' },
       { label: 'Progress', path: '/progress' },
       { label: 'Community', path: '/community' },
