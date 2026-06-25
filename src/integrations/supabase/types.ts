@@ -607,6 +607,163 @@ export type Database = {
           },
         ]
       }
+      course_access: {
+        Row: {
+          created_at: string
+          granted_at: string
+          jvzoo_email: string | null
+          jvzoo_order_id: string | null
+          source: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_at?: string
+          jvzoo_email?: string | null
+          jvzoo_order_id?: string | null
+          source?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_at?: string
+          jvzoo_email?: string | null
+          jvzoo_order_id?: string | null
+          source?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      course_lessons: {
+        Row: {
+          created_at: string
+          description: string | null
+          duration_sec: number
+          id: string
+          is_preview: boolean
+          is_published: boolean
+          module_id: string
+          resources: Json
+          slug: string
+          sort_order: number
+          title: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          duration_sec?: number
+          id?: string
+          is_preview?: boolean
+          is_published?: boolean
+          module_id: string
+          resources?: Json
+          slug: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          duration_sec?: number
+          id?: string
+          is_preview?: boolean
+          is_published?: boolean
+          module_id?: string
+          resources?: Json
+          slug?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_lessons_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_modules: {
+        Row: {
+          cover_url: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_published: boolean
+          slug: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          slug: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          slug?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      course_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          lesson_id: string
+          updated_at: string
+          user_id: string
+          watched_seconds: number
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          lesson_id: string
+          updated_at?: string
+          user_id: string
+          watched_seconds?: number
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          updated_at?: string
+          user_id?: string
+          watched_seconds?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "course_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       direct_messages: {
         Row: {
           content: string
@@ -2500,6 +2657,10 @@ export type Database = {
       ensure_recipe_of_the_day: { Args: never; Returns: Json }
       generate_referral_code: { Args: { p_user_id: string }; Returns: string }
       get_user_plan: { Args: { p_user_id: string }; Returns: string }
+      grant_course_access: {
+        Args: { p_email: string; p_order_id?: string }
+        Returns: Json
+      }
       grant_ketopia_subscription: {
         Args: {
           p_amount?: number
@@ -2522,6 +2683,7 @@ export type Database = {
         Returns: undefined
       }
       is_admin: { Args: never; Returns: boolean }
+      user_has_course_access: { Args: { p_user_id: string }; Returns: boolean }
       user_has_feature: {
         Args: { p_feature: string; p_user_id: string }
         Returns: boolean
