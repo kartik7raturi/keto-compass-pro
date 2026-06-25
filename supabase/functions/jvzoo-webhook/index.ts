@@ -14,6 +14,10 @@ const PRODUCT_PLAN_MAP: Record<string, "basic" | "vip" | "vip_lifetime"> = {
   // "12345": "basic",  // $19
   // "67890": "vip",    // $99
 };
+// JVZoo product IDs for the standalone Video Course ($47). Grants course access only.
+const COURSE_PRODUCT_IDS = new Set<string>([
+  // Add your JVZoo course product ID(s) here, e.g.: "33333"
+]);
 
 // JVZoo signature: concat all POST fields (sorted alphabetically by key) with "|",
 // append "|<secret>", SHA1, uppercase, first 8 chars must equal cverify.
@@ -124,6 +128,26 @@ Deno.serve(async (req) => {
 
     // 3. Process transaction
     if (["SALE", "BILL"].includes(txnType)) {
+      // Course-only product → grant course access (no full membership)
+      if (COURSE_PRODUCT_IDS.has(productId)) {
+        const { error } = await supabase.rpc("grant_course_access", {
+          p_email: email, p_amount: amount,
+          p_product_id: productId, p_order_id: orderId,
+        });
+        if (error) {
+          return await logAndRespond(
+            { ...baseLog, signature_valid: true, processed: false,
+              error_message: `grant_course_access: ${error.message}` },
+            500, { error: error.message },
+          );
+        }
+        console.log(`JVZoo ${txnType}: granted course access to ${email}`);
+        return await logAndRespond(
+          { ...baseLog, signature_valid: true, processed: true },
+          200, { ok: true, course: true, email },
+        );
+      }
+
       const plan = PRODUCT_PLAN_MAP[productId] ?? (amount >= 90 ? "vip" : "basic");
       const { error } = await supabase.rpc("grant_ketopia_subscription", {
         p_email: email, p_plan: plan, p_amount: amount,
