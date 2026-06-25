@@ -140,7 +140,7 @@ const Pricing = () => {
                     <img
                       src="https://i.jvzoo.com/117081/423665/5"
                       alt="ketopia #1 custom keto diet platform"
-                      border="0"
+                      
                     />
                   </a>
 
@@ -187,7 +187,7 @@ const Pricing = () => {
         <img
           src="https://i.jvzoo.com/117081/423665/99"
           alt="ketopia #1 custom keto diet platform"
-          border="0"
+          
           width="1"
           height="1"
         />
