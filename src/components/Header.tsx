@@ -272,14 +272,30 @@ const Header = () => {
       {mobileMenuOpen && (
         <div className="md:hidden border-t bg-background/95 backdrop-blur">
           <nav className="container py-3 px-4 space-y-1">
-            {navItems.map(item => (
-              <button
-                key={item.path}
-                onClick={() => handleNavigation(item.path)}
-                className="block w-full text-left py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-              >
-                {item.label}
-              </button>
+            {navGroups.map(group => (
+              <div key={group.label} className="py-1">
+                {group.items.length === 0 ? (
+                  <button
+                    onClick={() => handleNavigation(group.path)}
+                    className="block w-full text-left py-2 text-sm font-semibold text-foreground hover:text-primary"
+                  >
+                    {group.label}
+                  </button>
+                ) : (
+                  <>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide py-1">{group.label}</p>
+                    {group.items.map(item => (
+                      <button
+                        key={item.path}
+                        onClick={() => handleNavigation(item.path)}
+                        className="block w-full text-left py-1.5 pl-3 text-sm text-muted-foreground hover:text-primary"
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </>
+                )}
+              </div>
             ))}
           </nav>
         </div>
