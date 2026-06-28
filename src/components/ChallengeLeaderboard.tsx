@@ -19,19 +19,17 @@ interface ChallengeLeaderboardProps {
 }
 
 const ChallengeLeaderboard = ({ category = 'all' }: ChallengeLeaderboardProps) => {
-  const [timeframe, setTimeframe] = useState<'weekly' | 'monthly'>('weekly');
+  const [timeframe, setTimeframe] = useState<'weekly' | 'monthly'>('monthly');
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchLeaderboard();
 
-    // Real-time subscription for leaderboard updates
     const channel = supabase
-      .channel('leaderboard-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'user_challenges' }, () => {
-        fetchLeaderboard();
-      })
+      .channel('leaderboard-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'user_challenges' }, () => fetchLeaderboard())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'challenge_daily_logs' }, () => fetchLeaderboard())
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
@@ -41,46 +39,30 @@ const ChallengeLeaderboard = ({ category = 'all' }: ChallengeLeaderboardProps) =
     setLoading(true);
     try {
       const now = new Date();
-      let startDate: Date;
-      
-      if (timeframe === 'weekly') {
-        startDate = new Date(now.setDate(now.getDate() - 7));
-      } else {
-        startDate = new Date(now.setMonth(now.getMonth() - 1));
-      }
+      const startDate = timeframe === 'weekly'
+        ? new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+        : new Date(now.getFullYear(), now.getMonth(), 1);
 
-      // Get completed challenges in the timeframe
-      let query = supabase
+      const { data: completedChallenges } = await supabase
         .from('user_challenges')
         .select('user_id, challenge_id, is_completed, challenges(challenge_type, reward_points)')
         .eq('is_completed', true)
         .gte('created_at', startDate.toISOString());
 
-      const { data: completedChallenges } = await query;
-
-      // Filter by category if specified
-      const filtered = category === 'all' 
-        ? completedChallenges 
+      const filtered = category === 'all'
+        ? completedChallenges
         : completedChallenges?.filter((c: any) => c.challenges?.challenge_type?.toLowerCase() === category);
 
-      // Aggregate by user
       const userStats: Record<string, { points: number; count: number }> = {};
       filtered?.forEach((c: any) => {
-        if (!userStats[c.user_id]) {
-          userStats[c.user_id] = { points: 0, count: 0 };
-        }
+        if (!userStats[c.user_id]) userStats[c.user_id] = { points: 0, count: 0 };
         userStats[c.user_id].points += c.challenges?.reward_points || 50;
         userStats[c.user_id].count += 1;
       });
 
       const userIds = Object.keys(userStats);
-      if (userIds.length === 0) {
-        setLeaderboard([]);
-        setLoading(false);
-        return;
-      }
+      if (userIds.length === 0) { setLeaderboard([]); setLoading(false); return; }
 
-      // Get user profiles
       const { data: profiles } = await supabase
         .from('profiles')
         .select('user_id, display_name, avatar_url')
@@ -95,7 +77,8 @@ const ChallengeLeaderboard = ({ category = 'all' }: ChallengeLeaderboardProps) =
       })) || [];
 
       leaderboardData.sort((a, b) => b.points - a.points);
-      setLeaderboard(leaderboardData.slice(0, 10));
+      // Top 5 only per spec
+      setLeaderboard(leaderboardData.slice(0, 5));
     } catch (error) {
       console.error('Error fetching leaderboard:', error);
     } finally {
