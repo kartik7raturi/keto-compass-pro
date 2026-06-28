@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Check, PlayCircle, Shield, Clock, Star, BookOpen } from 'lucide-react';
@@ -39,6 +40,15 @@ const CourseSales = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>The Ketopia Video Course — Learn Keto the Right Way</title>
+        <meta name="description" content="Lifetime access to the Ketopia keto video course. Step-by-step lessons, meal planning, and fat-loss strategies. 60-day money-back guarantee." />
+        <link rel="canonical" href="https://keto-compass-pro.lovable.app/course-sales" />
+        <meta property="og:title" content="The Ketopia Video Course — Learn Keto the Right Way" />
+        <meta property="og:description" content="Lifetime access. 60-day money-back guarantee. Step-by-step video lessons." />
+        <meta property="og:url" content="https://keto-compass-pro.lovable.app/course-sales" />
+        <meta property="og:type" content="product" />
+      </Helmet>
       {/* Hero */}
       <section className="relative py-16 md:py-24 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-background to-amber-500/10" />

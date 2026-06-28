@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { supabase } from '@/integrations/supabase/client';
@@ -38,6 +39,15 @@ const Course = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Keto Video Course — Master Keto Step by Step | Ketopia</title>
+        <meta name="description" content="Video lessons covering keto basics, meal planning, fat-loss strategies and more. Watch at your own pace." />
+        <link rel="canonical" href="https://keto-compass-pro.lovable.app/course" />
+        <meta property="og:title" content="Keto Video Course — Master Keto Step by Step" />
+        <meta property="og:description" content="Video lessons covering keto basics, meal planning, fat-loss strategies and more." />
+        <meta property="og:url" content="https://keto-compass-pro.lovable.app/course" />
+        <meta property="og:type" content="website" />
+      </Helmet>
       <Header />
       <main className="container mx-auto px-4 py-10 max-w-5xl">
         <div className="flex items-start justify-between flex-wrap gap-4 mb-8">
