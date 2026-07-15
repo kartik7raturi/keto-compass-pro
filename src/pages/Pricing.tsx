@@ -142,6 +142,7 @@ const Pricing = () => {
                   <a
                     href="https://www.jvzoo.com/b/117081/423665/5"
                     aria-label="Get Keto Starter Plan"
+                    onClick={() => trackBuyNowClick('keto_starter', 19, 'USD')}
                     className="flex justify-center transition-transform hover:scale-[1.02]"
                   >
                     <img

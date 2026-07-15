@@ -1,6 +1,8 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Check, Crown, Zap, Target, TrendingUp, Dumbbell, Droplets, Calendar, Star, Shield } from 'lucide-react';
 import SalesDisclaimer from '@/components/SalesDisclaimer';
+import { useEffect } from 'react';
+import { trackBuyNowClick, trackViewContent, trackAddToCart } from '@/lib/tracking';
 
 const VIP_FEATURES = [
   { icon: Target, label: '30-Day Keto Challenge', desc: 'Structured daily plan to reach ketosis' },
@@ -95,6 +97,7 @@ const VipUpgrade = () => {
                   <a
                     href="https://www.jvzoo.com/b/0/443435/5"
                     aria-label="Get 12-Month VIP Access"
+                    onClick={() => trackBuyNowClick('vip_12_month', 47, 'USD')}
                     className="flex justify-center transition-transform hover:scale-[1.02]"
                   >
                     <img
