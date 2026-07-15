@@ -58,6 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         data: displayName ? { display_name: displayName } : undefined
       }
     });
+    if (!error) trackSignup({ method: 'email' });
     return { error };
   };
 
@@ -66,6 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       email,
       password,
     });
+    if (!error) trackLogin({ method: 'email' });
     return { error };
   };
 
