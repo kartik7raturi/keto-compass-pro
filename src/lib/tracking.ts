@@ -7,6 +7,8 @@ export type UtmData = Partial<Record<UtmKey, string>> & { landing_page?: string;
 
 const UTM_STORAGE_KEY = 'ketopia_utm_attribution';
 const SESSION_STORAGE_KEY = 'ketopia_session_id';
+export const META_PIXEL_ID = '1759880568532895';
+export const META_TEST_EVENT_CODE = 'TEST1841';
 
 declare global {
   interface Window {
@@ -71,24 +73,69 @@ export function getStoredUtm(): { first_touch: UtmData | null; last_touch: UtmDa
 }
 
 // ---------- Meta Pixel ----------
-export function fbTrack(event: string, params?: Record<string, any>) {
+function createMetaEventId(event: string): string {
+  const randomId = typeof crypto !== 'undefined' && 'randomUUID' in crypto
+    ? crypto.randomUUID()
+    : Math.random().toString(36).slice(2, 12);
+  return `${event.toLowerCase()}_${Date.now()}_${randomId}`;
+}
+
+function getMetaEventSourceUrl(): string | undefined {
+  if (typeof window === 'undefined') return undefined;
+  return window.location.href;
+}
+
+async function sendConversionsApiEvent(
+  event: string,
+  params: Record<string, any>,
+  eventId: string,
+  actionSource = 'website',
+) {
   try {
-    if (typeof window !== 'undefined' && window.fbq) {
-      window.fbq('track', event, params || {});
-    }
+    const utm = getStoredUtm();
+    await supabase.functions.invoke('meta-conversions-api', {
+      body: {
+        event_name: event,
+        event_id: eventId,
+        event_source_url: getMetaEventSourceUrl(),
+        action_source: actionSource,
+        custom_data: params,
+        test_event_code: META_TEST_EVENT_CODE,
+        attribution: utm,
+        user_data: {
+          client_user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+        },
+      },
+    });
   } catch {
-    // ignore
+    // Meta server-side tracking should never block the user experience.
   }
 }
 
-export function fbTrackCustom(event: string, params?: Record<string, any>) {
+export function fbTrack(event: string, params?: Record<string, any>) {
+  const eventId = createMetaEventId(event);
+  const eventParams = params || {};
   try {
     if (typeof window !== 'undefined' && window.fbq) {
-      window.fbq('trackCustom', event, params || {});
+      window.fbq('track', event, eventParams, { eventID: eventId });
     }
   } catch {
     // ignore
   }
+  void sendConversionsApiEvent(event, eventParams, eventId);
+}
+
+export function fbTrackCustom(event: string, params?: Record<string, any>) {
+  const eventId = createMetaEventId(event);
+  const eventParams = params || {};
+  try {
+    if (typeof window !== 'undefined' && window.fbq) {
+      window.fbq('trackCustom', event, eventParams, { eventID: eventId });
+    }
+  } catch {
+    // ignore
+  }
+  void sendConversionsApiEvent(event, eventParams, eventId);
 }
 
 // ---------- Funnel logging ----------
