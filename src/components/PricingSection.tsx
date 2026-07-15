@@ -33,7 +33,7 @@ const PricingSection = () => {
         <Button 
           size="lg"
           className="bg-gradient-to-r from-primary to-primary/80 text-lg px-8 py-7 shadow-lg hover:shadow-xl"
-          onClick={() => navigate('/onboarding')}
+          onClick={() => { trackLead('pricing_section_cta'); navigate('/onboarding'); }}
         >
           Get Your Free Custom Keto Plan <ChevronRight className="ml-2 h-5 w-5" />
         </Button>
