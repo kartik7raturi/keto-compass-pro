@@ -113,6 +113,7 @@ const OnboardingSurvey = () => {
         toast({ title: 'Signup Error', description: error.message, variant: 'destructive' });
       } else {
         setSignupDone(true);
+        trackLead('onboarding_survey', { motivation: data.motivation });
         // Save survey data after signup
         const { data: sessionData } = await supabase.auth.getSession();
         if (sessionData.session?.user) {

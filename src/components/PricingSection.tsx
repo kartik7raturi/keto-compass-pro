@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Zap, TrendingUp, Shield, Award, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { trackLead } from '@/lib/tracking';
 
 const RESULTS = [
   { icon: TrendingUp, text: 'Average 8-12 lbs lost in first month' },
