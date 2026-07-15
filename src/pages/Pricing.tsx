@@ -13,6 +13,11 @@ const FEATURES = [
 ];
 
 const Pricing = () => {
+  useEffect(() => {
+    trackViewContent('pricing_page', { product: 'keto_starter', value: 19, currency: 'USD' });
+    trackAddToCart('keto_starter', 19, 'USD');
+  }, []);
+
 
   return (
     <div className="min-h-screen bg-background">
