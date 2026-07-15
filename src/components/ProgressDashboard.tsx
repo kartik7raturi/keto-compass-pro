@@ -46,7 +46,7 @@ const ProgressDashboard = () => {
   const fetchUserData = async () => {
     try {
       const { data: profileData } = await supabase
-        .from('profiles').select('*').eq('user_id', user?.id).single();
+        .from('profiles').select('*').eq('user_id', user?.id).maybeSingle();
 
       const { data: weightData } = await supabase
         .from('weight_logs').select('*').eq('user_id', user?.id)

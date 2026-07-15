@@ -25,7 +25,7 @@ const CourseSales = () => {
 
   const trackClick = async () => {
     try {
-      await supabase.from('funnel_events').insert({ event_type: 'course_cta_click', page: '/course-sales' } as any);
+      await supabase.from('funnel_events').insert({ event_name: 'course_cta_click', page: '/course-sales' } as any);
     } catch {}
   };
 
