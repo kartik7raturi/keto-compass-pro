@@ -59,10 +59,14 @@ const Blog = () => {
         .select('*')
         .eq('slug', articleSlug)
         .eq('is_published', true)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
-      
+      if (!data) {
+        navigate('/blog');
+        return;
+      }
+
       setCurrentArticle(data);
       
       // Increment view count
