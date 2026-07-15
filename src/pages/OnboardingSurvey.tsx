@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ChevronRight, ChevronLeft, Check } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { trackLead } from '@/lib/tracking';
 
 interface SurveyData {
   current_weight: string;
