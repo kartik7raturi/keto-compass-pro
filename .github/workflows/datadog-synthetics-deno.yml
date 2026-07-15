@@ -4,7 +4,10 @@ on:
   schedule:
     - cron: "*/30 * * * *"
   workflow_dispatch:
+codex/update-vip-upgrade-sales-page-buttons-pf9txt
+
 codex/update-vip-upgrade-sales-page-buttons-wfhfng
+main
   workflow_run:
     workflows: ["Deploy", "Production Deploy", "Vercel Production Deployment"]
     types: [completed]
@@ -12,10 +15,13 @@ codex/update-vip-upgrade-sales-page-buttons-wfhfng
 jobs:
   browser-test:
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+codex/update-vip-upgrade-sales-page-buttons-pf9txt
+
 
 
 jobs:
   browser-test:
+ main
  main
     runs-on: ubuntu-latest
     env:
