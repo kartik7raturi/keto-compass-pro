@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Check, Crown, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useButtonLinks } from '@/hooks/useButtonLinks';
 import { useSubscription } from '@/hooks/useSubscription';
+import { trackPurchase } from '@/lib/tracking';
 
 const ThankYouVip = () => {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ const ThankYouVip = () => {
 
   // Re-poll subscription a few times so the IPN-updated plan shows up immediately.
   useEffect(() => {
+    trackPurchase('vip_12_month', 47, 'USD', { source: 'thank-you-vip' });
     const tries = [1000, 3000, 6000, 12000];
     const timers = tries.map(t => setTimeout(() => refetch(), t));
     return () => timers.forEach(clearTimeout);
