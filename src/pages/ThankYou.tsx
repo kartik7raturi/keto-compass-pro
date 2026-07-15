@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Check, Crown, PartyPopper, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useButtonLinks } from '@/hooks/useButtonLinks';
+import { trackPurchase } from '@/lib/tracking';
 
 const ThankYou = () => {
   const [searchParams] = useSearchParams();
@@ -17,11 +18,14 @@ const ThankYou = () => {
   useEffect(() => {
     if (plan === 'basic') {
       upgradePlan('basic', 'one_time', 19);
+      trackPurchase('keto_starter', 19, 'USD', { plan: 'basic' });
     } else if (plan === 'vip-monthly') {
       upgradePlan('vip', 'monthly', 29);
+      trackPurchase('vip_monthly', 29, 'USD', { plan: 'vip-monthly' });
     } else if (plan === 'vip-lifetime' || plan === 'vip-yearly') {
       // $99 yearly plan — stored as vip_lifetime internally; expiry now 365 days
       upgradePlan('vip_lifetime', 'one_time', 99);
+      trackPurchase('vip_yearly', 99, 'USD', { plan: 'vip-yearly' });
     }
     // Re-poll a few times so the IPN processor's update lands.
     const tries = [2000, 5000, 10000];

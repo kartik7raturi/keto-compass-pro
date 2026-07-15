@@ -1,6 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, Star, Shield, Crown, Sparkles, Clock, Lock, Flame, BookOpen, Utensils, LineChart } from 'lucide-react';
 import SalesDisclaimer from '@/components/SalesDisclaimer';
+import { trackBuyNowClick, trackViewContent, trackAddToCart } from '@/lib/tracking';
+import { useEffect } from 'react';
 
 const FEATURES = [
   { icon: BookOpen, text: '1000+ Keto Recipes' },
@@ -11,6 +13,11 @@ const FEATURES = [
 ];
 
 const Pricing = () => {
+  useEffect(() => {
+    trackViewContent('pricing_page', { product: 'keto_starter', value: 19, currency: 'USD' });
+    trackAddToCart('keto_starter', 19, 'USD');
+  }, []);
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -135,6 +142,7 @@ const Pricing = () => {
                   <a
                     href="https://www.jvzoo.com/b/117081/423665/5"
                     aria-label="Get Keto Starter Plan"
+                    onClick={() => trackBuyNowClick('keto_starter', 19, 'USD')}
                     className="flex justify-center transition-transform hover:scale-[1.02]"
                   >
                     <img

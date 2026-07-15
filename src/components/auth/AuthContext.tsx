@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { trackSignup, trackLogin } from '@/lib/tracking';
 
 interface AuthContextType {
   user: User | null;
@@ -57,6 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         data: displayName ? { display_name: displayName } : undefined
       }
     });
+    if (!error) trackSignup({ method: 'email' });
     return { error };
   };
 
@@ -65,6 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       email,
       password,
     });
+    if (!error) trackLogin({ method: 'email' });
     return { error };
   };
 

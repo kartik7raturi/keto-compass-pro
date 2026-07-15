@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Zap, TrendingUp, Shield, Award, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { trackLead } from '@/lib/tracking';
 
 const RESULTS = [
   { icon: TrendingUp, text: 'Average 8-12 lbs lost in first month' },
@@ -32,7 +33,7 @@ const PricingSection = () => {
         <Button 
           size="lg"
           className="bg-gradient-to-r from-primary to-primary/80 text-lg px-8 py-7 shadow-lg hover:shadow-xl"
-          onClick={() => navigate('/onboarding')}
+          onClick={() => { trackLead('pricing_section_cta'); navigate('/onboarding'); }}
         >
           Get Your Free Custom Keto Plan <ChevronRight className="ml-2 h-5 w-5" />
         </Button>
