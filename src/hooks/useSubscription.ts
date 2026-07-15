@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthContext';
 
+const ADMIN_EMAIL = 'sankhobusiness@gmail.com';
+
 export type PlanType = 'free' | 'basic' | 'vip' | 'vip_lifetime';
 
 interface Subscription {
@@ -64,6 +66,7 @@ export const useSubscription = () => {
   };
 
   const hasAccess = (feature: string): boolean => {
+    if (user?.email?.toLowerCase() === ADMIN_EMAIL) return true;
     // If no subscription data yet, deny access
     if (!subscription) return false;
     if (!subscription.is_active) return false;
@@ -85,6 +88,7 @@ export const useSubscription = () => {
   };
 
   const hasPaidPlan = (): boolean => {
+    if (user?.email?.toLowerCase() === ADMIN_EMAIL) return true;
     if (!subscription) return false;
     return subscription.is_active && ['basic', 'vip', 'vip_lifetime'].includes(subscription.plan_type);
   };

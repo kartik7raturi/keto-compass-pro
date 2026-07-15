@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ChevronRight, ChevronLeft, Check } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { trackLead } from '@/lib/tracking';
 
 interface SurveyData {
   current_weight: string;
@@ -112,6 +113,7 @@ const OnboardingSurvey = () => {
         toast({ title: 'Signup Error', description: error.message, variant: 'destructive' });
       } else {
         setSignupDone(true);
+        trackLead('onboarding_survey', { motivation: data.motivation });
         // Save survey data after signup
         const { data: sessionData } = await supabase.auth.getSession();
         if (sessionData.session?.user) {

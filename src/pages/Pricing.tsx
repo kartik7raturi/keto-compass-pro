@@ -1,6 +1,8 @@
-import { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, Star, Shield, Crown, Sparkles, Clock, Lock, Flame, BookOpen, Utensils, LineChart } from 'lucide-react';
+import SalesDisclaimer from '@/components/SalesDisclaimer';
+import { trackBuyNowClick, trackViewContent, trackAddToCart } from '@/lib/tracking';
+import { useEffect } from 'react';
 
 const FEATURES = [
   { icon: BookOpen, text: '1000+ Keto Recipes' },
@@ -12,19 +14,13 @@ const FEATURES = [
 
 const Pricing = () => {
   useEffect(() => {
-    const s = document.createElement('script');
-    s.type = 'text/javascript';
-    s.src = 'https://warriorplus.com/o2/js/gf37tm';
-    s.defer = true;
-    document.body.appendChild(s);
-    return () => { document.body.removeChild(s); };
+    trackViewContent('pricing_page', { product: 'keto_starter', value: 19, currency: 'USD' });
+    trackAddToCart('keto_starter', 19, 'USD');
   }, []);
+
 
   return (
     <div className="min-h-screen bg-background">
-      {/* WarriorPlus view tracking pixel */}
-      <img src="https://warriorplus.com/o2/v/xtpnsb/gf37tm" alt="" width="1" height="1" style={{ position: 'absolute', left: -9999, top: -9999 }} />
-
       <main>
         {/* Hero */}
         <section className="relative py-20 md:py-28 overflow-hidden">
@@ -38,9 +34,22 @@ const Pricing = () => {
             <h1 className="text-4xl md:text-6xl font-bold mb-5 leading-tight">
               Start Your <span className="bg-gradient-to-r from-primary to-amber-500 bg-clip-text text-transparent">Keto Transformation</span> Today
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-2">
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-6">
               The complete keto system — recipes, trackers, meal plans, and a supportive community in one place.
             </p>
+            <a
+              href="https://www.producthunt.com/products/ketopia?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-ketopia"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex transition-transform hover:scale-[1.02]"
+            >
+              <img
+                alt="Ketopia  - ALL IN ONE KETO PLATFORM | Product Hunt"
+                width="250"
+                height="54"
+                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1158629&amp;theme=light&amp;t=1780051410186"
+              />
+            </a>
           </div>
         </section>
 
@@ -96,20 +105,20 @@ const Pricing = () => {
         {/* Pricing Card */}
         <section className="py-14 bg-gradient-to-b from-primary/5 to-background">
           <div className="container mx-auto px-4">
-            <div className="max-w-md mx-auto">
+            <div className="max-w-md md:max-w-lg mx-auto">
               <Card className="border-2 border-primary shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-primary to-amber-500 text-primary-foreground py-2.5 text-center text-sm font-bold tracking-wide">
                   🔥 START YOUR KETO JOURNEY TODAY 🔥
                 </div>
-                <CardHeader className="text-center pb-2 pt-14">
+                <CardHeader className="text-center pb-2 pt-12 sm:pt-14">
                   <div className="flex items-center justify-center gap-1 mb-2">
                     {[1,2,3,4,5].map(i => (
                       <Star key={i} className="h-5 w-5 text-amber-500 fill-amber-500" />
                     ))}
                   </div>
-                  <CardTitle className="text-2xl">Keto Starter Plan</CardTitle>
+                  <CardTitle className="text-xl sm:text-2xl">Keto Starter Plan</CardTitle>
                   <div className="mt-4">
-                    <span className="text-6xl font-bold bg-gradient-to-r from-primary to-amber-500 bg-clip-text text-transparent">$19</span>
+                    <span className="text-5xl sm:text-6xl font-bold bg-gradient-to-r from-primary to-amber-500 bg-clip-text text-transparent">$19</span>
                     <span className="text-muted-foreground text-lg">/month</span>
                   </div>
                   <p className="text-xs text-muted-foreground mt-2">Cancel anytime • No hidden fees</p>
@@ -130,12 +139,19 @@ const Pricing = () => {
                     </p>
                   </div>
 
-                  <a href="https://warriorplus.com/o2/buy/xtpnsb/gf37tm/h8p8sl" target="_blank" rel="noopener noreferrer" className="block transition-transform hover:scale-[1.02]">
-                    <img src="https://warriorplus.com/o2/btn/fn100011001/xtpnsb/gf37tm/458023" alt="Buy now" className="w-full" />
+                  <a
+                    href="https://www.jvzoo.com/b/117081/423665/5"
+                    aria-label="Get Keto Starter Plan"
+                    onClick={() => trackBuyNowClick('keto_starter', 19, 'USD')}
+                    className="flex justify-center transition-transform hover:scale-[1.02]"
+                  >
+                    <img
+                      src="https://i.jvzoo.com/117081/423665/5"
+                      alt="ketopia #1 custom keto diet platform"
+                      
+                    />
                   </a>
 
-                  {/* WarriorPlus Disclaimer */}
-                  <div className="wplus_spdisclaimer text-sm text-foreground" />
 
                   <p className="text-xs text-center text-muted-foreground">
                     Secure payment • Instant access
@@ -174,6 +190,16 @@ const Pricing = () => {
           </div>
         </section>
 
+        <SalesDisclaimer />
+
+        <img
+          src="https://i.jvzoo.com/117081/423665/99"
+          alt="ketopia #1 custom keto diet platform"
+          
+          width="1"
+          height="1"
+        />
+
         {/* Footer links */}
         <div className="py-8 text-center border-t">
           <div className="container px-4 flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
@@ -183,9 +209,6 @@ const Pricing = () => {
             <a href="/refund-policy" className="hover:text-primary transition-colors">Refund Policy</a>
             <a href="/contact" className="hover:text-primary transition-colors">Contact</a>
           </div>
-          <p className="text-xs text-muted-foreground mt-4 max-w-2xl mx-auto px-4">
-            These earnings are not representative for the average participants. The average participant will earn significantly less or no money at all through this product or service.
-          </p>
         </div>
       </main>
     </div>

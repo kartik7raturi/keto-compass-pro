@@ -1,6 +1,12 @@
+ codex/update-vip-upgrade-sales-page-buttons-pf9txt
 import { Button } from '@/components/ui/button';
+
+ main
 import { Card, CardContent } from '@/components/ui/card';
 import { Check, Crown, Zap, Target, TrendingUp, Dumbbell, Droplets, Calendar, Star, Shield } from 'lucide-react';
+import SalesDisclaimer from '@/components/SalesDisclaimer';
+import { useEffect } from 'react';
+import { trackBuyNowClick, trackViewContent, trackAddToCart } from '@/lib/tracking';
 
 const VIP_FEATURES = [
   { icon: Target, label: '30-Day Keto Challenge', desc: 'Structured daily plan to reach ketosis' },
@@ -18,22 +24,6 @@ const VIP_FEATURES = [
   { icon: Shield, label: 'Marketplace Access', desc: 'Buy & sell keto food locally' },
 ];
 
-const WHY_VIP = [
-  'Faster results with structured system',
-  'No guesswork — everything planned',
-  'Proven strategies for fat loss',
-  'Designed for beginners & busy people',
-  'Works from home without gym',
-];
-
-const PERFECT_FOR = [
-  'You struggle with cravings and fat loss',
-  'You want a clear diet plan',
-  'You need structured guidance',
-  'You want faster and visible results',
-  'You prefer a simple system to follow',
-];
-
 const TESTIMONIALS = [
   { name: 'Sarah M.', text: 'Lost 20 lbs in 2 months with VIP features!', stars: 5 },
   { name: 'James K.', text: 'The fasting tracker changed my routine completely.', stars: 5 },
@@ -41,6 +31,15 @@ const TESTIMONIALS = [
 ];
 
 const VipUpgrade = () => {
+ codex/update-vip-upgrade-sales-page-buttons-pf9txt
+
+  useEffect(() => {
+    trackViewContent('vip_upgrade_page', { product: 'vip_12_month', value: 47, currency: 'USD' });
+    trackAddToCart('vip_12_month', 47, 'USD');
+  }, []);
+
+
+ main
   return (
     <div className="min-h-screen bg-background">
       <main>
@@ -59,43 +58,6 @@ const VipUpgrade = () => {
               Take your keto journey to the next level with advanced trackers, personalized meal plans, 
               workout logging, fasting protocols, and detailed analytics.
             </p>
-          </div>
-        </section>
-
-        {/* What is Ketopia VIP */}
-        <section className="py-10 bg-secondary/10">
-          <div className="container mx-auto px-4 max-w-3xl">
-            <h2 className="text-2xl font-bold text-center mb-4">What is Ketopia VIP?</h2>
-            <p className="text-muted-foreground text-center mb-6">
-              Ketopia VIP is a premium digital upgrade that gives you full access to advanced weight-loss strategies, structured plans, and exclusive content.
-            </p>
-            <div className="space-y-3 max-w-md mx-auto">
-              <h3 className="font-semibold">When you upgrade, you will receive:</h3>
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-amber-500 flex-shrink-0" /> Advanced fat-loss diet plans (PDF)</li>
-                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-amber-500 flex-shrink-0" /> Exclusive meal plans & recipes</li>
-                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-amber-500 flex-shrink-0" /> Step-by-step transformation system</li>
-                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-amber-500 flex-shrink-0" /> Premium training content (videos/guides)</li>
-                <li className="flex items-center gap-2"><Check className="h-4 w-4 text-amber-500 flex-shrink-0" /> Bonus resources for faster results</li>
-              </ul>
-              <p className="text-xs text-muted-foreground italic">
-                This is a digital product. No physical items or supplements will be shipped.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Why Choose VIP */}
-        <section className="py-10">
-          <div className="container mx-auto px-4 max-w-3xl">
-            <h2 className="text-2xl font-bold text-center mb-6">Why Choose VIP Access?</h2>
-            <div className="max-w-md mx-auto space-y-2">
-              {WHY_VIP.map(item => (
-                <div key={item} className="flex items-center gap-2 text-sm">
-                  <Check className="h-4 w-4 text-amber-500 flex-shrink-0" /> {item}
-                </div>
-              ))}
-            </div>
           </div>
         </section>
 
@@ -122,14 +84,18 @@ const VipUpgrade = () => {
           </div>
         </section>
 
+ codex/update-vip-upgrade-sales-page-buttons-pf9txt
         {/* WarriorPlus view tracking pixel */}
         <img src="https://warriorplus.com/o2/v/xtpnsb/z91gcv" alt="" width="1" height="1" style={{ position: 'absolute', left: -9999, top: -9999 }} />
 
+
+ main
         {/* Pricing */}
         <section id="pricing" className="py-16 bg-gradient-to-b from-amber-500/5 to-background">
           <div className="container px-4">
-            <h2 className="text-2xl md:text-3xl font-bold text-center mb-2">Choose Your VIP Plan</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-2">VIP Access</h2>
             <p className="text-center text-muted-foreground mb-8">Unlock everything. No restrictions.</p>
+codex/update-vip-upgrade-sales-page-buttons-pf9txt
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
               <Card className="border-2 border-amber-500/30 shadow-lg">
                 <CardContent className="p-6 text-center space-y-4">
@@ -159,15 +125,18 @@ const VipUpgrade = () => {
                 </CardContent>
               </Card>
 
+
+            <div className="max-w-md md:max-w-lg mx-auto">
+ main
               <Card className="border-2 border-primary shadow-xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-xs font-bold rounded-bl-lg">BEST VALUE</div>
-                <CardContent className="p-6 text-center space-y-4">
-                  <h3 className="text-xl font-bold">12-Month Access</h3>
+                <CardContent className="p-4 sm:p-6 md:p-8 text-center space-y-5">
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold">12-Month Access</h3>
                   <div>
-                    <span className="text-5xl font-bold">$99</span>
+                    <span className="text-4xl sm:text-5xl md:text-6xl font-bold">$99</span>
                     <span className="text-muted-foreground">/year</span>
                   </div>
-                  <ul className="text-sm space-y-2 text-left">
+                  <ul className="text-sm sm:text-base space-y-2.5 text-left">
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />All VIP features for a full year</li>
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />Single yearly payment — save vs monthly</li>
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />Priority support</li>
@@ -175,6 +144,7 @@ const VipUpgrade = () => {
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />60-day money back guarantee</li>
                   </ul>
 
+ codex/update-vip-upgrade-sales-page-buttons-pf9txt
                   <a href="https://warriorplus.com/o2/buy/xtpnsb/z91gcv/brp9cq" target="_blank" rel="noopener noreferrer" className="block transition-transform hover:scale-[1.02]">
                     <img src="https://warriorplus.com/o2/btn/fn100011001/xtpnsb/z91gcv/464642" alt="Get 12-Month VIP Access" className="w-full" />
                   </a>
@@ -185,14 +155,26 @@ const VipUpgrade = () => {
                   <a
                     href="https://warriorplus.com/o/nothanks/z91gcv"
                     className="block text-sm text-muted-foreground hover:text-foreground underline mt-2"
+
+                  <a
+                    href="https://www.jvzoo.com/b/0/443435/5"
+                    aria-label="Get 12-Month VIP Access"
+                    onClick={() => trackBuyNowClick('vip_12_month', 47, 'USD')}
+                    className="flex justify-center transition-transform hover:scale-[1.02]"
+ main
                   >
-                    No Thanks
+                    <img
+                      src="https://i.jvzoo.com/0/443435/5"
+                      alt="VIP Upgrade ketopia #1 custom keto diet platform"
+                      
+                    />
                   </a>
                 </CardContent>
               </Card>
             </div>
           </div>
         </section>
+
 
         {/* 60-Day Guarantee */}
         <section className="py-12 bg-amber-500/5">
@@ -208,47 +190,15 @@ const VipUpgrade = () => {
           </div>
         </section>
 
-        {/* Perfect For You */}
-        <section className="py-10">
-          <div className="container mx-auto px-4 max-w-3xl">
-            <h2 className="text-2xl font-bold text-center mb-6">This is Perfect For You If:</h2>
-            <div className="max-w-md mx-auto space-y-2">
-              {PERFECT_FOR.map(item => (
-                <div key={item} className="flex items-center gap-2 text-sm">
-                  <Check className="h-4 w-4 text-amber-500 flex-shrink-0" /> {item}
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        <SalesDisclaimer />
 
-        {/* CTA */}
-        <section className="py-12 bg-gradient-to-r from-amber-500/10 to-orange-500/10">
-          <div className="container mx-auto px-4 text-center max-w-2xl">
-            <h2 className="text-2xl font-bold mb-3">Upgrade Now & Start Your Transformation</h2>
-            <p className="text-muted-foreground mb-6">
-              Click the button below to unlock full VIP access and take control of your fitness journey today.
-            </p>
-            <Button
-              size="lg"
-              className="bg-gradient-to-r from-amber-500 to-orange-600 text-white text-lg py-7 px-10"
-              onClick={() => { document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }); }}
-            >
-              👉 Upgrade to Ketopia VIP Now
-            </Button>
-          </div>
-        </section>
-
-        {/* Disclaimer */}
-        <section className="py-6 bg-secondary/10">
-          <div className="container mx-auto px-4 text-center max-w-2xl">
-            <h3 className="font-semibold text-sm mb-2">Disclaimer</h3>
-            <p className="text-xs text-muted-foreground">
-              This product is for educational purposes only. Results may vary from person to person.
-              This is not medical advice. Please consult a professional before making dietary changes.
-            </p>
-          </div>
-        </section>
+        <img
+          src="https://i.jvzoo.com/0/443435/99"
+          alt="VIP Upgrade ketopia #1 custom keto diet platform"
+          
+          width="1"
+          height="1"
+        />
 
         {/* Footer links */}
         <div className="py-6 text-center border-t">
@@ -259,9 +209,6 @@ const VipUpgrade = () => {
             <a href="/refund-policy" className="hover:text-primary transition-colors">Refund Policy</a>
             <a href="/contact" className="hover:text-primary transition-colors">Contact</a>
           </div>
-          <p className="text-xs text-muted-foreground mt-4 max-w-2xl mx-auto px-4">
-            These earnings are not representative for the average participants. The average participant will earn significantly less or no money at all through this product or service.
-          </p>
         </div>
       </main>
     </div>

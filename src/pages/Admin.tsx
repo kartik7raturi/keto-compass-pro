@@ -7,7 +7,8 @@ import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, Loader2, ChefHat, FileText, BookOpen, Image, Target, MessageSquare, Award, Headphones, Layout, Crown, Package, Pencil } from "lucide-react";
+import { Shield, Loader2, ChefHat, FileText, BookOpen, Image, Target, MessageSquare, Award, Headphones, Layout, Crown, Package, Pencil, Webhook, GraduationCap } from "lucide-react";
+import { AdminWebhookLogs } from "@/components/admin/AdminWebhookLogs";
 import { AdminRecipes } from "@/components/admin/AdminRecipes";
 import { AdminArticles } from "@/components/admin/AdminArticles";
 import { AdminStories } from "@/components/admin/AdminStories";
@@ -19,6 +20,7 @@ import { AdminModeration } from "@/components/admin/AdminModeration";
 import { AdminSupportChats } from "@/components/admin/AdminSupportChats";
 import { AdminButtonLinks } from "@/components/admin/AdminButtonLinks";
 import { AdminProducts } from "@/components/admin/AdminProducts";
+import { AdminCourse } from "@/components/admin/AdminCourse";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -266,6 +268,12 @@ const Admin = () => {
             <TabsTrigger value="subscriptions" className="flex items-center gap-1 text-xs">
               <Crown className="h-3.5 w-3.5" /><span className="hidden sm:inline">Subs</span>
             </TabsTrigger>
+            <TabsTrigger value="course" className="flex items-center gap-1 text-xs">
+              <GraduationCap className="h-3.5 w-3.5" /><span className="hidden sm:inline">Course</span>
+            </TabsTrigger>
+            <TabsTrigger value="webhooks" className="flex items-center gap-1 text-xs">
+              <Webhook className="h-3.5 w-3.5" /><span className="hidden sm:inline">Webhooks</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="recipes"><AdminRecipes /></TabsContent>
@@ -280,6 +288,8 @@ const Admin = () => {
           <TabsContent value="products"><AdminProducts /></TabsContent>
           <TabsContent value="pages"><AdminPages /></TabsContent>
           <TabsContent value="subscriptions"><AdminSubscriptions /></TabsContent>
+          <TabsContent value="course"><AdminCourse /></TabsContent>
+          <TabsContent value="webhooks"><AdminWebhookLogs /></TabsContent>
         </Tabs>
       </main>
       <Footer />

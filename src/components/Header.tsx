@@ -9,6 +9,8 @@ import UserProgressWidget from "@/components/UserProgressWidget";
 import NotificationBell from "@/components/NotificationBell";
 import { useSubscription } from "@/hooks/useSubscription";
 
+const ADMIN_EMAIL = 'sankhobusiness@gmail.com';
+
 const Header = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -17,7 +19,8 @@ const Header = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const { subscription } = useSubscription();
 
-  const hasPaid = subscription && subscription.is_active && ['basic', 'vip', 'vip_lifetime'].includes(subscription.plan_type);
+  const isAdminEmail = user?.email?.toLowerCase() === ADMIN_EMAIL;
+  const hasPaid = isAdminEmail || (subscription && subscription.is_active && ['basic', 'vip', 'vip_lifetime'].includes(subscription.plan_type));
   const isVip = subscription && subscription.is_active && (subscription.plan_type === 'vip' || subscription.plan_type === 'vip_lifetime');
 
   const handleSignOut = async () => {
@@ -63,41 +66,58 @@ const Header = () => {
           .eq('role', 'admin')
           .maybeSingle();
         
-        setIsAdmin(!!roleData);
+        setIsAdmin(!!roleData || isAdminEmail);
       }
     };
 
     fetchUserProfile();
-  }, [user]);
+  }, [user, isAdminEmail]);
 
-  const getNavItems = () => {
-    if (!user) {
+  // 4 top-level categories with submenus
+  const navGroups = (() => {
+    if (!user || !hasPaid) {
       return [
-        { label: 'Home', path: '/' },
-        { label: 'Pricing', path: '/pricing' },
-        { label: 'Contact', path: '/contact' },
+        { label: 'Home', path: '/', items: [] as { label: string; path: string }[] },
+        { label: 'Pricing', path: '/pricing', items: [] },
+        { label: 'Course', path: '/course-sales', items: [] },
+        { label: 'Contact', path: '/contact', items: [] },
       ];
     }
-    if (!hasPaid) {
-      return [
-        { label: 'Home', path: '/' },
-        { label: 'Pricing', path: '/pricing' },
-        { label: 'Contact', path: '/contact' },
-      ];
-    }
-    const items = [
-      { label: 'Home', path: '/' },
-      { label: 'Recipes', path: '/recipes' },
-      { label: 'Tracker', path: '/tracker' },
-      { label: 'Challenges', path: '/challenges' },
-      { label: 'Progress', path: '/progress' },
-      { label: 'Community', path: '/community' },
-      { label: 'Marketplace', path: '/marketplace' },
+    return [
+      {
+        label: 'Track', path: '/progress', items: [
+          { label: 'Progress', path: '/progress' },
+          { label: 'Tracker', path: '/tracker' },
+          { label: 'Challenges', path: '/challenges' },
+          { label: 'Leaderboard', path: '/leaderboard' },
+        ]
+      },
+      {
+        label: 'Eat', path: '/recipes', items: [
+          { label: 'Recipes', path: '/recipes' },
+          { label: 'Weekly Plan', path: '/weekly-plan' },
+          { label: 'Quick Meals', path: '/quick-meals' },
+          { label: 'Custom Plan', path: '/custom-plan' },
+        ]
+      },
+      {
+        label: 'Learn', path: '/course', items: [
+          { label: 'Video Course', path: '/course' },
+          { label: 'Keto Guide', path: '/guide' },
+          { label: 'Blog', path: '/blog' },
+          { label: 'FAQ', path: '/faq' },
+        ]
+      },
+      {
+        label: 'Community', path: '/community', items: [
+          { label: 'Community Feed', path: '/community' },
+          { label: 'Transformations', path: '/transformations' },
+          { label: 'Success Stories', path: '/stories' },
+          { label: 'Marketplace', path: '/marketplace' },
+        ]
+      },
     ];
-    return items;
-  };
-
-  const navItems = getNavItems();
+  })();
 
   return (
     <header className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b">
@@ -119,15 +139,30 @@ const Header = () => {
           </div>
         </div>
         
-        <nav className="hidden md:flex items-center gap-4 lg:gap-6">
-          {navItems.map(item => (
-            <button
-              key={item.path}
-              onClick={() => handleNavigation(item.path)}
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
-            >
-              {item.label}
-            </button>
+        <nav className="hidden md:flex items-center gap-1 lg:gap-2">
+          {navGroups.map(group => (
+            group.items.length === 0 ? (
+              <button
+                key={group.label}
+                onClick={() => handleNavigation(group.path)}
+                className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors rounded-md hover:bg-secondary/50"
+              >
+                {group.label}
+              </button>
+            ) : (
+              <DropdownMenu key={group.label}>
+                <DropdownMenuTrigger className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors rounded-md hover:bg-secondary/50 flex items-center gap-1 outline-none">
+                  {group.label} <ChevronDown className="h-3 w-3" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-48">
+                  {group.items.map(item => (
+                    <DropdownMenuItem key={item.path} onClick={() => handleNavigation(item.path)}>
+                      {item.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )
           ))}
         </nav>
 
@@ -237,14 +272,30 @@ const Header = () => {
       {mobileMenuOpen && (
         <div className="md:hidden border-t bg-background/95 backdrop-blur">
           <nav className="container py-3 px-4 space-y-1">
-            {navItems.map(item => (
-              <button
-                key={item.path}
-                onClick={() => handleNavigation(item.path)}
-                className="block w-full text-left py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-              >
-                {item.label}
-              </button>
+            {navGroups.map(group => (
+              <div key={group.label} className="py-1">
+                {group.items.length === 0 ? (
+                  <button
+                    onClick={() => handleNavigation(group.path)}
+                    className="block w-full text-left py-2 text-sm font-semibold text-foreground hover:text-primary"
+                  >
+                    {group.label}
+                  </button>
+                ) : (
+                  <>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide py-1">{group.label}</p>
+                    {group.items.map(item => (
+                      <button
+                        key={item.path}
+                        onClick={() => handleNavigation(item.path)}
+                        className="block w-full text-left py-1.5 pl-3 text-sm text-muted-foreground hover:text-primary"
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </>
+                )}
+              </div>
             ))}
           </nav>
         </div>

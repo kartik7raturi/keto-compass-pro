@@ -9,6 +9,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
+const ADMIN_EMAIL = 'sankhobusiness@gmail.com';
+
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
@@ -37,6 +39,11 @@ const Auth = () => {
         toast({ title: "Welcome back!" });
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
+          if (user.email?.toLowerCase() === ADMIN_EMAIL) {
+            navigate('/progress');
+            return;
+          }
+
           const hasPaid = await checkHasPaidPlan(user.id);
           navigate(hasPaid ? '/progress' : '/pricing');
         } else {

@@ -2,3 +2,8 @@ project_id = "xnfgauzspvonuklviyfg"
 
 [functions.send-notification-email]
 verify_jwt = false
+
+[functions.jvzoo-webhook]
+verify_jwt = false
+[functions.meta-conversions-api]
+verify_jwt = false

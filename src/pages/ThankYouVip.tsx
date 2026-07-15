@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Check, Crown, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useButtonLinks } from '@/hooks/useButtonLinks';
 import { useSubscription } from '@/hooks/useSubscription';
+import { trackPurchase } from '@/lib/tracking';
 
 const ThankYouVip = () => {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ const ThankYouVip = () => {
 
   // Re-poll subscription a few times so the IPN-updated plan shows up immediately.
   useEffect(() => {
+    trackPurchase('vip_12_month', 47, 'USD', { source: 'thank-you-vip' });
     const tries = [1000, 3000, 6000, 12000];
     const timers = tries.map(t => setTimeout(() => refetch(), t));
     return () => timers.forEach(clearTimeout);
@@ -38,7 +40,7 @@ const ThankYouVip = () => {
         <div className="max-w-xl mx-auto text-center mb-6">
           <div className="bg-amber-500/5 border border-amber-500/20 rounded-lg p-4 mb-6">
             <p className="text-sm font-medium">
-              Thank you for your VIP purchase!
+              Thank you for upgrading to Ketopia VIP!
             </p>
           </div>
         </div>
@@ -48,15 +50,26 @@ const ThankYouVip = () => {
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-amber-500/10 mb-4">
               <Crown className="h-10 w-10 text-amber-500" />
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-2">Welcome to VIP! 🎉</h1>
-            <p className="text-lg text-muted-foreground">
-              Your VIP plan is now active. All premium features are unlocked.
-            </p>
+            <h1 className="text-3xl md:text-4xl font-bold mb-2">Thank you for upgrading to Ketopia VIP!</h1>
+            <div className="space-y-4 text-sm md:text-base text-muted-foreground max-w-md mx-auto">
+              <p>
+                Access URL:{' '}
+                <a href="https://www.ketopia.online/login" className="font-semibold text-primary underline-offset-4 hover:underline">
+                  https://www.ketopia.online/login
+                </a>
+              </p>
+              <p>
+                Your VIP account is upgraded automatically after purchase. Login with the same email used at checkout.
+                All VIP features unlock instantly.
+              </p>
+              <p>
+                Support: Email us at:{' '}
+                <a href="mailto:andrewjimmer692@gmail.com" className="font-semibold text-primary underline-offset-4 hover:underline">
+                  andrewjimmer692@gmail.com
+                </a>
+              </p>
+            </div>
           </div>
-
-          <p className="text-xs text-muted-foreground">
-            A receipt has been emailed to you.
-          </p>
 
           <Card className="border-2 border-primary shadow-xl overflow-hidden">
             <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground py-3 text-center font-bold">
@@ -87,13 +100,21 @@ const ThankYouVip = () => {
               <Button
                 variant="outline"
                 className="w-full text-muted-foreground"
-                onClick={handleDashboard}
+                asChild
               >
-                No thanks, go to my dashboard
+                <a href="https://www.jvzoo.com/nothanks/443435">No Thanks</a>
               </Button>
             </CardContent>
           </Card>
         </div>
+
+        <img
+          src="https://i.jvzoo.com/0/443435/99"
+          alt="VIP Upgrade ketopia #1 custom keto diet platform"
+          
+          width="1"
+          height="1"
+        />
 
         {/* Footer links */}
         <div className="mt-12 text-center">
