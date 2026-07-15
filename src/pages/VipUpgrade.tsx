@@ -27,6 +27,11 @@ const TESTIMONIALS = [
 ];
 
 const VipUpgrade = () => {
+  useEffect(() => {
+    trackViewContent('vip_upgrade_page', { product: 'vip_12_month', value: 47, currency: 'USD' });
+    trackAddToCart('vip_12_month', 47, 'USD');
+  }, []);
+
 
   return (
     <div className="min-h-screen bg-background">
