@@ -1,6 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, Star, Shield, Crown, Sparkles, Clock, Lock, Flame, BookOpen, Utensils, LineChart } from 'lucide-react';
 import SalesDisclaimer from '@/components/SalesDisclaimer';
+import { trackBuyNowClick, trackViewContent, trackAddToCart } from '@/lib/tracking';
+import { useEffect } from 'react';
 
 const FEATURES = [
   { icon: BookOpen, text: '1000+ Keto Recipes' },
