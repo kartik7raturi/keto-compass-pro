@@ -79,10 +79,10 @@ const Transformations = () => {
       <Helmet>
         <title>Transformations & Success Stories | Ketopia</title>
         <meta name="description" content="Real transformations from the Ketopia community — before/after photos, weight-loss journeys, and keto tips that work." />
-        <link rel="canonical" href="https://keto-compass-pro.lovable.app/transformations" />
+        <link rel="canonical" href="https://ketopia.online/transformations" />
         <meta property="og:title" content="Transformations & Success Stories | Ketopia" />
         <meta property="og:description" content="Real keto transformations and journey tips from the Ketopia community." />
-        <meta property="og:url" content="https://keto-compass-pro.lovable.app/transformations" />
+        <meta property="og:url" content="https://ketopia.online/transformations" />
       </Helmet>
       <Header />
       <main className="container mx-auto px-4 py-8 max-w-5xl">
