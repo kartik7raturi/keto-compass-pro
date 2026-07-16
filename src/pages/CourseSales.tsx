@@ -43,10 +43,10 @@ const CourseSales = () => {
       <Helmet>
         <title>The Ketopia Video Course — Learn Keto the Right Way</title>
         <meta name="description" content="Lifetime access to the Ketopia keto video course. Step-by-step lessons, meal planning, and fat-loss strategies. 60-day money-back guarantee." />
-        <link rel="canonical" href="https://keto-compass-pro.lovable.app/course-sales" />
+        <link rel="canonical" href="https://ketopia.online/course-sales" />
         <meta property="og:title" content="The Ketopia Video Course — Learn Keto the Right Way" />
         <meta property="og:description" content="Lifetime access. 60-day money-back guarantee. Step-by-step video lessons." />
-        <meta property="og:url" content="https://keto-compass-pro.lovable.app/course-sales" />
+        <meta property="og:url" content="https://ketopia.online/course-sales" />
         <meta property="og:type" content="product" />
       </Helmet>
       {/* Hero */}

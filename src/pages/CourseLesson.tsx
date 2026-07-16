@@ -69,10 +69,10 @@ const CourseLesson = () => {
       <Helmet>
         <title>{lesson.title} — Ketopia Course</title>
         <meta name="description" content={(lesson.description || `Watch the "${lesson.title}" lesson in the Ketopia keto video course.`).slice(0, 160)} />
-        <link rel="canonical" href={`https://keto-compass-pro.lovable.app/course/${moduleSlug}/${lessonSlug}`} />
+        <link rel="canonical" href={`https://ketopia.online/course/${moduleSlug}/${lessonSlug}`} />
         <meta property="og:title" content={`${lesson.title} — Ketopia Course`} />
         <meta property="og:description" content={(lesson.description || `A keto video lesson.`).slice(0, 160)} />
-        <meta property="og:url" content={`https://keto-compass-pro.lovable.app/course/${moduleSlug}/${lessonSlug}`} />
+        <meta property="og:url" content={`https://ketopia.online/course/${moduleSlug}/${lessonSlug}`} />
         <meta property="og:type" content="video.other" />
       </Helmet>
       <Header />

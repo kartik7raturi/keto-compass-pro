@@ -42,10 +42,10 @@ const Course = () => {
       <Helmet>
         <title>Keto Video Course — Master Keto Step by Step | Ketopia</title>
         <meta name="description" content="Video lessons covering keto basics, meal planning, fat-loss strategies and more. Watch at your own pace." />
-        <link rel="canonical" href="https://keto-compass-pro.lovable.app/course" />
+        <link rel="canonical" href="https://ketopia.online/course" />
         <meta property="og:title" content="Keto Video Course — Master Keto Step by Step" />
         <meta property="og:description" content="Video lessons covering keto basics, meal planning, fat-loss strategies and more." />
-        <meta property="og:url" content="https://keto-compass-pro.lovable.app/course" />
+        <meta property="og:url" content="https://ketopia.online/course" />
         <meta property="og:type" content="website" />
       </Helmet>
       <Header />
