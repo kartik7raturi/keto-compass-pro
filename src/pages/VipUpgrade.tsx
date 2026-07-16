@@ -1,7 +1,3 @@
- codex/update-vip-upgrade-sales-page-buttons-pf9txt
-import { Button } from '@/components/ui/button';
-
- main
 import { Card, CardContent } from '@/components/ui/card';
 import { Check, Crown, Zap, Target, TrendingUp, Dumbbell, Droplets, Calendar, Star, Shield } from 'lucide-react';
 import SalesDisclaimer from '@/components/SalesDisclaimer';
@@ -24,22 +20,12 @@ const VIP_FEATURES = [
   { icon: Shield, label: 'Marketplace Access', desc: 'Buy & sell keto food locally' },
 ];
 
-const TESTIMONIALS = [
-  { name: 'Sarah M.', text: 'Lost 20 lbs in 2 months with VIP features!', stars: 5 },
-  { name: 'James K.', text: 'The fasting tracker changed my routine completely.', stars: 5 },
-  { name: 'Maria L.', text: 'Best investment for my keto journey.', stars: 5 },
-];
-
 const VipUpgrade = () => {
- codex/update-vip-upgrade-sales-page-buttons-pf9txt
-
   useEffect(() => {
     trackViewContent('vip_upgrade_page', { product: 'vip_12_month', value: 47, currency: 'USD' });
     trackAddToCart('vip_12_month', 47, 'USD');
   }, []);
 
-
- main
   return (
     <div className="min-h-screen bg-background">
       <main>
@@ -55,7 +41,7 @@ const VipUpgrade = () => {
               Upgrade to Ketopia <span className="bg-gradient-to-r from-amber-500 to-orange-600 bg-clip-text text-transparent">VIP Access</span> 🚀
             </h1>
             <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto">
-              Take your keto journey to the next level with advanced trackers, personalized meal plans, 
+              Take your keto journey to the next level with advanced trackers, personalized meal plans,
               workout logging, fasting protocols, and detailed analytics.
             </p>
           </div>
@@ -84,50 +70,12 @@ const VipUpgrade = () => {
           </div>
         </section>
 
- codex/update-vip-upgrade-sales-page-buttons-pf9txt
-        {/* WarriorPlus view tracking pixel */}
-        <img src="https://warriorplus.com/o2/v/xtpnsb/z91gcv" alt="" width="1" height="1" style={{ position: 'absolute', left: -9999, top: -9999 }} />
-
-
- main
         {/* Pricing */}
         <section id="pricing" className="py-16 bg-gradient-to-b from-amber-500/5 to-background">
           <div className="container px-4">
             <h2 className="text-2xl md:text-3xl font-bold text-center mb-2">VIP Access</h2>
             <p className="text-center text-muted-foreground mb-8">Unlock everything. No restrictions.</p>
-codex/update-vip-upgrade-sales-page-buttons-pf9txt
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-              <Card className="border-2 border-amber-500/30 shadow-lg">
-                <CardContent className="p-6 text-center space-y-4">
-                  <h3 className="text-xl font-bold">Monthly</h3>
-                  <div>
-                    <span className="text-5xl font-bold">$29</span>
-                    <span className="text-muted-foreground">/month</span>
-                  </div>
-                  <ul className="text-sm space-y-2 text-left">
-                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-amber-500" />All VIP features</li>
-                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-amber-500" />Cancel anytime</li>
-                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-amber-500" />Priority support</li>
-                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-amber-500" />60-day money back guarantee</li>
-                  </ul>
-                  <a href="https://warriorplus.com/o2/buy/xtpnsb/z91gcv/mtf1m1" target="_blank" rel="noopener noreferrer" className="block transition-transform hover:scale-[1.02]">
-                    <img src="https://warriorplus.com/o2/btn/fn160011001/xtpnsb/z91gcv/464930" alt="Get Monthly VIP Access" className="w-full" />
-                  </a>
-
-                  <div className="wplus_spdisclaimer" />
-
-                  <a
-                    href="https://warriorplus.com/o/nothanks/z91gcv"
-                    className="block text-sm text-muted-foreground hover:text-foreground underline mt-2"
-                  >
-                    No Thanks
-                  </a>
-                </CardContent>
-              </Card>
-
-
             <div className="max-w-md md:max-w-lg mx-auto">
- main
               <Card className="border-2 border-primary shadow-xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-xs font-bold rounded-bl-lg">BEST VALUE</div>
                 <CardContent className="p-4 sm:p-6 md:p-8 text-center space-y-5">
@@ -143,38 +91,19 @@ codex/update-vip-upgrade-sales-page-buttons-pf9txt
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />Future updates included</li>
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />60-day money back guarantee</li>
                   </ul>
-
- codex/update-vip-upgrade-sales-page-buttons-pf9txt
-                  <a href="https://warriorplus.com/o2/buy/xtpnsb/z91gcv/brp9cq" target="_blank" rel="noopener noreferrer" className="block transition-transform hover:scale-[1.02]">
-                    <img src="https://warriorplus.com/o2/btn/fn100011001/xtpnsb/z91gcv/464642" alt="Get 12-Month VIP Access" className="w-full" />
-                  </a>
-
-                  {/* WarriorPlus Disclaimer */}
-                  <div className="wplus_spdisclaimer text-sm text-foreground" />
-
-                  <a
-                    href="https://warriorplus.com/o/nothanks/z91gcv"
-                    className="block text-sm text-muted-foreground hover:text-foreground underline mt-2"
-
                   <a
                     href="https://www.jvzoo.com/b/0/443435/5"
                     aria-label="Get 12-Month VIP Access"
                     onClick={() => trackBuyNowClick('vip_12_month', 47, 'USD')}
                     className="flex justify-center transition-transform hover:scale-[1.02]"
- main
                   >
-                    <img
-                      src="https://i.jvzoo.com/0/443435/5"
-                      alt="VIP Upgrade ketopia #1 custom keto diet platform"
-                      
-                    />
+                    <img src="https://i.jvzoo.com/0/443435/5" alt="VIP Upgrade ketopia #1 custom keto diet platform" />
                   </a>
                 </CardContent>
               </Card>
             </div>
           </div>
         </section>
-
 
         {/* 60-Day Guarantee */}
         <section className="py-12 bg-amber-500/5">
@@ -192,13 +121,7 @@ codex/update-vip-upgrade-sales-page-buttons-pf9txt
 
         <SalesDisclaimer />
 
-        <img
-          src="https://i.jvzoo.com/0/443435/99"
-          alt="VIP Upgrade ketopia #1 custom keto diet platform"
-          
-          width="1"
-          height="1"
-        />
+        <img src="https://i.jvzoo.com/0/443435/99" alt="VIP Upgrade ketopia tracking" width="1" height="1" />
 
         {/* Footer links */}
         <div className="py-6 text-center border-t">
