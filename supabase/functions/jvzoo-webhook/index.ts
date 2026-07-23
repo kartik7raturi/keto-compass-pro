@@ -148,7 +148,7 @@ Deno.serve(async (req) => {
         );
       }
 
-      const plan = PRODUCT_PLAN_MAP[productId] ?? (amount >= 90 ? "vip" : "basic");
+      const plan = PRODUCT_PLAN_MAP[productId] ?? (amount >= 90 ? "vip_lifetime" : amount >= 30 ? "vip" : "basic");
       const { error } = await supabase.rpc("grant_ketopia_subscription", {
         p_email: email, p_plan: plan, p_amount: amount,
         p_product_id: productId, p_order_id: orderId,

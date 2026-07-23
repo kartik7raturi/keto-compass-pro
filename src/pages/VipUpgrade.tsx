@@ -1,7 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Check, Crown, Zap, Target, TrendingUp, Dumbbell, Droplets, Calendar, Star, Shield } from 'lucide-react';
 import SalesDisclaimer from '@/components/SalesDisclaimer';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { trackBuyNowClick, trackViewContent, trackAddToCart } from '@/lib/tracking';
 
 const VIP_FEATURES = [
@@ -20,11 +20,25 @@ const VIP_FEATURES = [
   { icon: Shield, label: 'Marketplace Access', desc: 'Buy & sell keto food locally' },
 ];
 
+const CHECKOUT_URL = 'https://www.jvzoo.com/b/0/443435/1';
+const NO_THANKS_URL = 'https://www.jvzoo.com/nothanks/443435';
+
+const getYouTubeEmbed = (url: string): string | null => {
+  if (!url) return null;
+  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\w-]{11})/);
+  return m ? `https://www.youtube.com/embed/${m[1]}` : null;
+};
+
 const VipUpgrade = () => {
+  const [videoUrl, setVideoUrl] = useState<string>('');
+
   useEffect(() => {
-    trackViewContent('vip_upgrade_page', { product: 'vip_12_month', value: 47, currency: 'USD' });
-    trackAddToCart('vip_12_month', 47, 'USD');
+    trackViewContent('vip_upgrade_page', { product: 'vip_yearly', value: 39.99, currency: 'USD' });
+    trackAddToCart('vip_yearly', 39.99, 'USD');
+    setVideoUrl(localStorage.getItem('vip_upgrade_video_url') || '');
   }, []);
+
+  const embedUrl = getYouTubeEmbed(videoUrl);
 
   return (
     <div className="min-h-screen bg-background">
@@ -46,6 +60,23 @@ const VipUpgrade = () => {
             </p>
           </div>
         </section>
+
+        {/* Video */}
+        {embedUrl && (
+          <section className="py-8">
+            <div className="container px-4 max-w-3xl">
+              <div className="relative w-full rounded-xl overflow-hidden shadow-2xl border border-amber-500/20" style={{ paddingTop: '56.25%' }}>
+                <iframe
+                  src={embedUrl}
+                  title="Ketopia VIP Overview"
+                  className="absolute inset-0 w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Features Grid */}
         <section className="py-12 container px-4">
@@ -79,25 +110,31 @@ const VipUpgrade = () => {
               <Card className="border-2 border-primary shadow-xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-xs font-bold rounded-bl-lg">BEST VALUE</div>
                 <CardContent className="p-4 sm:p-6 md:p-8 text-center space-y-5">
-                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold">12-Month Access</h3>
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold">12-Month VIP Access</h3>
                   <div>
-                    <span className="text-4xl sm:text-5xl md:text-6xl font-bold">$99</span>
+                    <span className="text-4xl sm:text-5xl md:text-6xl font-bold">$39.99</span>
                     <span className="text-muted-foreground">/year</span>
                   </div>
                   <ul className="text-sm sm:text-base space-y-2.5 text-left">
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />All VIP features for a full year</li>
-                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />Single yearly payment — save vs monthly</li>
+                    <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />Single yearly payment — huge savings</li>
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />Priority support</li>
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />Future updates included</li>
                     <li className="flex items-center gap-2"><Check className="h-4 w-4 text-primary" />60-day money back guarantee</li>
                   </ul>
                   <a
-                    href="https://www.jvzoo.com/b/0/443435/5"
+                    href={CHECKOUT_URL}
                     aria-label="Get 12-Month VIP Access"
-                    onClick={() => trackBuyNowClick('vip_12_month', 47, 'USD')}
+                    onClick={() => trackBuyNowClick('vip_yearly', 39.99, 'USD')}
                     className="flex justify-center transition-transform hover:scale-[1.02]"
                   >
-                    <img src="https://i.jvzoo.com/0/443435/5" alt="VIP Upgrade ketopia #1 custom keto diet platform" />
+                    <img src="https://i.jvzoo.com/0/443435/1" alt="VIP Upgrade ketopia #1 custom keto diet platform" />
+                  </a>
+                  <a
+                    href={NO_THANKS_URL}
+                    className="block text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
+                  >
+                    No Thanks
                   </a>
                 </CardContent>
               </Card>
@@ -121,7 +158,8 @@ const VipUpgrade = () => {
 
         <SalesDisclaimer />
 
-        <img src="https://i.jvzoo.com/0/443435/99" alt="VIP Upgrade ketopia tracking" width="1" height="1" />
+        {/* JVZoo tracking pixel */}
+        <img src="https://i.jvzoo.com/0/443435/99" alt="" width="1" height="1" style={{ position: 'absolute', left: '-9999px' }} />
 
         {/* Footer links */}
         <div className="py-6 text-center border-t">

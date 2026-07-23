@@ -29,18 +29,10 @@ const Header = () => {
   };
 
   const handleNavigation = (path: string) => {
-    // If user is logged in but hasn't paid, redirect feature pages to pricing
-    if (user && !hasPaid && !isAdmin) {
-      const freePages = ['/', '/contact', '/pricing', '/onboarding', '/auth', '/imprint', '/privacy', '/terms', '/refund-policy', '/about', '/faq', '/blog'];
-      if (!freePages.includes(path)) {
-        navigate('/pricing');
-        setMobileMenuOpen(false);
-        return;
-      }
-    }
     navigate(path);
     setMobileMenuOpen(false);
   };
+
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -75,14 +67,15 @@ const Header = () => {
 
   // 4 top-level categories with submenus
   const navGroups = (() => {
-    if (!user || !hasPaid) {
+    if (!user) {
       return [
         { label: 'Home', path: '/', items: [] as { label: string; path: string }[] },
-        { label: 'Pricing', path: '/pricing', items: [] },
+        { label: 'Recipes', path: '/recipes', items: [] },
         { label: 'Course', path: '/course-sales', items: [] },
         { label: 'Contact', path: '/contact', items: [] },
       ];
     }
+
     return [
       {
         label: 'Track', path: '/progress', items: [
@@ -169,17 +162,8 @@ const Header = () => {
         <div className="flex items-center gap-2">
           {user ? (
             <div className="flex items-center gap-1 md:gap-2">
-              {/* Role-based CTA: basic users see VIP upgrade, unpaid logged-in users see pricing */}
-              {!hasPaid && (
-                <Button
-                  size="sm"
-                  className="hidden sm:inline-flex bg-gradient-to-r from-primary to-primary/80 text-primary-foreground"
-                  onClick={() => navigate('/pricing')}
-                >
-                  Choose Plan
-                </Button>
-              )}
-              {hasPaid && !isVip && (
+              {/* Everyone who isn't already VIP sees the VIP upgrade CTA */}
+              {!isVip && (
                 <Button
                   size="sm"
                   className="hidden sm:inline-flex bg-gradient-to-r from-amber-500 to-orange-600 text-white"
@@ -189,6 +173,7 @@ const Header = () => {
                   Upgrade to VIP
                 </Button>
               )}
+
               <NotificationBell />
               <span className="text-sm text-muted-foreground hidden lg:block">
                 Welcome, {userDisplayName}
@@ -221,32 +206,25 @@ const Header = () => {
                   <DropdownMenuItem onClick={() => navigate('/articles')}>
                     Manage Articles
                   </DropdownMenuItem>
-                  {!isVip && hasPaid && (
+                  {!isVip && (
                     <DropdownMenuItem onClick={() => navigate('/vip-upgrade')}>
                       <Crown className="mr-2 h-4 w-4 text-amber-500" />
                       VIP Upgrade
                     </DropdownMenuItem>
                   )}
-                  {!hasPaid && (
-                    <DropdownMenuItem onClick={() => navigate('/pricing')}>
-                      Choose a Plan
-                    </DropdownMenuItem>
-                  )}
+
                   {isAdmin && (
                     <DropdownMenuItem onClick={() => navigate('/admin')}>
                       Admin Dashboard
                     </DropdownMenuItem>
                   )}
-                  {hasPaid && (
-                    <>
-                      <DropdownMenuItem onClick={() => navigate('/progress')}>
-                        Progress Dashboard
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate('/tracker')}>
-                        Tracker
-                      </DropdownMenuItem>
-                    </>
-                  )}
+                  <DropdownMenuItem onClick={() => navigate('/progress')}>
+                    Progress Dashboard
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/tracker')}>
+                    Tracker
+                  </DropdownMenuItem>
+
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="mr-2 h-4 w-4" />

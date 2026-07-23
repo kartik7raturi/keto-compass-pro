@@ -19,15 +19,6 @@ const Auth = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const checkHasPaidPlan = async (userId: string) => {
-    const { data } = await supabase
-      .from('user_subscriptions')
-      .select('plan_type, is_active')
-      .eq('user_id', userId)
-      .maybeSingle();
-    return data && data.is_active && ['basic', 'vip', 'vip_lifetime'].includes(data.plan_type);
-  };
-
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -37,18 +28,7 @@ const Auth = () => {
         toast({ title: "Error signing in", description: error.message, variant: "destructive" });
       } else {
         toast({ title: "Welcome back!" });
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          if (user.email?.toLowerCase() === ADMIN_EMAIL) {
-            navigate('/progress');
-            return;
-          }
-
-          const hasPaid = await checkHasPaidPlan(user.id);
-          navigate(hasPaid ? '/progress' : '/pricing');
-        } else {
-          navigate('/');
-        }
+        navigate('/progress');
       }
     } catch {
       toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
@@ -56,6 +36,7 @@ const Auth = () => {
       setIsLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 to-background flex items-center justify-center p-4">
