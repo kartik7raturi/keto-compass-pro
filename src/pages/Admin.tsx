@@ -303,9 +303,13 @@ const Admin = () => {
             <TabsTrigger value="course" className="flex items-center gap-1 text-xs">
               <GraduationCap className="h-3.5 w-3.5" /><span className="hidden sm:inline">Course</span>
             </TabsTrigger>
+            <TabsTrigger value="vipvideo" className="flex items-center gap-1 text-xs">
+              <Crown className="h-3.5 w-3.5" /><span className="hidden sm:inline">VIP Video</span>
+            </TabsTrigger>
             <TabsTrigger value="webhooks" className="flex items-center gap-1 text-xs">
               <Webhook className="h-3.5 w-3.5" /><span className="hidden sm:inline">Webhooks</span>
             </TabsTrigger>
+
           </TabsList>
 
           <TabsContent value="recipes"><AdminRecipes /></TabsContent>
