@@ -67,14 +67,15 @@ const Header = () => {
 
   // 4 top-level categories with submenus
   const navGroups = (() => {
-    if (!user || !hasPaid) {
+    if (!user) {
       return [
         { label: 'Home', path: '/', items: [] as { label: string; path: string }[] },
-        { label: 'Pricing', path: '/pricing', items: [] },
+        { label: 'Recipes', path: '/recipes', items: [] },
         { label: 'Course', path: '/course-sales', items: [] },
         { label: 'Contact', path: '/contact', items: [] },
       ];
     }
+
     return [
       {
         label: 'Track', path: '/progress', items: [
