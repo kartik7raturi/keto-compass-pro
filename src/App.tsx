@@ -100,20 +100,21 @@ const App = () => (
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/articles" element={<ArticleManager />} />
                 <Route path="/admin" element={<Admin />} />
-                <Route path="/recipes" element={<RequirePlan><Recipes /></RequirePlan>} />
-                <Route path="/tracker" element={<RequirePlan><Tracker /></RequirePlan>} />
+                <Route path="/recipes" element={<Recipes />} />
+                <Route path="/tracker" element={<Tracker />} />
                 <Route path="/tracker/30-day-keto" element={<RequirePlan required="vip"><Keto30 /></RequirePlan>} />
                 <Route path="/tracker/fasting" element={<RequirePlan required="vip"><Fasting /></RequirePlan>} />
                 <Route path="/tracker/workout" element={<RequirePlan required="vip"><Workout /></RequirePlan>} />
                 <Route path="/tracker/water" element={<RequirePlan required="vip"><Water /></RequirePlan>} />
                 <Route path="/tracker/period" element={<RequirePlan required="vip"><PeriodTracker /></RequirePlan>} />
                 <Route path="/tracker/weekly-plan" element={<RequirePlan required="vip"><WeeklyPlan /></RequirePlan>} />
-                <Route path="/progress" element={<RequirePlan><Progress /></RequirePlan>} />
-                <Route path="/challenges" element={<RequirePlan><Challenges /></RequirePlan>} />
-                <Route path="/marketplace" element={<RequirePlan><Marketplace /></RequirePlan>} />
+                <Route path="/progress" element={<Progress />} />
+                <Route path="/challenges" element={<Challenges />} />
+                <Route path="/marketplace" element={<Marketplace />} />
                 <Route path="/weekly-plan" element={<RequirePlan required="vip"><WeeklyPlan /></RequirePlan>} />
-                <Route path="/quick-meals" element={<RequirePlan><QuickMeals /></RequirePlan>} />
+                <Route path="/quick-meals" element={<QuickMeals />} />
                 <Route path="/custom-plan" element={<RequirePlan required="vip"><CustomPlan /></RequirePlan>} />
+
                 <Route path="/guide" element={<Guide />} />
                 <Route path="/stories" element={<Stories />} />
                 <Route path="/blog" element={<Blog />} />
