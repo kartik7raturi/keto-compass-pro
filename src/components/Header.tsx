@@ -206,17 +206,13 @@ const Header = () => {
                   <DropdownMenuItem onClick={() => navigate('/articles')}>
                     Manage Articles
                   </DropdownMenuItem>
-                  {!isVip && hasPaid && (
+                  {!isVip && (
                     <DropdownMenuItem onClick={() => navigate('/vip-upgrade')}>
                       <Crown className="mr-2 h-4 w-4 text-amber-500" />
                       VIP Upgrade
                     </DropdownMenuItem>
                   )}
-                  {!hasPaid && (
-                    <DropdownMenuItem onClick={() => navigate('/pricing')}>
-                      Choose a Plan
-                    </DropdownMenuItem>
-                  )}
+
                   {isAdmin && (
                     <DropdownMenuItem onClick={() => navigate('/admin')}>
                       Admin Dashboard
