@@ -29,18 +29,10 @@ const Header = () => {
   };
 
   const handleNavigation = (path: string) => {
-    // If user is logged in but hasn't paid, redirect feature pages to pricing
-    if (user && !hasPaid && !isAdmin) {
-      const freePages = ['/', '/contact', '/pricing', '/onboarding', '/auth', '/imprint', '/privacy', '/terms', '/refund-policy', '/about', '/faq', '/blog'];
-      if (!freePages.includes(path)) {
-        navigate('/pricing');
-        setMobileMenuOpen(false);
-        return;
-      }
-    }
     navigate(path);
     setMobileMenuOpen(false);
   };
+
 
   useEffect(() => {
     const fetchUserProfile = async () => {
