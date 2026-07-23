@@ -218,16 +218,13 @@ const Header = () => {
                       Admin Dashboard
                     </DropdownMenuItem>
                   )}
-                  {hasPaid && (
-                    <>
-                      <DropdownMenuItem onClick={() => navigate('/progress')}>
-                        Progress Dashboard
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate('/tracker')}>
-                        Tracker
-                      </DropdownMenuItem>
-                    </>
-                  )}
+                  <DropdownMenuItem onClick={() => navigate('/progress')}>
+                    Progress Dashboard
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/tracker')}>
+                    Tracker
+                  </DropdownMenuItem>
+
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="mr-2 h-4 w-4" />
