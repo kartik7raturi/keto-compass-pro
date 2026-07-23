@@ -162,17 +162,8 @@ const Header = () => {
         <div className="flex items-center gap-2">
           {user ? (
             <div className="flex items-center gap-1 md:gap-2">
-              {/* Role-based CTA: basic users see VIP upgrade, unpaid logged-in users see pricing */}
-              {!hasPaid && (
-                <Button
-                  size="sm"
-                  className="hidden sm:inline-flex bg-gradient-to-r from-primary to-primary/80 text-primary-foreground"
-                  onClick={() => navigate('/pricing')}
-                >
-                  Choose Plan
-                </Button>
-              )}
-              {hasPaid && !isVip && (
+              {/* Everyone who isn't already VIP sees the VIP upgrade CTA */}
+              {!isVip && (
                 <Button
                   size="sm"
                   className="hidden sm:inline-flex bg-gradient-to-r from-amber-500 to-orange-600 text-white"
@@ -182,6 +173,7 @@ const Header = () => {
                   Upgrade to VIP
                 </Button>
               )}
+
               <NotificationBell />
               <span className="text-sm text-muted-foreground hidden lg:block">
                 Welcome, {userDisplayName}
