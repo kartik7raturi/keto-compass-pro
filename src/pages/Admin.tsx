@@ -325,7 +325,9 @@ const Admin = () => {
           <TabsContent value="pages"><AdminPages /></TabsContent>
           <TabsContent value="subscriptions"><AdminSubscriptions /></TabsContent>
           <TabsContent value="course"><AdminCourse /></TabsContent>
+          <TabsContent value="vipvideo"><AdminVipVideo /></TabsContent>
           <TabsContent value="webhooks"><AdminWebhookLogs /></TabsContent>
+
         </Tabs>
       </main>
       <Footer />
