@@ -73,6 +73,38 @@ const AdminImprintEditor = ({ open, onOpenChange }: { open: boolean; onOpenChang
   );
 };
 
+const AdminVipVideo = () => {
+  const [url, setUrl] = useState('');
+  const { toast } = useToast();
+
+  useEffect(() => {
+    setUrl(localStorage.getItem('vip_upgrade_video_url') || '');
+  }, []);
+
+  const save = () => {
+    localStorage.setItem('vip_upgrade_video_url', url.trim());
+    toast({ title: 'Saved', description: 'VIP upgrade video URL updated.' });
+  };
+
+  return (
+    <Card>
+      <CardHeader className="py-4">
+        <CardTitle className="text-base">VIP Upgrade Page Video</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <Label>YouTube video URL</Label>
+        <Input value={url} onChange={e => setUrl(e.target.value)} placeholder="https://www.youtube.com/watch?v=..." />
+        <p className="text-xs text-muted-foreground">Paste any YouTube URL. Leave blank to hide the video section.</p>
+        <div className="flex gap-2">
+          <Button onClick={save}>Save Video URL</Button>
+          {url && <Button variant="outline" onClick={() => { setUrl(''); localStorage.removeItem('vip_upgrade_video_url'); toast({ title: 'Cleared' }); }}>Clear</Button>}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+
 const AdminPages = () => {
   const navigate = useNavigate();
   const [editImprint, setEditImprint] = useState(false);
