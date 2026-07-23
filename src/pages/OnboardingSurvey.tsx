@@ -334,13 +334,14 @@ const OnboardingSurvey = () => {
 
             <Button
               className="w-full bg-gradient-to-r from-primary to-primary/80 py-6 text-lg font-bold"
-              onClick={() => navigate('/pricing')}
+              onClick={() => navigate('/auth')}
             >
-              Get Full Report & Access — $19.99
+              Create Free Account & Get Full Access
             </Button>
             <p className="text-xs text-center text-muted-foreground">
-              Unlock all recipes, tracker, and complete meal plans
+              100% free — unlock recipes, tracker, and meal plans
             </p>
+
           </CardContent>
         </Card>
       </div>
