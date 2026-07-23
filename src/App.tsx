@@ -83,7 +83,7 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/pricing" element={<Navigate to="/vip-upgrade" replace />} />
                 <Route path="/ketopia-plr" element={<KetopiaPLR />} />
                 <Route path="/ketopia-plr-downloads" element={<KetopiaPLRDownloads />} />
                 <Route path="/onboarding" element={<OnboardingSurvey />} />
