@@ -1,82 +1,37 @@
+This is a large, multi-area change set. Here's how I'll approach the 15 points, grouped for efficiency. Please confirm before I start — some items need clarification.
 
-This request is large — splitting into 9 focused workstreams. I'll execute in order; each stage is independently shippable so you can pause/redirect.
+## Group A — Admin & Content (points 1, 4, 8, 9)
+- Extend the existing `AdminArticles` panel into a full rich-text editor: title, subheading, body (with formatting/fonts/headings), tags, cover image upload + replace, inline image insertion, publish/unpublish toggle.
+- Add an **AI Article Generator** tab: admin enters topics + schedule (daily cadence). A new edge function `generate-daily-article` runs on a `pg_cron` schedule, calls Lovable AI Gateway (google/gemini-2.5-flash) to draft an article from the next queued topic, and inserts it as published. New table `article_topics_queue` (topic, status, scheduled_for).
 
-## 1. RLS audit & fixes — `course_*` + `funnel_events`
-- Run `supabase--linter` and inspect existing policies on `course_modules`, `course_lessons`, `course_access`, `course_progress`, `funnel_events`.
-- Confirm:
-  - Public can read only `is_published = true` modules/lessons (already in place per migrations — verify).
-  - `course_progress` is strictly `auth.uid() = user_id` for SELECT/INSERT/UPDATE/DELETE.
-  - `course_access` users see only their own row; admins manage all; service_role writes via `grant_course_access` (SECURITY DEFINER) so webhook still works.
-  - `funnel_events` allows anon/auth INSERT (so funnel tracking works pre-login) but SELECT restricted to admins only.
-- Migration patches any gap.
+## Group B — Community & Menu (points 2, 3)
+- Remove the duplicate "Success Stories" entry from the community menu, keeping "Transformations" as the single page (or vice versa — I'll keep the one already wired to `/transformations`).
+- Add a ⭐ icon next to "VIP Upgrade" in the header nav for non-VIP users.
 
-## 2. Per-route SEO meta
-- Install `react-helmet-async`, wrap `<App>` in `HelmetProvider` (in `src/main.tsx`).
-- Add `<Helmet>` blocks to:
-  - `/course` (Course.tsx) — "Keto Course — Video Lessons | Ketopia"
-  - `/course-sales` (CourseSales.tsx) — sales-focused title + OG image
-  - `/course/:moduleSlug/:lessonSlug` (CourseLesson.tsx) — dynamic per-lesson title/description/OG using fetched lesson data.
-- Remove duplicate canonical from `index.html` (sitewide og:* stays as fallback).
+## Group C — Blog & Success Story bugs (points 5, 6)
+- Fix "Back to articles" button in `Blog.tsx` (likely a broken navigate call / stale route).
+- Fix Success Story / Transformations flow: uploaded photo not rendering (storage URL mismatch) and full-story modal not opening (missing click handler / route).
 
-## 3. Admin Course Manager tab
-- New component `src/components/admin/AdminCourse.tsx`:
-  - List/create/edit/delete `course_modules` (title, description, slug, cover_url, sort_order, is_published).
-  - For each module: nested lessons table with create/edit/delete (title, slug, video_url, duration_sec, sort_order, is_preview, is_published, resources JSON).
-  - Video field is a URL input (YouTube/Vimeo/mp4) — no upload.
-- Wire into `Admin.tsx` as new tab "Course".
+## Group D — Payments & Webhooks (points 7, 10, 12)
+- New admin tab **Payment Test** listing all checkout URLs ($39.99 VIP JVZoo, course, etc.) with "Open in new tab" + "Simulate webhook" buttons that POST a signed test payload to `jvzoo-webhook`.
+- Audit `AdminWebhookLogs` + `jvzoo-webhook` function: verify signature check, retry handling, log rendering. Fix anything broken.
+- After JVZoo checkout: `ThankYou`/`ThankYouVip` already refetch subscription; I'll add a polling fallback (5s × 6) in case the webhook lands slightly after redirect, plus a toast + auto-route to `/progress`.
 
-## 4. Lazy-load main routes
-- Convert these to `React.lazy` + `<Suspense>` in `App.tsx`:
-  `Course`, `CourseLesson`, `CourseSales`, `Pricing`, `Admin`, `Progress`, `Marketplace`, `Recipes`, `Tracker`, `Profile`, `Blog`, `Community`-wrapped routes.
-- Add a lightweight loading fallback (existing spinner pattern).
+## Group E — Analytics (point 13)
+- Add `trackLead('quiz_complete')`, `trackSignup`, `trackLogin`, `trackViewContent('vip_upgrade')`, `trackBuyNowClick('vip_yearly', 39.99)`, and a server-side `Purchase` event fired from `jvzoo-webhook` via Meta Conversions API when it grants `vip`.
 
-## 5. Realtime leaderboard — top 5 per challenge, monthly
-- Refactor `ChallengeLeaderboard.tsx`:
-  - Group by `challenge_id` instead of overall when category given.
-  - Limit to top 5 per challenge.
-  - Default timeframe to monthly; keep weekly toggle.
-  - Realtime subscription already exists — verify it covers `challenge_daily_logs` too.
-- Surface on `/challenges` more prominently.
+## Group F — VIP video from DB (point 14)
+- New table `site_settings (key text pk, value jsonb)`. Admin panel writes `vip_video_url`. `VipUpgrade.tsx` reads from DB (with localStorage cache as fallback). Removes the current localStorage-only behaviour.
 
-## 6. Transformations / journey share section
-- New page `/transformations` using existing `success_stories` table (already has 12 cols, RLS).
-- Components: submission form (title, before/after photos via `community-media` bucket, story, tips), feed of approved stories, like button (reuse `community_likes` pattern).
-- Add nav link under "Community" group.
+## Group G — Gating validation (points 11, 15)
+- Audit every `RequirePlan` usage to confirm only truly VIP-only routes are wrapped.
+- Ensure `AuthContext` fires `onAuthStateChange` correctly so header CTAs flip instantly on login/logout (add a subscription refetch on `SIGNED_IN`).
+- Manual E2E via Playwright: signup → quiz → login → visit every non-VIP page → confirm no redirect loop.
 
-## 7. Slim menu — 3–4 top categories + submenus
-Restructure `Header.tsx` into:
-- **Track** → Tracker, Progress, Challenges, Leaderboard
-- **Eat** → Recipes, Weekly Plan, Quick Meals, Custom Plan
-- **Learn** → Course, Guide, Blog, FAQ, Stories
-- **Community** → Community, Transformations, Marketplace, Messages
-Plus right-side: Pricing, Profile/Auth.
-Use shadcn `NavigationMenu` with dropdowns; mobile uses existing Sheet.
+## Questions before I start
+1. **Daily article generator**: what time of day should it run (UTC)? And do you want articles auto-published, or created as drafts for you to review?
+2. **AI model**: OK to use `google/gemini-2.5-flash` on the Lovable AI Gateway (already configured, no extra key needed)?
+3. **Community menu**: keep "Transformations" and delete "Success Stories" (they show the same data)?
+4. **Payment test panel**: do you want it to hit the real JVZoo webhook with a test payload (recorded in logs), or just open the real checkout URLs?
 
-## 8. Sitemap + robots
-- Convert `public/sitemap.xml` to a generator script `scripts/generate-sitemap.ts` that includes static routes + dynamically pulls published `course_modules`/`course_lessons`/`blog` slugs at build time via Supabase REST.
-- Add `predev`/`prebuild` hooks.
-- Add new routes (`/course`, `/course-sales`, `/transformations`).
-- Add `Sitemap: https://keto-compass-pro.lovable.app/sitemap.xml` (already present).
-
-## 9. Light cleanup pass
-- Progress bar (`src/components/ui/progress.tsx`): already uses gradient + shadow — leave; verify usage in `ProgressDashboard` shows correct values, fix any `value > 100` overflow with `Math.min(100, value)` clamp at call sites that look off.
-- Remove low-value sections I notice while editing (e.g. duplicate testimonials on Index, stale advertisement slots on gated pages) — minimal, listed in final summary.
-- Keep all business logic intact.
-
-## Technical notes
-- All migrations follow GRANT → ENABLE RLS → POLICY order.
-- Lazy routes wrapped in single `<Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin"/></div>}>`.
-- Helmet provider added once in `main.tsx`; per-page Helmet replaces sitewide og:title/og:description for JS crawlers, static stays as social-crawler fallback.
-
-## Build order
-1. RLS migration (needs your approval first) →
-2. Helmet + SEO meta →
-3. Lazy routes →
-4. Header restructure →
-5. Admin course tab →
-6. Leaderboard refactor →
-7. Transformations page (may need second migration for likes on success_stories if missing) →
-8. Sitemap generator →
-9. Cleanup + progress audit.
-
-Approve and I'll start with the RLS migration.
+Once you answer these I'll implement all 15 items in one pass.
