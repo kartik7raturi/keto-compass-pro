@@ -177,8 +177,8 @@ const Blog = () => {
               />
             )}
             
-            <div className="prose prose-lg max-w-none">
-              <div dangerouslySetInnerHTML={{ __html: currentArticle.content.replace(/\n/g, '<br />') }} />
+            <div className="prose prose-lg max-w-none prose-headings:font-bold prose-img:rounded-lg">
+              <div dangerouslySetInnerHTML={{ __html: currentArticle.content }} />
             </div>
           </article>
         </main>
