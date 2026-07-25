@@ -168,6 +168,7 @@ const Header = () => {
                   className="hidden sm:inline-flex bg-gradient-to-r from-amber-500 to-orange-600 text-white"
                   onClick={() => navigate('/vip-upgrade')}
                 >
+                  <Star className="mr-1 h-4 w-4 fill-white" />
                   <Crown className="mr-1 h-4 w-4" />
                   Upgrade to VIP
                 </Button>
