@@ -2,6 +2,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Check, Crown, Zap, Target, TrendingUp, Dumbbell, Droplets, Calendar, Star, Shield } from 'lucide-react';
 import SalesDisclaimer from '@/components/SalesDisclaimer';
 import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { trackBuyNowClick, trackViewContent, trackAddToCart } from '@/lib/tracking';
 
 const VIP_FEATURES = [
