@@ -105,7 +105,6 @@ const Header = () => {
         label: 'Community', path: '/community', items: [
           { label: 'Community Feed', path: '/community' },
           { label: 'Transformations', path: '/transformations' },
-          { label: 'Success Stories', path: '/stories' },
           { label: 'Marketplace', path: '/marketplace' },
         ]
       },
