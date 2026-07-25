@@ -11,6 +11,7 @@ import { Shield, Loader2, ChefHat, FileText, BookOpen, Image, Target, MessageSqu
 import { AdminWebhookLogs } from "@/components/admin/AdminWebhookLogs";
 import { AdminRecipes } from "@/components/admin/AdminRecipes";
 import { AdminArticles } from "@/components/admin/AdminArticles";
+import { AdminArticleTopics } from "@/components/admin/AdminArticleTopics";
 import { AdminStories } from "@/components/admin/AdminStories";
 import { AdminAdvertisements } from "@/components/admin/AdminAdvertisements";
 import { AdminChallenges } from "@/components/admin/AdminChallenges";
