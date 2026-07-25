@@ -110,15 +110,15 @@ const Stories = () => {
           duration_months: durationMonths ? parseInt(durationMonths) : null,
           before_image_url: beforeUrl,
           after_image_url: afterUrl,
-          is_approved: false,
+          is_approved: true,
           is_featured: false
         });
 
       if (error) throw error;
 
       toast({ 
-        title: 'Story submitted!', 
-        description: 'Your story will be reviewed and published soon.' 
+        title: 'Story published!', 
+        description: 'Your transformation is now live for the community to see.' 
       });
       
       // Reset form
@@ -279,55 +279,87 @@ const Stories = () => {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {stories.map((storyItem) => (
-              <Card key={storyItem.id} className="h-full">
-                <CardHeader>
-                  <div className="flex items-center gap-4">
-                    {storyItem.before_image_url || storyItem.after_image_url ? (
-                      <div className="flex -space-x-2">
-                        {storyItem.before_image_url && (
-                          <Avatar className="ring-2 ring-background">
-                            <AvatarImage src={storyItem.before_image_url} />
-                            <AvatarFallback>B</AvatarFallback>
-                          </Avatar>
-                        )}
-                        {storyItem.after_image_url && (
-                          <Avatar className="ring-2 ring-background">
-                            <AvatarImage src={storyItem.after_image_url} />
-                            <AvatarFallback>A</AvatarFallback>
-                          </Avatar>
-                        )}
-                      </div>
-                    ) : (
-                      <Avatar>
-                        <AvatarFallback>{getInitials(storyItem.title)}</AvatarFallback>
-                      </Avatar>
-                    )}
-                    <div>
-                      <CardTitle className="text-lg">{storyItem.title}</CardTitle>
-                      <div className="flex gap-2 mt-2">
-                        {storyItem.weight_lost && (
-                          <Badge variant="secondary">{storyItem.weight_lost} lbs lost</Badge>
-                        )}
-                        {storyItem.duration_months && (
-                          <Badge variant="outline">{storyItem.duration_months} months</Badge>
-                        )}
-                        {storyItem.is_featured && (
-                          <Badge>Featured</Badge>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground italic">"{storyItem.story}"</p>
-                </CardContent>
-              </Card>
+              <StoryCard key={storyItem.id} story={storyItem} />
             ))}
           </div>
         )}
       </main>
       <Footer />
     </div>
+  );
+};
+
+const StoryCard = ({ story }: { story: SuccessStory }) => {
+  const [open, setOpen] = useState(false);
+  const initials = story.title.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+  return (
+    <>
+      <Card className="h-full cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setOpen(true)}>
+        <CardHeader>
+          <div className="flex items-center gap-4">
+            {story.before_image_url || story.after_image_url ? (
+              <div className="flex -space-x-2">
+                {story.before_image_url && (
+                  <Avatar className="ring-2 ring-background">
+                    <AvatarImage src={story.before_image_url} />
+                    <AvatarFallback>B</AvatarFallback>
+                  </Avatar>
+                )}
+                {story.after_image_url && (
+                  <Avatar className="ring-2 ring-background">
+                    <AvatarImage src={story.after_image_url} />
+                    <AvatarFallback>A</AvatarFallback>
+                  </Avatar>
+                )}
+              </div>
+            ) : (
+              <Avatar><AvatarFallback>{initials}</AvatarFallback></Avatar>
+            )}
+            <div>
+              <CardTitle className="text-lg">{story.title}</CardTitle>
+              <div className="flex gap-2 mt-2 flex-wrap">
+                {story.weight_lost && <Badge variant="secondary">{story.weight_lost} lbs lost</Badge>}
+                {story.duration_months && <Badge variant="outline">{story.duration_months} months</Badge>}
+                {story.is_featured && <Badge>Featured</Badge>}
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground italic line-clamp-3">"{story.story}"</p>
+          <Button variant="link" size="sm" className="px-0 mt-2">Read full story →</Button>
+        </CardContent>
+      </Card>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>{story.title}</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            {(story.before_image_url || story.after_image_url) && (
+              <div className="grid grid-cols-2 gap-3">
+                {story.before_image_url && (
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1 font-semibold">BEFORE</p>
+                    <img src={story.before_image_url} alt="Before" className="w-full rounded-lg object-cover aspect-square" />
+                  </div>
+                )}
+                {story.after_image_url && (
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1 font-semibold">AFTER</p>
+                    <img src={story.after_image_url} alt="After" className="w-full rounded-lg object-cover aspect-square" />
+                  </div>
+                )}
+              </div>
+            )}
+            <div className="flex gap-2 flex-wrap">
+              {story.weight_lost && <Badge variant="secondary">{story.weight_lost} lbs lost</Badge>}
+              {story.duration_months && <Badge variant="outline">{story.duration_months} months</Badge>}
+            </div>
+            <p className="whitespace-pre-wrap leading-relaxed">{story.story}</p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

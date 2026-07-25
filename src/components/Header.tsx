@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Menu, User, LogOut, X, ChevronDown, Crown } from "lucide-react";
+import { Menu, User, LogOut, X, ChevronDown, Crown, Star } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -105,7 +105,6 @@ const Header = () => {
         label: 'Community', path: '/community', items: [
           { label: 'Community Feed', path: '/community' },
           { label: 'Transformations', path: '/transformations' },
-          { label: 'Success Stories', path: '/stories' },
           { label: 'Marketplace', path: '/marketplace' },
         ]
       },
@@ -169,6 +168,7 @@ const Header = () => {
                   className="hidden sm:inline-flex bg-gradient-to-r from-amber-500 to-orange-600 text-white"
                   onClick={() => navigate('/vip-upgrade')}
                 >
+                  <Star className="mr-1 h-4 w-4 fill-white" />
                   <Crown className="mr-1 h-4 w-4" />
                   Upgrade to VIP
                 </Button>

@@ -2,6 +2,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Check, Crown, Zap, Target, TrendingUp, Dumbbell, Droplets, Calendar, Star, Shield } from 'lucide-react';
 import SalesDisclaimer from '@/components/SalesDisclaimer';
 import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { trackBuyNowClick, trackViewContent, trackAddToCart } from '@/lib/tracking';
 
 const VIP_FEATURES = [
@@ -35,7 +36,11 @@ const VipUpgrade = () => {
   useEffect(() => {
     trackViewContent('vip_upgrade_page', { product: 'vip_yearly', value: 39.99, currency: 'USD' });
     trackAddToCart('vip_yearly', 39.99, 'USD');
-    setVideoUrl(localStorage.getItem('vip_upgrade_video_url') || '');
+    (async () => {
+      const { data } = await supabase.from('site_settings').select('value').eq('key', 'vip_video_url').maybeSingle();
+      const dbUrl = (data?.value as any)?.url as string | undefined;
+      setVideoUrl(dbUrl || localStorage.getItem('vip_upgrade_video_url') || '');
+    })();
   }, []);
 
   const embedUrl = getYouTubeEmbed(videoUrl);
