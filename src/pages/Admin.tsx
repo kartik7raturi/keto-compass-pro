@@ -322,6 +322,9 @@ const Admin = () => {
             <TabsTrigger value="vipvideo" className="flex items-center gap-1 text-xs">
               <Crown className="h-3.5 w-3.5" /><span className="hidden sm:inline">VIP Video</span>
             </TabsTrigger>
+            <TabsTrigger value="ai-topics" className="flex items-center gap-1 text-xs">
+              <FileText className="h-3.5 w-3.5" /><span className="hidden sm:inline">AI Topics</span>
+            </TabsTrigger>
             <TabsTrigger value="webhooks" className="flex items-center gap-1 text-xs">
               <Webhook className="h-3.5 w-3.5" /><span className="hidden sm:inline">Webhooks</span>
             </TabsTrigger>
@@ -330,6 +333,7 @@ const Admin = () => {
 
           <TabsContent value="recipes"><AdminRecipes /></TabsContent>
           <TabsContent value="articles"><AdminArticles /></TabsContent>
+          <TabsContent value="ai-topics"><AdminArticleTopics /></TabsContent>
           <TabsContent value="stories"><AdminStories /></TabsContent>
           <TabsContent value="ads"><AdminAdvertisements /></TabsContent>
           <TabsContent value="badges"><AdminBadges /></TabsContent>
