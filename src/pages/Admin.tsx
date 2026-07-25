@@ -75,15 +75,30 @@ const AdminImprintEditor = ({ open, onOpenChange }: { open: boolean; onOpenChang
 
 const AdminVipVideo = () => {
   const [url, setUrl] = useState('');
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    setUrl(localStorage.getItem('vip_upgrade_video_url') || '');
+    (async () => {
+      const { data } = await supabase.from('site_settings').select('value').eq('key', 'vip_video_url').maybeSingle();
+      const stored = (data?.value as any)?.url || localStorage.getItem('vip_upgrade_video_url') || '';
+      setUrl(stored);
+      setLoading(false);
+    })();
   }, []);
 
-  const save = () => {
+  const save = async () => {
+    const { error } = await supabase.from('site_settings').upsert({ key: 'vip_video_url', value: { url: url.trim() } as any });
+    if (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); return; }
     localStorage.setItem('vip_upgrade_video_url', url.trim());
     toast({ title: 'Saved', description: 'VIP upgrade video URL updated.' });
+  };
+
+  const clear = async () => {
+    await supabase.from('site_settings').upsert({ key: 'vip_video_url', value: { url: '' } as any });
+    localStorage.removeItem('vip_upgrade_video_url');
+    setUrl('');
+    toast({ title: 'Cleared' });
   };
 
   return (
@@ -93,11 +108,11 @@ const AdminVipVideo = () => {
       </CardHeader>
       <CardContent className="space-y-3">
         <Label>YouTube video URL</Label>
-        <Input value={url} onChange={e => setUrl(e.target.value)} placeholder="https://www.youtube.com/watch?v=..." />
-        <p className="text-xs text-muted-foreground">Paste any YouTube URL. Leave blank to hide the video section.</p>
+        <Input value={url} disabled={loading} onChange={e => setUrl(e.target.value)} placeholder="https://www.youtube.com/watch?v=..." />
+        <p className="text-xs text-muted-foreground">Paste any YouTube URL. Saved to database — visible to all visitors instantly.</p>
         <div className="flex gap-2">
-          <Button onClick={save}>Save Video URL</Button>
-          {url && <Button variant="outline" onClick={() => { setUrl(''); localStorage.removeItem('vip_upgrade_video_url'); toast({ title: 'Cleared' }); }}>Clear</Button>}
+          <Button onClick={save} disabled={loading}>Save Video URL</Button>
+          {url && <Button variant="outline" onClick={clear}>Clear</Button>}
         </div>
       </CardContent>
     </Card>
