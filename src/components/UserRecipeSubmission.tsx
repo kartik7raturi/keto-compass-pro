@@ -167,8 +167,11 @@ export const UserRecipeSubmission = () => {
         }
       }
 
+      const slug = `${title.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "")}-${crypto.randomUUID().slice(0, 8)}`;
+
       await supabase.from('user_recipes').insert({
         user_id: user?.id,
+        slug,
         title,
         description,
         category,
