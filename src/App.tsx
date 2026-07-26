@@ -104,6 +104,7 @@ const App = () => (
                 <Route path="/articles" element={<ArticleManager />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/recipes" element={<Recipes />} />
+                <Route path="/recipes/:slug" element={<RecipePage />} />
                 <Route path="/tracker" element={<Tracker />} />
                 <Route path="/tracker/30-day-keto" element={<RequirePlan required="vip"><Keto30 /></RequirePlan>} />
                 <Route path="/tracker/fasting" element={<RequirePlan required="vip"><Fasting /></RequirePlan>} />
