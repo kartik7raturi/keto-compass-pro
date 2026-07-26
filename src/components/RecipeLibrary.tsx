@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Users, ChefHat, ThumbsUp, Trophy } from "lucide-react";
@@ -27,6 +28,7 @@ interface Recipe {
   protein: number;
   fat: number;
   calories: number;
+  slug: string;
   image_url?: string;
   upvotes?: number;
 }
@@ -418,7 +420,7 @@ const RecipeLibrary = () => {
                             ? 'group-hover:text-[hsl(var(--pcos-pink))]' 
                             : 'group-hover:text-keto-green'
                         }`}>
-                          {recipe.title}
+                          <Link to={`/recipes/${recipe.slug}`} className="hover:underline">{recipe.title}</Link>
                         </CardTitle>
                         
                         <div className="flex items-center gap-2 mt-2">
@@ -503,7 +505,7 @@ const RecipeLibrary = () => {
                           <SocialShareButtons 
                             title={recipe.title}
                             description={recipe.description}
-                            url={`${window.location.origin}/recipes/${recipe.id}`}
+                            url={`${window.location.origin}/recipes/${recipe.slug}`}
                             image={recipe.image_url || ''}
                             className="justify-center"
                           />
@@ -541,7 +543,7 @@ const RecipeLibrary = () => {
                           ? 'group-hover:text-[hsl(var(--pcos-pink))]' 
                           : 'group-hover:text-keto-green'
                       }`}>
-                        {recipe.title}
+                        <Link to={`/recipes/${recipe.slug}`} className="hover:underline">{recipe.title}</Link>
                       </CardTitle>
                       
                       <div className="flex items-center gap-2 mt-2">
@@ -626,7 +628,7 @@ const RecipeLibrary = () => {
                         <SocialShareButtons 
                           title={recipe.title}
                           description={recipe.description}
-                          url={`${window.location.origin}/recipes/${recipe.id}`}
+                          url={`${window.location.origin}/recipes/${recipe.slug}`}
                           image={recipe.image_url || ''}
                           className="justify-center"
                         />
@@ -647,7 +649,7 @@ const RecipeLibrary = () => {
                       ? 'group-hover:text-[hsl(var(--pcos-pink))]' 
                       : 'group-hover:text-keto-green'
                   }`}>
-                    {recipe.title}
+                    <Link to={`/recipes/${recipe.slug}`} className="hover:underline">{recipe.title}</Link>
                   </CardTitle>
                   
                   {/* Show user info for community recipes */}
@@ -739,7 +741,7 @@ const RecipeLibrary = () => {
                     <SocialShareButtons 
                       title={recipe.title}
                       description={recipe.description}
-                      url={`${window.location.origin}/recipes/${recipe.id}`}
+                      url={`${window.location.origin}/recipes/${recipe.slug}`}
                       image={recipe.image_url || ''}
                       className="justify-center"
                     />

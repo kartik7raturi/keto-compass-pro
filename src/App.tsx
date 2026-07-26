@@ -24,6 +24,7 @@ const ArticleManager = lazy(() => import("./pages/ArticleManager"));
 const Admin = lazy(() => import("./pages/Admin"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Recipes = lazy(() => import("./pages/Recipes"));
+const RecipePage = lazy(() => import("./pages/RecipePage"));
 const Tracker = lazy(() => import("./pages/Tracker"));
 const Progress = lazy(() => import("./pages/Progress"));
 const Challenges = lazy(() => import("./pages/Challenges"));
@@ -103,6 +104,7 @@ const App = () => (
                 <Route path="/articles" element={<ArticleManager />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/recipes" element={<Recipes />} />
+                <Route path="/recipes/:slug" element={<RecipePage />} />
                 <Route path="/tracker" element={<Tracker />} />
                 <Route path="/tracker/30-day-keto" element={<RequirePlan required="vip"><Keto30 /></RequirePlan>} />
                 <Route path="/tracker/fasting" element={<RequirePlan required="vip"><Fasting /></RequirePlan>} />

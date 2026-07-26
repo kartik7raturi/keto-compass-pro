@@ -1925,14 +1925,17 @@ export type Database = {
           difficulty: string | null
           fat: number | null
           id: string
+          image_url: string | null
           ingredients: string[]
           instructions: string[]
           is_keto_friendly: boolean | null
           prep_time: number | null
           protein: number | null
           servings: number | null
+          slug: string
           social_shares: number | null
           title: string
+          updated_at: string
         }
         Insert: {
           calories?: number | null
@@ -1945,14 +1948,17 @@ export type Database = {
           difficulty?: string | null
           fat?: number | null
           id?: string
+          image_url?: string | null
           ingredients: string[]
           instructions: string[]
           is_keto_friendly?: boolean | null
           prep_time?: number | null
           protein?: number | null
           servings?: number | null
+          slug: string
           social_shares?: number | null
           title: string
+          updated_at?: string
         }
         Update: {
           calories?: number | null
@@ -1965,14 +1971,17 @@ export type Database = {
           difficulty?: string | null
           fat?: number | null
           id?: string
+          image_url?: string | null
           ingredients?: string[]
           instructions?: string[]
           is_keto_friendly?: boolean | null
           prep_time?: number | null
           protein?: number | null
           servings?: number | null
+          slug?: string
           social_shares?: number | null
           title?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -2375,6 +2384,7 @@ export type Database = {
           prep_time: number | null
           protein: number | null
           servings: number | null
+          slug: string
           title: string
           updated_at: string | null
           upvotes: number | null
@@ -2399,6 +2409,7 @@ export type Database = {
           prep_time?: number | null
           protein?: number | null
           servings?: number | null
+          slug: string
           title: string
           updated_at?: string | null
           upvotes?: number | null
@@ -2423,6 +2434,7 @@ export type Database = {
           prep_time?: number | null
           protein?: number | null
           servings?: number | null
+          slug?: string
           title?: string
           updated_at?: string | null
           upvotes?: number | null
