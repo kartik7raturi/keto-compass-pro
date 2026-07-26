@@ -24,6 +24,7 @@ const ArticleManager = lazy(() => import("./pages/ArticleManager"));
 const Admin = lazy(() => import("./pages/Admin"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Recipes = lazy(() => import("./pages/Recipes"));
+const RecipePage = lazy(() => import("./pages/RecipePage"));
 const Tracker = lazy(() => import("./pages/Tracker"));
 const Progress = lazy(() => import("./pages/Progress"));
 const Challenges = lazy(() => import("./pages/Challenges"));
