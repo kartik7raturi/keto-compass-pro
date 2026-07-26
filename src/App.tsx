@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import { Suspense, lazy } from "react";
 import { Loader2 } from "lucide-react";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -70,6 +71,7 @@ const PageFallback = () => (
 );
 
 const App = () => (
+  <HelmetProvider>
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <DietModeProvider>
@@ -150,6 +152,7 @@ const App = () => (
       </DietModeProvider>
     </AuthProvider>
   </QueryClientProvider>
+  </HelmetProvider>
 );
 
 export default App;
