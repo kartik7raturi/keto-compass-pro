@@ -7,6 +7,8 @@ import { Clock, ArrowRight, BookOpen, ArrowLeft, Eye } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
+import { SEO } from "@/components/seo/SEO";
+import { SITE_CONFIG } from "@/lib/seo/config";
 
 interface Article {
   id: string;
@@ -31,11 +33,14 @@ const Blog = () => {
     if (slug) {
       fetchArticleBySlug(slug);
     } else {
+      window.scrollTo(0, 0);
       fetchAllArticles();
     }
   }, [slug]);
 
   const fetchAllArticles = async () => {
+    setLoading(true);
+    setCurrentArticle(null);
     try {
       const { data, error } = await supabase
         .from('articles')
@@ -53,6 +58,8 @@ const Blog = () => {
   };
 
   const fetchArticleBySlug = async (articleSlug: string) => {
+    setLoading(true);
+    window.scrollTo(0, 0);
     try {
       const { data, error } = await supabase
         .from('articles')
@@ -141,8 +148,34 @@ const Blog = () => {
   }
 
   if (currentArticle) {
+    const articlePath = `/blog/${currentArticle.slug}`;
+    const articleImage = currentArticle.featured_image_url || SITE_CONFIG.defaultImage;
+    const jsonLd = {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: currentArticle.title,
+      description: currentArticle.excerpt,
+      image: articleImage,
+      datePublished: currentArticle.created_at,
+      dateModified: currentArticle.created_at,
+      author: { "@type": "Organization", name: SITE_CONFIG.organization.name },
+      publisher: {
+        "@type": "Organization",
+        name: SITE_CONFIG.organization.name,
+        logo: { "@type": "ImageObject", url: SITE_CONFIG.organization.logo },
+      },
+      mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_CONFIG.url}${articlePath}` },
+    };
     return (
       <div className="min-h-screen bg-background">
+        <SEO
+          title={currentArticle.title}
+          description={currentArticle.excerpt}
+          path={articlePath}
+          image={articleImage}
+          type="article"
+          jsonLd={jsonLd}
+        />
         <Header />
         <main className="container mx-auto px-4 py-8">
           <Button 
@@ -189,6 +222,11 @@ const Blog = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Keto Knowledge Hub"
+        description="Expert-backed articles to guide your ketogenic journey and help you achieve lasting results."
+        path="/blog"
+      />
       <Header />
       <main className="container mx-auto px-4 py-8">
         <div className="text-center mb-16">
