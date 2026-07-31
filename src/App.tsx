@@ -62,6 +62,7 @@ const Course = lazy(() => import("./pages/Course"));
 const CourseLesson = lazy(() => import("./pages/CourseLesson"));
 const CourseSales = lazy(() => import("./pages/CourseSales"));
 const Transformations = lazy(() => import("./pages/Transformations"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 
 const queryClient = new QueryClient();
 
@@ -86,6 +87,7 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/pricing" element={<Navigate to="/vip-upgrade" replace />} />
                 <Route path="/ketopia-plr" element={<KetopiaPLR />} />
                 <Route path="/ketopia-plr-downloads" element={<KetopiaPLRDownloads />} />

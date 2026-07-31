@@ -808,6 +808,48 @@ export type Database = {
           },
         ]
       }
+      daily_food_logs: {
+        Row: {
+          calories: number
+          carbs: number
+          created_at: string
+          fat: number
+          id: string
+          log_date: string
+          logged_at: string
+          meal_type: string
+          name: string
+          protein: number
+          user_id: string
+        }
+        Insert: {
+          calories?: number
+          carbs?: number
+          created_at?: string
+          fat?: number
+          id?: string
+          log_date: string
+          logged_at?: string
+          meal_type: string
+          name: string
+          protein?: number
+          user_id: string
+        }
+        Update: {
+          calories?: number
+          carbs?: number
+          created_at?: string
+          fat?: number
+          id?: string
+          log_date?: string
+          logged_at?: string
+          meal_type?: string
+          name?: string
+          protein?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       direct_messages: {
         Row: {
           content: string

@@ -12,6 +12,8 @@ import { DateNavigator } from "@/components/tracker/DateNavigator";
 import { AddFoodSheet } from "@/components/tracker/AddFoodSheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { format } from "date-fns";
+import { useAuth } from "@/components/auth/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 // SEO Component
 const SEO = () => {
@@ -50,32 +52,71 @@ interface MealItem {
 const Tracker = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { user } = useAuth();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [addFoodOpen, setAddFoodOpen] = useState(false);
   const [activeMealType, setActiveMealType] = useState("breakfast");
   const [meals, setMeals] = useState<MealItem[]>([]);
-  
-  // Goals - in a real app these would come from user profile
-  const calorieGoal = 2000;
-  const macroGoals = { carbs: 25, protein: 120, fat: 150 };
 
-  // Load meals from localStorage on date change
+  // Personalized goals — pulled from the user's onboarding survey when signed in,
+  // falling back to sensible defaults for guests who haven't set targets yet.
+  const [calorieGoal, setCalorieGoal] = useState(2000);
+  const [macroGoals, setMacroGoals] = useState({ carbs: 25, protein: 120, fat: 150 });
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from('user_survey_responses')
+      .select('daily_calorie_target, daily_carb_target, daily_protein_target, daily_fat_target')
+      .eq('user_id', user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) {
+          if (data.daily_calorie_target) setCalorieGoal(data.daily_calorie_target);
+          setMacroGoals({
+            carbs: data.daily_carb_target ?? 25,
+            protein: data.daily_protein_target ?? 120,
+            fat: data.daily_fat_target ?? 150,
+          });
+        }
+      });
+  }, [user]);
+
+  // Load meals for the selected date — from Supabase for signed-in users (synced
+  // across devices), or localStorage as a fallback for guests.
   useEffect(() => {
     const dateKey = format(selectedDate, 'yyyy-MM-dd');
-    const saved = localStorage.getItem(`meals_${dateKey}`);
-    if (saved) {
-      setMeals(JSON.parse(saved));
-    } else {
-      setMeals([]);
-    }
-  }, [selectedDate]);
 
-  // Save meals to localStorage
-  const saveMeals = (newMeals: MealItem[]) => {
-    const dateKey = format(selectedDate, 'yyyy-MM-dd');
-    localStorage.setItem(`meals_${dateKey}`, JSON.stringify(newMeals));
-    setMeals(newMeals);
-  };
+    if (user) {
+      supabase
+        .from('daily_food_logs')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('log_date', dateKey)
+        .order('logged_at', { ascending: true })
+        .then(({ data, error }) => {
+          if (error) {
+            console.error('Error loading food logs:', error);
+            return;
+          }
+          setMeals(
+            (data || []).map((row) => ({
+              id: row.id,
+              name: row.name,
+              calories: row.calories,
+              carbs: row.carbs,
+              protein: row.protein,
+              fat: row.fat,
+              time: format(new Date(row.logged_at), 'h:mm a'),
+              mealType: row.meal_type,
+            }))
+          );
+        });
+    } else {
+      const saved = localStorage.getItem(`meals_${dateKey}`);
+      setMeals(saved ? JSON.parse(saved) : []);
+    }
+  }, [selectedDate, user]);
 
   // Calculate totals
   const totals = meals.reduce((acc, meal) => ({
@@ -91,18 +132,60 @@ const Tracker = () => {
   const getMealTotalCalories = (type: string) =>
     getMealsByType(type).reduce((sum, m) => sum + m.calories, 0);
 
-  const handleAddFood = (food: { id: string; name: string; carbs: number; protein: number; fat: number; calories: number }, mealType: string) => {
-    const newMeal: MealItem = {
-      id: `${Date.now()}-${food.id}`,
-      name: food.name,
-      calories: food.calories,
-      carbs: food.carbs,
-      protein: food.protein,
-      fat: food.fat,
-      time: format(new Date(), 'h:mm a'),
-      mealType,
-    };
-    saveMeals([...meals, newMeal]);
+  const handleAddFood = async (food: { id: string; name: string; carbs: number; protein: number; fat: number; calories: number }, mealType: string) => {
+    const dateKey = format(selectedDate, 'yyyy-MM-dd');
+    const now = new Date();
+
+    if (user) {
+      const { data, error } = await supabase
+        .from('daily_food_logs')
+        .insert({
+          user_id: user.id,
+          log_date: dateKey,
+          meal_type: mealType,
+          name: food.name,
+          calories: food.calories,
+          carbs: food.carbs,
+          protein: food.protein,
+          fat: food.fat,
+          logged_at: now.toISOString(),
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error saving food log:', error);
+        return;
+      }
+
+      setMeals((prev) => [
+        ...prev,
+        {
+          id: data.id,
+          name: data.name,
+          calories: data.calories,
+          carbs: data.carbs,
+          protein: data.protein,
+          fat: data.fat,
+          time: format(now, 'h:mm a'),
+          mealType: data.meal_type,
+        },
+      ]);
+    } else {
+      const newMeal: MealItem = {
+        id: `${Date.now()}-${food.id}`,
+        name: food.name,
+        calories: food.calories,
+        carbs: food.carbs,
+        protein: food.protein,
+        fat: food.fat,
+        time: format(now, 'h:mm a'),
+        mealType,
+      };
+      const newMeals = [...meals, newMeal];
+      localStorage.setItem(`meals_${dateKey}`, JSON.stringify(newMeals));
+      setMeals(newMeals);
+    }
   };
 
   const openAddFood = (mealType: string) => {
@@ -128,6 +211,16 @@ const Tracker = () => {
         <div className="mb-6">
           <DateNavigator date={selectedDate} onDateChange={setSelectedDate} />
         </div>
+
+        {!user && (
+          <div className="mb-6 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-muted-foreground">
+            You're tracking as a guest — this data is only saved on this device.{' '}
+            <button className="text-primary font-medium hover:underline" onClick={() => navigate('/auth')}>
+              Sign in
+            </button>{' '}
+            to save your progress and access it from anywhere.
+          </div>
+        )}
 
         {/* Calorie Summary Card */}
         <Card className="mb-6 overflow-hidden">
@@ -160,17 +253,17 @@ const Tracker = () => {
             {/* Ketosis Status */}
             <div className="mt-4 pt-4 border-t">
               <div className="flex items-center gap-2">
-                <Zap className={`h-5 w-5 ${totals.carbs <= 25 ? 'text-primary' : 'text-destructive'}`} />
+                <Zap className={`h-5 w-5 ${totals.carbs <= macroGoals.carbs ? 'text-primary' : 'text-destructive'}`} />
                 <span className="font-medium">
-                  {totals.carbs <= 25 
+                  {totals.carbs <= macroGoals.carbs 
                     ? "In Ketosis Range 🎯" 
                     : "Above Carb Limit ⚠️"
                   }
                 </span>
                 <span className="text-sm text-muted-foreground ml-auto">
-                  {totals.carbs <= 25 
-                    ? `${25 - totals.carbs}g carbs left` 
-                    : `${totals.carbs - 25}g over limit`
+                  {totals.carbs <= macroGoals.carbs 
+                    ? `${macroGoals.carbs - totals.carbs}g carbs left` 
+                    : `${totals.carbs - macroGoals.carbs}g over limit`
                   }
                 </span>
               </div>
