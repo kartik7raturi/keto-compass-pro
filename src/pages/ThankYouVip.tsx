@@ -54,8 +54,8 @@ const ThankYouVip = () => {
             <div className="space-y-4 text-sm md:text-base text-muted-foreground max-w-md mx-auto">
               <p>
                 Access URL:{' '}
-                <a href="https://www.ketopia.online/login" className="font-semibold text-primary underline-offset-4 hover:underline">
-                  https://www.ketopia.online/login
+                <a href="https://www.ketopia.online/auth" className="font-semibold text-primary underline-offset-4 hover:underline">
+                  https://www.ketopia.online/auth
                 </a>
               </p>
               <p>
@@ -64,8 +64,8 @@ const ThankYouVip = () => {
               </p>
               <p>
                 Support: Email us at:{' '}
-                <a href="mailto:andrewjimmer692@gmail.com" className="font-semibold text-primary underline-offset-4 hover:underline">
-                  andrewjimmer692@gmail.com
+                <a href="mailto:sankhobusiness@gmail.com" className="font-semibold text-primary underline-offset-4 hover:underline">
+                  sankhobusiness@gmail.com
                 </a>
               </p>
             </div>

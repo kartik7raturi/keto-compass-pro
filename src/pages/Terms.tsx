@@ -131,7 +131,7 @@ const Terms = () => {
             <CardContent>
               <p className="text-muted-foreground">
                 If you have any questions about these Terms of Service, please contact us at 
-                legal@ketopia.com or through our support center.
+                sankhobusiness@gmail.com or through our support center.
               </p>
             </CardContent>
           </Card>

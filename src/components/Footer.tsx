@@ -1,5 +1,6 @@
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Mail, Twitter, Instagram, Facebook } from "lucide-react";
+import { Mail } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -19,17 +20,10 @@ const Footer = () => {
               Your complete companion for a successful keto journey. Track, learn, and thrive with our community.
             </p>
             <div className="flex gap-2">
-              <Button variant="outline" size="icon" onClick={() => console.log('Twitter clicked')}>
-                <Twitter className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="icon" onClick={() => console.log('Instagram clicked')}>
-                <Instagram className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="icon" onClick={() => console.log('Facebook clicked')}>
-                <Facebook className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="icon" onClick={() => console.log('Email clicked')}>
-                <Mail className="h-4 w-4" />
+              <Button variant="outline" size="icon" asChild>
+                <a href="mailto:sankhobusiness@gmail.com" aria-label="Email Ketopia">
+                  <Mail className="h-4 w-4" />
+                </a>
               </Button>
             </div>
           </div>
@@ -37,40 +31,40 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">Features</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="/tracker" className="hover:text-keto-green transition-colors">Macro Tracker</a></li>
-              <li><a href="/recipes" className="hover:text-keto-green transition-colors">Recipe Library</a></li>
-              <li><a href="/progress" className="hover:text-keto-green transition-colors">Progress Dashboard</a></li>
-              <li><a href="/tracker/weekly-plan" className="hover:text-keto-green transition-colors">Meal Planner</a></li>
-              <li><a href="/marketplace" className="hover:text-keto-green transition-colors">Marketplace</a></li>
-              <li><a href="/community" className="hover:text-keto-green transition-colors">Community</a></li>
+              <li><Link to="/tracker" className="hover:text-keto-green transition-colors">Macro Tracker</Link></li>
+              <li><Link to="/recipes" className="hover:text-keto-green transition-colors">Recipe Library</Link></li>
+              <li><Link to="/progress" className="hover:text-keto-green transition-colors">Progress Dashboard</Link></li>
+              <li><Link to="/tracker/weekly-plan" className="hover:text-keto-green transition-colors">Meal Planner</Link></li>
+              <li><Link to="/marketplace" className="hover:text-keto-green transition-colors">Marketplace</Link></li>
+              <li><Link to="/community" className="hover:text-keto-green transition-colors">Community</Link></li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-semibold mb-4">Resources</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="/guide" className="hover:text-keto-green transition-colors">Keto Guide</a></li>
-              <li><a href="/blog" className="hover:text-keto-green transition-colors">Blog</a></li>
-              <li><a href="/stories" className="hover:text-keto-green transition-colors">Success Stories</a></li>
-              <li><a href="/pricing" className="hover:text-keto-green transition-colors">Pricing</a></li>
-              <li><a href="/vip-upgrade" className="hover:text-keto-green transition-colors">VIP Upgrade</a></li>
-              <li><a href="/ketopia-plr" className="hover:text-keto-green transition-colors">Ketopia PLR</a></li>
-              <li><a href="/shop" className="hover:text-keto-green transition-colors">Shop</a></li>
-              <li><a href="/faq" className="hover:text-keto-green transition-colors">FAQ</a></li>
-              <li><a href="/support" className="hover:text-keto-green transition-colors">Support</a></li>
+              <li><Link to="/guide" className="hover:text-keto-green transition-colors">Keto Guide</Link></li>
+              <li><Link to="/blog" className="hover:text-keto-green transition-colors">Blog</Link></li>
+              <li><Link to="/stories" className="hover:text-keto-green transition-colors">Success Stories</Link></li>
+              <li><Link to="/pricing" className="hover:text-keto-green transition-colors">Pricing</Link></li>
+              <li><Link to="/vip-upgrade" className="hover:text-keto-green transition-colors">VIP Upgrade</Link></li>
+              <li><Link to="/ketopia-plr" className="hover:text-keto-green transition-colors">Ketopia PLR</Link></li>
+              <li><Link to="/shop" className="hover:text-keto-green transition-colors">Shop</Link></li>
+              <li><Link to="/faq" className="hover:text-keto-green transition-colors">FAQ</Link></li>
+              <li><Link to="/support" className="hover:text-keto-green transition-colors">Support</Link></li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-semibold mb-4">Company</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="/about" className="hover:text-keto-green transition-colors">About Us</a></li>
-              <li><a href="/careers" className="hover:text-keto-green transition-colors">Careers</a></li>
-              <li><a href="/privacy" className="hover:text-keto-green transition-colors">Privacy Policy</a></li>
-              <li><a href="/terms" className="hover:text-keto-green transition-colors">Terms of Service</a></li>
-              <li><a href="/refund-policy" className="hover:text-keto-green transition-colors">Return & Refund Policy</a></li>
-              <li><a href="/imprint" className="hover:text-keto-green transition-colors">Imprint</a></li>
-              <li><a href="/contact" className="hover:text-keto-green transition-colors">Contact</a></li>
+              <li><Link to="/about" className="hover:text-keto-green transition-colors">About Us</Link></li>
+              <li><Link to="/careers" className="hover:text-keto-green transition-colors">Careers</Link></li>
+              <li><Link to="/privacy" className="hover:text-keto-green transition-colors">Privacy Policy</Link></li>
+              <li><Link to="/terms" className="hover:text-keto-green transition-colors">Terms of Service</Link></li>
+              <li><Link to="/refund-policy" className="hover:text-keto-green transition-colors">Return & Refund Policy</Link></li>
+              <li><Link to="/imprint" className="hover:text-keto-green transition-colors">Imprint</Link></li>
+              <li><Link to="/contact" className="hover:text-keto-green transition-colors">Contact</Link></li>
             </ul>
           </div>
         </div>

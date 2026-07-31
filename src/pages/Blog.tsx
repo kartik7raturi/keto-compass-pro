@@ -1,14 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, ArrowRight, BookOpen, ArrowLeft, Eye } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Clock, ArrowRight, BookOpen, ArrowLeft, Eye, Search } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { SEO } from "@/components/seo/SEO";
 import { SITE_CONFIG } from "@/lib/seo/config";
+import SocialShareButtons from "@/components/SocialShareButtons";
 
 interface Article {
   id: string;
@@ -28,6 +30,8 @@ const Blog = () => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [currentArticle, setCurrentArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   useEffect(() => {
     if (slug) {
@@ -111,6 +115,51 @@ const Blog = () => {
       day: 'numeric' 
     });
   };
+
+  const categories = useMemo(() => {
+    const set = new Set(articles.map((a) => a.category).filter(Boolean));
+    return Array.from(set).sort();
+  }, [articles]);
+
+  const filteredArticles = useMemo(() => {
+    return articles.filter((a) => {
+      const matchesCategory = !activeCategory || a.category === activeCategory;
+      const q = searchQuery.trim().toLowerCase();
+      const matchesSearch =
+        !q ||
+        a.title.toLowerCase().includes(q) ||
+        (a.excerpt || "").toLowerCase().includes(q);
+      return matchesCategory && matchesSearch;
+    });
+  }, [articles, activeCategory, searchQuery]);
+
+  const relatedArticles = useMemo(() => {
+    if (!currentArticle) return [];
+    const sameCategory = articles.filter(
+      (a) => a.id !== currentArticle.id && a.category === currentArticle.category
+    );
+    const others = articles.filter(
+      (a) => a.id !== currentArticle.id && a.category !== currentArticle.category
+    );
+    return [...sameCategory, ...others].slice(0, 3);
+  }, [articles, currentArticle]);
+
+  // Keep the article list loaded in the background so related articles / filters
+  // work even when landing directly on a single article page.
+  useEffect(() => {
+    if (articles.length === 0) {
+      supabase
+        .from('articles')
+        .select('*')
+        .eq('is_published', true)
+        .order('created_at', { ascending: false })
+        .then(({ data }) => {
+          if (data) setArticles(data);
+        });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentArticle]);
+
 
   if (loading) {
     return (
@@ -213,6 +262,47 @@ const Blog = () => {
             <div className="prose prose-lg max-w-none prose-headings:font-bold prose-img:rounded-lg">
               <div dangerouslySetInnerHTML={{ __html: currentArticle.content }} />
             </div>
+
+            <div className="mt-10 pt-6 border-t flex flex-wrap items-center justify-between gap-4">
+              <span className="text-sm font-medium text-muted-foreground">Share this article</span>
+              <SocialShareButtons
+                title={currentArticle.title}
+                description={currentArticle.excerpt}
+                url={`${SITE_CONFIG.url}${articlePath}`}
+                image={articleImage}
+              />
+            </div>
+
+            {relatedArticles.length > 0 && (
+              <div className="mt-12 pt-8 border-t">
+                <h2 className="text-2xl font-bold mb-6">Keep Reading</h2>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {relatedArticles.map((related) => (
+                    <Card
+                      key={related.id}
+                      className="overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer group"
+                      onClick={() => navigate(`/blog/${related.slug}`)}
+                    >
+                      <div className="relative overflow-hidden">
+                        <img
+                          src={related.featured_image_url || "https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"}
+                          alt={related.title}
+                          className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+                      <CardContent className="p-4">
+                        <Badge className={`${getCategoryColor(related.category)} mb-2`}>
+                          {related.category}
+                        </Badge>
+                        <h3 className="font-semibold text-sm leading-snug line-clamp-2">
+                          {related.title}
+                        </h3>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
           </article>
         </main>
         <Footer />
@@ -241,15 +331,54 @@ const Blog = () => {
           </p>
         </div>
 
-        {articles.length === 0 ? (
+        <div className="max-w-2xl mx-auto mb-10 space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search articles..."
+              className="pl-9"
+            />
+          </div>
+          {categories.length > 1 && (
+            <div className="flex flex-wrap justify-center gap-2">
+              <Button
+                variant={activeCategory === null ? "default" : "outline"}
+                size="sm"
+                onClick={() => setActiveCategory(null)}
+              >
+                All
+              </Button>
+              {categories.map((cat) => (
+                <Button
+                  key={cat}
+                  variant={activeCategory === cat ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setActiveCategory(cat)}
+                >
+                  {cat}
+                </Button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {filteredArticles.length === 0 ? (
           <div className="text-center py-12">
             <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <p className="text-lg text-muted-foreground">No articles available yet.</p>
+            <p className="text-lg text-muted-foreground">
+              {articles.length === 0 ? "No articles available yet." : "No articles match your search."}
+            </p>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {articles.map((article) => (
-              <Card key={article.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300 group">
+            {filteredArticles.map((article) => (
+              <Card
+                key={article.id}
+                className="overflow-hidden hover:shadow-lg transition-shadow duration-300 group cursor-pointer"
+                onClick={() => navigate(`/blog/${article.slug}`)}
+              >
                 <div className="relative overflow-hidden">
                   <img 
                     src={article.featured_image_url || "https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"}
@@ -289,7 +418,10 @@ const Blog = () => {
                       variant="ghost" 
                       size="sm" 
                       className="group/btn"
-                      onClick={() => navigate(`/blog/${article.slug}`)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/blog/${article.slug}`);
+                      }}
                     >
                       Read More 
                       <ArrowRight className="h-3 w-3 ml-1 group-hover/btn:translate-x-1 transition-transform" />
