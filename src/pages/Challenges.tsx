@@ -38,7 +38,6 @@ const Challenges = () => {
   const [userChallenges, setUserChallenges] = useState<UserChallenge[]>([]);
   const [filter, setFilter] = useState<string>('all');
   const [loading, setLoading] = useState(true);
-  const [selectedChallengeId, setSelectedChallengeId] = useState<string | null>(null);
   const [expandedChallenge, setExpandedChallenge] = useState<string | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -167,8 +166,6 @@ const Challenges = () => {
 
   const getUserChallenge = (challengeId: string) =>
     userChallenges.find(uc => uc.challenge_id === challengeId);
-
-  const activeChallenges = userChallenges.filter(uc => !uc.is_completed);
 
   if (loading) {
     return (

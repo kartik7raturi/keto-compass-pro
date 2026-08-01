@@ -41,6 +41,7 @@ const Water = () => {
   const [goal, setGoal] = useState<number>(8);
   const [cups, setCups] = useState<number>(0);
   const [loading, setLoading] = useState(true);
+  const [todayLogId, setTodayLogId] = useState<string | null>(null);
 
   const pct = useMemo(() => Math.min(100, Math.round((cups / goal) * 100)), [cups, goal]);
 
@@ -58,21 +59,26 @@ const Water = () => {
         .select('*')
         .eq('user_id', user?.id)
         .eq('date', today)
-        .maybeSingle();
+        .order('created_at', { ascending: false });
 
-      if (data) {
-        setGoal(data.daily_goal);
-        setCups(data.cups_consumed);
+      if (data && data.length > 0) {
+        // Use the most recent entry for today (guards against any legacy duplicate rows)
+        setGoal(data[0].daily_goal);
+        setCups(data[0].cups_consumed);
+        setTodayLogId(data[0].id);
       } else {
         // Create today's entry with defaults
-        await supabase
+        const { data: created } = await supabase
           .from('water_logs')
           .insert({
             user_id: user?.id,
             date: today,
             cups_consumed: 0,
             daily_goal: 8
-          });
+          })
+          .select()
+          .single();
+        if (created) setTodayLogId(created.id);
       }
     } catch (error) {
       console.error('Error fetching water log:', error);
@@ -83,17 +89,24 @@ const Water = () => {
 
   const updateWaterLog = async (newCups: number, newGoal?: number) => {
     if (!user) return;
-    
+
     try {
       const today = new Date().toISOString().slice(0, 10);
-      await supabase
-        .from('water_logs')
-        .upsert({
-          user_id: user.id,
-          date: today,
-          cups_consumed: newCups,
-          daily_goal: newGoal || goal
-        });
+      if (todayLogId) {
+        // Update the existing row for today instead of upserting blind, since
+        // water_logs has no unique constraint on (user_id, date) to upsert against.
+        await supabase
+          .from('water_logs')
+          .update({ cups_consumed: newCups, daily_goal: newGoal || goal })
+          .eq('id', todayLogId);
+      } else {
+        const { data: created } = await supabase
+          .from('water_logs')
+          .insert({ user_id: user.id, date: today, cups_consumed: newCups, daily_goal: newGoal || goal })
+          .select()
+          .single();
+        if (created) setTodayLogId(created.id);
+      }
     } catch (error) {
       console.error('Error updating water log:', error);
     }

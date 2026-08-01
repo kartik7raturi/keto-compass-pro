@@ -7,7 +7,7 @@ import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, Loader2, ChefHat, FileText, BookOpen, Image, Target, MessageSquare, Award, Headphones, Layout, Crown, Package, Pencil, Webhook, GraduationCap } from "lucide-react";
+import { Shield, Loader2, ChefHat, FileText, BookOpen, Image, Target, MessageSquare, Award, Headphones, Layout, Crown, Package, Webhook, GraduationCap } from "lucide-react";
 import { AdminWebhookLogs } from "@/components/admin/AdminWebhookLogs";
 import { AdminRecipes } from "@/components/admin/AdminRecipes";
 import { AdminArticles } from "@/components/admin/AdminArticles";
@@ -25,54 +25,9 @@ import { AdminCourse } from "@/components/admin/AdminCourse";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-
-const AdminImprintEditor = ({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) => {
-  const [content, setContent] = useState('');
-  const { toast } = useToast();
-
-  useEffect(() => {
-    if (open) {
-      const stored = localStorage.getItem('imprint_content');
-      setContent(stored || '');
-    }
-  }, [open]);
-
-  const handleSave = () => {
-    localStorage.setItem('imprint_content', content);
-    toast({ title: 'Saved', description: 'Imprint content updated. Changes will appear on the Imprint page.' });
-    onOpenChange(false);
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Edit Imprint Page</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div>
-            <Label>Imprint Content (HTML supported)</Label>
-            <Textarea
-              value={content}
-              onChange={e => setContent(e.target.value)}
-              rows={20}
-              placeholder="Enter your imprint/impressum content here..."
-              className="font-mono text-xs"
-            />
-          </div>
-          <div className="flex gap-2">
-            <Button onClick={handleSave} className="flex-1">Save Imprint</Button>
-            <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-};
 
 const AdminVipVideo = () => {
   const [url, setUrl] = useState('');
@@ -123,7 +78,6 @@ const AdminVipVideo = () => {
 
 const AdminPages = () => {
   const navigate = useNavigate();
-  const [editImprint, setEditImprint] = useState(false);
 
   const pages = [
     { name: 'Homepage', path: '/', buttons: [], editable: false },
@@ -133,7 +87,7 @@ const AdminPages = () => {
     { name: 'Thank You (VIP)', path: '/thank-you-vip', buttons: ['thankyou_vip_supplement', 'thankyou_vip_dashboard'], editable: false },
     { name: 'Shop / Supplement', path: '/shop', buttons: ['shop_1_bottle', 'shop_3_bottles', 'shop_6_bottles'], editable: false },
     { name: 'Onboarding Quiz', path: '/onboarding', buttons: [], editable: false },
-    { name: 'Imprint', path: '/imprint', buttons: [], editable: true },
+    { name: 'Imprint', path: '/imprint', buttons: [], editable: false },
     { name: 'Recipes', path: '/recipes', buttons: [], editable: false },
     { name: 'Tracker', path: '/tracker', buttons: [], editable: false },
     { name: 'Progress', path: '/progress', buttons: [], editable: false },
@@ -174,11 +128,6 @@ const AdminPages = () => {
               </TableCell>
               <TableCell className="space-x-1">
                 <Button size="sm" variant="outline" onClick={() => navigate(p.path)}>View</Button>
-                {p.editable && (
-                  <Button size="sm" variant="outline" onClick={() => setEditImprint(true)}>
-                    <Pencil className="h-3 w-3 mr-1" /> Edit
-                  </Button>
-                )}
               </TableCell>
             </TableRow>
           ))}
@@ -187,8 +136,6 @@ const AdminPages = () => {
 
       {/* Button Links Management */}
       <AdminButtonLinks />
-
-      <AdminImprintEditor open={editImprint} onOpenChange={setEditImprint} />
     </div>
   );
 };

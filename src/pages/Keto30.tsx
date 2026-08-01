@@ -39,6 +39,7 @@ const Keto30 = () => {
   const { awardPoints } = usePointsSystem();
   const [startDate, setStartDate] = useState<string>("");
   const [completed, setCompleted] = useState<boolean[]>(Array(30).fill(false));
+  const [dayLogIds, setDayLogIds] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
   const started = !!startDate;
@@ -65,12 +66,15 @@ const Keto30 = () => {
       if (ketoData && ketoData.length > 0) {
         setStartDate(ketoData[0].date);
         const completedDays = Array(30).fill(false);
+        const idMap: Record<string, string> = {};
         ketoData.forEach(entry => {
+          idMap[entry.date] = entry.id;
           const dayIndex = Math.floor((new Date(entry.date).getTime() - new Date(ketoData[0].date).getTime()) / (1000 * 60 * 60 * 24));
           if (dayIndex >= 0 && dayIndex < 30) {
             completedDays[dayIndex] = entry.completed;
           }
         });
+        setDayLogIds(idMap);
         setCompleted(completedDays);
       }
     } catch (error) {
@@ -88,14 +92,17 @@ const Keto30 = () => {
     setCompleted(Array(30).fill(false));
     
     try {
-      await supabase
+      const { data } = await supabase
         .from('keto_streaks')
         .insert({
           user_id: user.id,
           date: today,
           completed: false
-        });
-      
+        })
+        .select()
+        .single();
+
+      if (data) setDayLogIds({ [today]: data.id });
       toast({ title: "Challenge started", description: "Your 30-day keto tracker is live. You got this!" });
     } catch (error) {
       toast({ title: "Error starting challenge", variant: "destructive" });
@@ -113,6 +120,7 @@ const Keto30 = () => {
       
       setStartDate("");
       setCompleted(Array(30).fill(false));
+      setDayLogIds({});
       toast({ title: "Tracker reset", description: "Start again anytime." });
     } catch (error) {
       toast({ title: "Error resetting tracker", variant: "destructive" });
@@ -131,13 +139,24 @@ const Keto30 = () => {
     setCompleted(newCompleted);
     
     try {
-      await supabase
-        .from('keto_streaks')
-        .upsert({
-          user_id: user.id,
-          date: dateStr,
-          completed: newCompleted[index]
-        });
+      const existingId = dayLogIds[dateStr];
+      if (existingId) {
+        await supabase
+          .from('keto_streaks')
+          .update({ completed: newCompleted[index] })
+          .eq('id', existingId);
+      } else {
+        const { data } = await supabase
+          .from('keto_streaks')
+          .insert({
+            user_id: user.id,
+            date: dateStr,
+            completed: newCompleted[index]
+          })
+          .select()
+          .single();
+        if (data) setDayLogIds(prev => ({ ...prev, [dateStr]: data.id }));
+      }
         
       // Award points for completing a keto day
       if (newCompleted[index]) {
