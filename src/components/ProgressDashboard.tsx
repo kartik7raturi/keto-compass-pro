@@ -38,6 +38,7 @@ const ProgressDashboard = () => {
   const [weeklyMacroAvg, setWeeklyMacroAvg] = useState({
     avgCarbs: 0, avgProtein: 0, avgFat: 0, avgCalories: 0
   });
+  const [targets, setTargets] = useState({ calories: 2000, carbs: 25, protein: 120, fat: 130 });
 
   useEffect(() => {
     if (user) fetchUserData();
@@ -64,10 +65,40 @@ const ProgressDashboard = () => {
         .from('keto_streaks').select('date, completed').eq('user_id', user?.id)
         .order('date', { ascending: false }).limit(30);
 
-      // Fetch macro logs for last 7 days
-      const { data: macroData } = await supabase
-        .from('macro_logs').select('*').eq('user_id', user?.id)
-        .gte('date', weekAgoStr).order('date', { ascending: true });
+      // Personalized targets from the onboarding survey
+      const { data: surveyData } = await supabase
+        .from('user_survey_responses')
+        .select('daily_calorie_target, daily_carb_target, daily_protein_target, daily_fat_target')
+        .eq('user_id', user?.id)
+        .maybeSingle();
+
+      if (surveyData) {
+        setTargets({
+          calories: surveyData.daily_calorie_target ?? 2000,
+          carbs: surveyData.daily_carb_target ?? 25,
+          protein: surveyData.daily_protein_target ?? 120,
+          fat: surveyData.daily_fat_target ?? 130,
+        });
+      }
+
+      // Fetch logged food for the last 7 days and aggregate into daily totals
+      // (macro_logs is a legacy table that's no longer written to — real entries
+      // live in daily_food_logs since the tracker was moved off localStorage).
+      const { data: foodLogData } = await supabase
+        .from('daily_food_logs').select('*').eq('user_id', user?.id)
+        .gte('log_date', weekAgoStr).order('log_date', { ascending: true });
+
+      const macroData = Object.values(
+        (foodLogData || []).reduce((acc: Record<string, any>, row) => {
+          const key = row.log_date;
+          if (!acc[key]) acc[key] = { date: key, carbs: 0, protein: 0, fat: 0, calories: 0 };
+          acc[key].carbs += row.carbs || 0;
+          acc[key].protein += row.protein || 0;
+          acc[key].fat += row.fat || 0;
+          acc[key].calories += row.calories || 0;
+          return acc;
+        }, {})
+      ) as { date: string; carbs: number; protein: number; fat: number; calories: number }[];
 
       let streak = 0;
       if (allKetoData) {
@@ -169,19 +200,21 @@ const ProgressDashboard = () => {
   const calorieChartData = macroLogs.map(m => ({
     date: new Date(m.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
     consumed: m.calories || 0,
-    target: 2000,
+    target: targets.calories,
   }));
 
+  // Expenditure comparison uses the user's real onboarding-calculated calorie
+  // target as the reference line instead of a random/fabricated "burned" number.
   const expenditureData = macroLogs.length > 0 
     ? macroLogs.map(m => ({
         day: new Date(m.date).toLocaleDateString('en-US', { weekday: 'short' }),
         consumed: m.calories || 0,
-        burned: Math.round((m.calories || 0) * 1.15 + Math.random() * 200),
+        burned: targets.calories,
       }))
     : [
-        { day: 'Mon', consumed: 0, burned: 0 },
-        { day: 'Tue', consumed: 0, burned: 0 },
-        { day: 'Wed', consumed: 0, burned: 0 },
+        { day: 'Mon', consumed: 0, burned: targets.calories },
+        { day: 'Tue', consumed: 0, burned: targets.calories },
+        { day: 'Wed', consumed: 0, burned: targets.calories },
       ];
 
   return (
@@ -268,9 +301,9 @@ const ProgressDashboard = () => {
             <ExpenditureChart data={expenditureData} />
           </FeatureGate>
           <MacroRings
-            protein={{ current: weeklyMacroAvg.avgProtein, goal: 120 }}
-            carbs={{ current: weeklyMacroAvg.avgCarbs, goal: 25 }}
-            fat={{ current: weeklyMacroAvg.avgFat, goal: 130 }}
+            protein={{ current: weeklyMacroAvg.avgProtein, goal: targets.protein }}
+            carbs={{ current: weeklyMacroAvg.avgCarbs, goal: targets.carbs }}
+            fat={{ current: weeklyMacroAvg.avgFat, goal: targets.fat }}
           />
         </div>
 
@@ -307,7 +340,7 @@ const ProgressDashboard = () => {
               avgCalories: weeklyMacroAvg.avgCalories,
               caloriesTrend: weeklySummary.weeklyWeightChange > 0 ? 'down' : 'stable',
               weightTrend: weeklySummary.weeklyWeightChange > 0 ? 'down' : 'stable',
-              proteinAdherence: weeklyMacroAvg.avgProtein > 0 ? Math.min(100, Math.round((weeklyMacroAvg.avgProtein / 120) * 100)) : 0
+              proteinAdherence: weeklyMacroAvg.avgProtein > 0 ? Math.min(100, Math.round((weeklyMacroAvg.avgProtein / targets.protein) * 100)) : 0
             }}
           />
         </div>

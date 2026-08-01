@@ -55,7 +55,6 @@ const Shop = lazy(() => import("./pages/Shop"));
 const Pricing = lazy(() => import("./pages/Pricing"));
 const KetopiaPLR = lazy(() => import("./pages/KetopiaPLR"));
 const KetopiaPLRDownloads = lazy(() => import("./pages/KetopiaPLRDownloads"));
-const Messages = lazy(() => import("./pages/Messages"));
 const Imprint = lazy(() => import("./pages/Imprint"));
 const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
 const Course = lazy(() => import("./pages/Course"));
@@ -63,6 +62,7 @@ const CourseLesson = lazy(() => import("./pages/CourseLesson"));
 const CourseSales = lazy(() => import("./pages/CourseSales"));
 const Transformations = lazy(() => import("./pages/Transformations"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const Leaderboard = lazy(() => import("./pages/Leaderboard"));
 
 const queryClient = new QueryClient();
 
@@ -139,14 +139,7 @@ const App = () => (
                     <Footer />
                   </div>
                 } />
-                <Route path="/messages" element={
-                  <div className="min-h-screen bg-background">
-                    <Header />
-                    <Community />
-                    <Footer />
-                  </div>
-                } />
-                <Route path="/leaderboard" element={<Progress />} />
+                <Route path="/leaderboard" element={<Leaderboard />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

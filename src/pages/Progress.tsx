@@ -1,11 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProgressDashboard from "@/components/ProgressDashboard";
-import FeatureGate from "@/components/FeatureGate";
-import { WeightTrendChart } from "@/components/progress/WeightTrendChart";
-import { ExpenditureChart } from "@/components/progress/ExpenditureChart";
-import { VisualProgressCharts } from "@/components/progress/VisualProgressCharts";
-import { WeeklyReport } from "@/components/progress/WeeklyReport";
 
 const Progress = () => {
   return (

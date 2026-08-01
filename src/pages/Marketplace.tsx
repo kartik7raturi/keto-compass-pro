@@ -530,6 +530,7 @@ const Marketplace = () => {
   };
 
   const deleteListing = async (id: string) => {
+    if (!window.confirm('Delete this listing? This cannot be undone.')) return;
     try {
       await supabase.from('food_listings').delete().eq('id', id);
       toast({ title: 'Listing deleted' });
@@ -613,10 +614,11 @@ const Marketplace = () => {
   const confirmBuy = async () => {
     if (!user || !buyListing) return;
     try {
-      const isDelivery = buyListing.delivery_type === 'delivery' || buyListing.delivery_type === 'both';
-      const addressPart = isDelivery && buyAddress.trim() ? ` — 📍 Delivery Address: ${buyAddress.trim()}` : '';
-      const pickupPart = (buyListing.delivery_type === 'takeaway' || buyListing.delivery_type === 'both') ? ` — ⏰ Pickup: ${buyPickupTime || 'ASAP'}` : '';
-      const content = `[FOOD:${buyListing.id}] 🛒 ORDER: I want to buy ${buyQuantity}x "${buyListing.title}" — Total: $${(buyListing.price * buyQuantity).toFixed(2)}${buyListing.delivery_type === 'takeaway' ? pickupPart : ` — Home Delivery${addressPart}`}`;
+      const isDelivery = buyListing.delivery_type === 'delivery' || (buyListing.delivery_type === 'both' && buyAddress.trim().length > 0);
+      const fulfillmentPart = isDelivery
+        ? ` — 📍 Delivery Address: ${buyAddress.trim() || 'Not provided'}`
+        : ` — ⏰ Pickup: ${buyPickupTime || 'ASAP'}`;
+      const content = `[FOOD:${buyListing.id}] 🛒 ORDER: I want to buy ${buyQuantity}x "${buyListing.title}" — Total: $${(buyListing.price * buyQuantity).toFixed(2)} — ${isDelivery ? 'Home Delivery' : 'Takeaway'}${fulfillmentPart}`;
       const { error } = await supabase.from('direct_messages').insert({
         sender_id: user.id, receiver_id: buyListing.seller_id, content
       });

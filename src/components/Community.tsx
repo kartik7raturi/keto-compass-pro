@@ -352,6 +352,7 @@ const Community = () => {
   };
 
   const deletePost = async (postId: string) => {
+    if (!window.confirm('Delete this post? This cannot be undone.')) return;
     try {
       await supabase.from('community_posts').delete().eq('id', postId);
       setPosts(prev => prev.filter(p => p.id !== postId));
