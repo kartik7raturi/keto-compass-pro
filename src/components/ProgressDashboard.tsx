@@ -188,6 +188,11 @@ const ProgressDashboard = () => {
   const goalWeight = profile?.goal_weight || 0;
   const startingWeight = weightLogs.length > 0 ? weightLogs[weightLogs.length - 1]?.weight || currentWeight : currentWeight;
   const weightLost = startingWeight - currentWeight;
+  const remainingToGoal = Math.max(0, currentWeight - goalWeight);
+  const totalToLose = Math.max(0.1, startingWeight - goalWeight);
+  const weightJourneyPercent = goalWeight > 0
+    ? Math.min(100, Math.max(0, Math.round(((startingWeight - currentWeight) / totalToLose) * 100)))
+    : 0;
 
   // Prepare real macro data for charts
   const macroChartData = macroLogs.map(m => ({
@@ -222,49 +227,77 @@ const ProgressDashboard = () => {
       <div className="container px-4 max-w-6xl mx-auto">
         <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6">Your Progress</h2>
 
-        {/* Weight Log & Goal */}
-        <div className="grid sm:grid-cols-2 gap-4 mb-6">
-          <Card>
-            <CardContent className="p-4 flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Current Weight</p>
-                <p className="text-2xl font-bold">{currentWeight || '—'} lbs</p>
+        {/* Weight Journey - motivating hero card */}
+        <Card className="mb-6 overflow-hidden border-primary/20">
+          <CardContent className="p-5 md:p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-base">Your Weight Journey</h3>
+              <div className="flex gap-2">
+                <Dialog open={editingWeight} onOpenChange={setEditingWeight}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm"><Plus className="h-4 w-4 mr-1" />Log Weight</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader><DialogTitle>Log Weight</DialogTitle></DialogHeader>
+                    <div className="space-y-4">
+                      <Input type="number" value={newCurrentWeight} onChange={(e) => setNewCurrentWeight(e.target.value)} placeholder="Weight (lbs)" />
+                      <Button onClick={updateCurrentWeight} className="w-full">Save</Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                <Dialog open={editingGoal} onOpenChange={setEditingGoal}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm"><Edit className="h-4 w-4 mr-1" />Goal</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader><DialogTitle>Set Goal Weight</DialogTitle></DialogHeader>
+                    <div className="space-y-4">
+                      <Input type="number" value={newGoalWeight} onChange={(e) => setNewGoalWeight(e.target.value)} placeholder="Goal (lbs)" />
+                      <Button onClick={updateGoalWeight} className="w-full">Save</Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
-              <Dialog open={editingWeight} onOpenChange={setEditingWeight}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="sm"><Plus className="h-4 w-4 mr-1" />Log</Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader><DialogTitle>Log Weight</DialogTitle></DialogHeader>
-                  <div className="space-y-4">
-                    <Input type="number" value={newCurrentWeight} onChange={(e) => setNewCurrentWeight(e.target.value)} placeholder="Weight (lbs)" />
-                    <Button onClick={updateCurrentWeight} className="w-full">Save</Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 flex items-center justify-between">
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 text-center mb-4">
               <div>
-                <p className="text-sm text-muted-foreground">Goal Weight</p>
-                <p className="text-2xl font-bold">{goalWeight || '—'} lbs</p>
+                <p className="text-xs text-muted-foreground">Starting</p>
+                <p className="text-lg md:text-2xl font-bold text-muted-foreground">{startingWeight || '—'}</p>
+                <p className="text-[10px] text-muted-foreground">lbs</p>
               </div>
-              <Dialog open={editingGoal} onOpenChange={setEditingGoal}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="sm"><Edit className="h-4 w-4 mr-1" />Edit</Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader><DialogTitle>Set Goal Weight</DialogTitle></DialogHeader>
-                  <div className="space-y-4">
-                    <Input type="number" value={newGoalWeight} onChange={(e) => setNewGoalWeight(e.target.value)} placeholder="Goal (lbs)" />
-                    <Button onClick={updateGoalWeight} className="w-full">Save</Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </CardContent>
-          </Card>
-        </div>
+              <div className="border-x">
+                <p className="text-xs text-muted-foreground">Current</p>
+                <p className="text-xl md:text-3xl font-bold text-primary">{currentWeight || '—'}</p>
+                <p className="text-[10px] text-muted-foreground">lbs</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Goal</p>
+                <p className="text-lg md:text-2xl font-bold text-keto-green">{goalWeight || '—'}</p>
+                <p className="text-[10px] text-muted-foreground">lbs</p>
+              </div>
+            </div>
+
+            {goalWeight > 0 && currentWeight > 0 && (
+              <>
+                <Progress value={weightJourneyPercent} className="h-2.5 mb-2" />
+                <p className="text-sm text-center font-medium">
+                  {remainingToGoal <= 0
+                    ? "🎉 You've hit your goal weight — amazing work!"
+                    : weightLost > 0
+                    ? `🔥 ${weightLost.toFixed(1)} lbs down, ${remainingToGoal.toFixed(1)} lbs to go — keep going!`
+                    : `${remainingToGoal.toFixed(1)} lbs to reach your goal. You've got this!`}
+                </p>
+              </>
+            )}
+            {(!goalWeight || goalWeight === 0) && (
+              <p className="text-sm text-center text-muted-foreground">
+                Set a goal weight to track your journey and stay motivated.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
 
         {/* Nutrition Analytics (real data) */}
         <NutritionAnalytics />

@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { useDietMode } from "@/components/DietModeProvider";
+import { useAuth } from "@/components/auth/AuthContext";
 import { RecipePopup } from "@/components/RecipePopup";
 
 interface Meal {
@@ -52,6 +53,8 @@ const WeeklyPlan = () => {
   const [selectedRecipe, setSelectedRecipe] = useState<Meal | null>(null);
   const { toast } = useToast();
   const { dietMode } = useDietMode();
+  const { user } = useAuth();
+  const [dietPreference, setDietPreference] = useState<string | null>(null);
   const isMobile = useIsMobile();
 
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -64,16 +67,34 @@ const WeeklyPlan = () => {
   };
 
   useEffect(() => {
+    if (!user) return;
+    supabase
+      .from('profiles')
+      .select('diet_preference')
+      .eq('user_id', user.id)
+      .maybeSingle()
+      .then(({ data }) => setDietPreference(data?.diet_preference || null));
+  }, [user]);
+
+  useEffect(() => {
     fetchMeals();
     fetchWeeklyPlan();
-  }, [dietMode]);
+  }, [dietMode, dietPreference]);
 
   const fetchMeals = async () => {
-    const { data: recipesData, error: recipesError } = await supabase
+    let query = supabase
       .from('recipes')
       .select('*')
-      .eq('diet_type', dietMode)
-      .order('title');
+      .eq('diet_type', dietMode);
+
+    // Respect the user's vegetarian/vegan/non-vegetarian preference from onboarding
+    if (dietPreference === 'vegan') {
+      query = query.eq('diet_category', 'vegan');
+    } else if (dietPreference === 'vegetarian') {
+      query = query.in('diet_category', ['vegan', 'vegetarian']);
+    }
+
+    const { data: recipesData, error: recipesError } = await query.order('title');
 
     if (!recipesError && recipesData && recipesData.length > 0) {
       const transformedMeals = recipesData.map(recipe => ({

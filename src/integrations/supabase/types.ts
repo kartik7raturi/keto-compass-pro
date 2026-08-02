@@ -1744,6 +1744,7 @@ export type Database = {
           country: string | null
           created_at: string
           current_weight: number | null
+          diet_preference: string | null
           diet_type: string | null
           display_name: string | null
           email: string | null
@@ -1766,6 +1767,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           current_weight?: number | null
+          diet_preference?: string | null
           diet_type?: string | null
           display_name?: string | null
           email?: string | null
@@ -1788,6 +1790,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           current_weight?: number | null
+          diet_preference?: string | null
           diet_type?: string | null
           display_name?: string | null
           email?: string | null
@@ -1963,6 +1966,7 @@ export type Database = {
           cook_time: number | null
           created_at: string
           description: string | null
+          diet_category: string
           diet_type: string | null
           difficulty: string | null
           fat: number | null
@@ -1986,6 +1990,7 @@ export type Database = {
           cook_time?: number | null
           created_at?: string
           description?: string | null
+          diet_category?: string
           diet_type?: string | null
           difficulty?: string | null
           fat?: number | null
@@ -2009,6 +2014,7 @@ export type Database = {
           cook_time?: number | null
           created_at?: string
           description?: string | null
+          diet_category?: string
           diet_type?: string | null
           difficulty?: string | null
           fat?: number | null
@@ -2614,6 +2620,7 @@ export type Database = {
           daily_fat_target: number | null
           daily_protein_target: number | null
           diet_experience: string | null
+          diet_preference: string | null
           exercise_frequency: string | null
           gender: string | null
           goal_weight: number | null
@@ -2634,6 +2641,7 @@ export type Database = {
           daily_fat_target?: number | null
           daily_protein_target?: number | null
           diet_experience?: string | null
+          diet_preference?: string | null
           exercise_frequency?: string | null
           gender?: string | null
           goal_weight?: number | null
@@ -2654,6 +2662,7 @@ export type Database = {
           daily_fat_target?: number | null
           daily_protein_target?: number | null
           diet_experience?: string | null
+          diet_preference?: string | null
           exercise_frequency?: string | null
           gender?: string | null
           goal_weight?: number | null

@@ -63,6 +63,7 @@ const CourseSales = lazy(() => import("./pages/CourseSales"));
 const Transformations = lazy(() => import("./pages/Transformations"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Leaderboard = lazy(() => import("./pages/Leaderboard"));
+const JoinGroup = lazy(() => import("./pages/JoinGroup"));
 
 const queryClient = new QueryClient();
 
@@ -140,6 +141,7 @@ const App = () => (
                   </div>
                 } />
                 <Route path="/leaderboard" element={<Leaderboard />} />
+                <Route path="/community/join/:groupId" element={<JoinGroup />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

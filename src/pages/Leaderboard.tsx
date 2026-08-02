@@ -20,11 +20,12 @@ interface LeaderboardEntry {
   current_level: number;
   challenges_completed: number;
   current_streak: number;
+  weight_lost: number;
 }
 
 const Leaderboard = () => {
   const [timeframe, setTimeframe] = useState<'weekly' | 'monthly' | 'alltime'>('weekly');
-  const [category, setCategory] = useState<'points' | 'challenges' | 'streaks'>('points');
+  const [category, setCategory] = useState<'points' | 'challenges' | 'streaks' | 'weight_loss'>('points');
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewingUser, setViewingUser] = useState<string | null>(null);
@@ -130,8 +131,33 @@ const Leaderboard = () => {
       // Get user profiles
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('user_id, display_name, avatar_url')
+        .select('user_id, display_name, avatar_url, current_weight')
         .in('user_id', Array.from(allUserIds));
+
+      // Weight loss: compare each user's earliest logged weight to their current weight.
+      // Shows only the amount lost (not raw body weight) to keep this less sensitive,
+      // and only for users who have logged weight at least once and are losing.
+      let weightLossByUser: Record<string, number> = {};
+      const { data: weightLogsData } = await supabase
+        .from('weight_logs')
+        .select('user_id, weight, logged_at')
+        .in('user_id', Array.from(allUserIds))
+        .order('logged_at', { ascending: true });
+
+      if (weightLogsData) {
+        const firstByUser: Record<string, number> = {};
+        weightLogsData.forEach((log) => {
+          if (firstByUser[log.user_id] === undefined) firstByUser[log.user_id] = log.weight;
+        });
+        Array.from(allUserIds).forEach((uid) => {
+          const profile = profiles?.find(p => p.user_id === uid);
+          const first = firstByUser[uid];
+          const current = profile?.current_weight;
+          if (first !== undefined && current !== undefined && current !== null && first > current) {
+            weightLossByUser[uid] = Math.round((first - current) * 10) / 10;
+          }
+        });
+      }
 
       // Build leaderboard
       const leaderboardData: LeaderboardEntry[] = Array.from(allUserIds).map(userId => {
@@ -146,6 +172,7 @@ const Leaderboard = () => {
           current_level: progress?.current_level || 1,
           challenges_completed: challengeCounts[userId] || 0,
           current_streak: streakCounts[userId] || 0,
+          weight_lost: weightLossByUser[userId] || 0,
         };
       });
 
@@ -154,11 +181,17 @@ const Leaderboard = () => {
         leaderboardData.sort((a, b) => b.total_points - a.total_points);
       } else if (category === 'challenges') {
         leaderboardData.sort((a, b) => b.challenges_completed - a.challenges_completed);
+      } else if (category === 'weight_loss') {
+        leaderboardData.sort((a, b) => b.weight_lost - a.weight_lost);
       } else {
         leaderboardData.sort((a, b) => b.current_streak - a.current_streak);
       }
 
-      setLeaderboard(leaderboardData.slice(0, 20));
+      const finalList = category === 'weight_loss'
+        ? leaderboardData.filter(e => e.weight_lost > 0)
+        : leaderboardData;
+
+      setLeaderboard(finalList.slice(0, 20));
     } catch (error) {
       console.error('Error fetching leaderboard:', error);
     } finally {
@@ -178,6 +211,7 @@ const Leaderboard = () => {
       case 'points': return <Star className="h-5 w-5 text-yellow-500" />;
       case 'challenges': return <Target className="h-5 w-5 text-green-500" />;
       case 'streaks': return <Flame className="h-5 w-5 text-orange-500" />;
+      case 'weight_loss': return <TrendingUp className="h-5 w-5 text-primary" />;
     }
   };
 
@@ -186,11 +220,12 @@ const Leaderboard = () => {
       case 'points': return `${entry.total_points} pts`;
       case 'challenges': return `${entry.challenges_completed} completed`;
       case 'streaks': return `${entry.current_streak} days`;
+      case 'weight_loss': return `${entry.weight_lost} lbs lost`;
     }
   };
 
   const startDirectMessage = (userId: string) => {
-    navigate(`/messages?user=${userId}`);
+    navigate(`/community?user=${userId}`);
   };
 
   return (
@@ -233,6 +268,14 @@ const Leaderboard = () => {
             >
               <Flame className="h-4 w-4" />
               Streaks
+            </Button>
+            <Button
+              variant={category === 'weight_loss' ? 'default' : 'outline'}
+              onClick={() => setCategory('weight_loss')}
+              className="gap-2"
+            >
+              <TrendingUp className="h-4 w-4" />
+              Weight Loss
             </Button>
           </div>
 

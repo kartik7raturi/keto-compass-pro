@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Users, Plus, Search, UserPlus, MessageCircle, Crown, Edit, Trash2, Upload } from 'lucide-react';
+import { Users, Plus, Search, UserPlus, MessageCircle, Crown, Edit, Trash2, Upload, Link2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -194,6 +194,12 @@ export const UserGroups = ({ onSelectGroup, selectedGroupId }: UserGroupsProps) 
     }
   };
 
+  const copyInviteLink = (groupId: string) => {
+    const link = `${window.location.origin}/community/join/${groupId}`;
+    navigator.clipboard.writeText(link);
+    toast({ title: 'Invite link copied!', description: 'Share it with friends to invite them to the group.' });
+  };
+
   const filteredGroups = groups.filter(g => g.name.toLowerCase().includes(searchQuery.toLowerCase()));
   const isInGroup = (groupId: string) => myGroups.some(g => g.id === groupId);
 
@@ -223,6 +229,11 @@ export const UserGroups = ({ onSelectGroup, selectedGroupId }: UserGroupsProps) 
                       </div>
                       <span className="text-xs text-muted-foreground">{group.member_count} members</span>
                     </div>
+                    {group.is_public && (
+                      <Button size="sm" variant="ghost" className="h-6 w-6 p-0" title="Copy invite link" onClick={(e) => { e.stopPropagation(); copyInviteLink(group.id); }}>
+                        <Link2 className="h-3 w-3" />
+                      </Button>
+                    )}
                     {group.owner_id === user?.id ? (
                       <div className="flex gap-1">
                         <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={(e) => { e.stopPropagation(); openEditGroup(group); }}>

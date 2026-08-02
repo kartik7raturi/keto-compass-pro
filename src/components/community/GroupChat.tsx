@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Users, Send, UserPlus, Settings, ArrowLeft } from 'lucide-react';
+import { Users, Send, UserPlus, Settings, ArrowLeft, Link2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/auth/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -208,6 +208,19 @@ export const GroupChat = ({ groupId, onBack }: GroupChatProps) => {
               {group?.member_count} members
             </span>
           </div>
+          {group?.member_count !== undefined && (
+            <Button
+              variant="ghost"
+              size="icon"
+              title="Copy invite link"
+              onClick={() => {
+                navigator.clipboard.writeText(`${window.location.origin}/community/join/${groupId}`);
+                toast({ title: 'Invite link copied!' });
+              }}
+            >
+              <Link2 className="h-4 w-4" />
+            </Button>
+          )}
           <Dialog open={showMembers} onOpenChange={setShowMembers}>
             <DialogTrigger asChild>
               <Button variant="ghost" size="icon">

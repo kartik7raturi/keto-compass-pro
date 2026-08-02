@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,41 +8,41 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAuth } from '@/components/auth/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { ChevronRight, ChevronLeft, Check } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Loader2, Leaf, Beef, Salad } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { trackLead } from '@/lib/tracking';
+import { generateWeeklyPlan, seedFromString, type DayPlan, type DietPreference } from '@/lib/mealPlanGenerator';
 
 interface SurveyData {
+  diet_preference: DietPreference | '';
   current_weight: string;
   goal_weight: string;
   height: string;
   age: string;
   gender: string;
   activity_level: string;
-  diet_experience: string;
-  exercise_frequency: string;
-  health_conditions: string;
-  motivation: string;
   email: string;
   password: string;
 }
 
 const QUIZ_STEPS = [
+  { key: 'diet_preference', q: 'What do you eat?', type: 'diet' },
   { key: 'gender', q: 'What is your gender?', type: 'select', options: ['Male', 'Female', 'Other', 'Prefer not to say'] },
   { key: 'age', q: 'How old are you?', type: 'number', placeholder: 'Your age' },
   { key: 'height', q: 'What is your height (inches)?', type: 'number', placeholder: 'e.g. 68' },
-  { key: 'current_weight', q: 'What is your current weight (lbs)?', type: 'number', placeholder: 'e.g. 180' },
-  { key: 'goal_weight', q: 'What is your goal weight (lbs)?', type: 'number', placeholder: 'e.g. 150' },
+  { key: 'weight', q: 'Your current & goal weight (lbs)', type: 'weight_pair' },
   { key: 'activity_level', q: 'How active are you?', type: 'select', options: ['Sedentary', 'Lightly Active', 'Moderately Active', 'Very Active', 'Extra Active'] },
-  { key: 'exercise_frequency', q: 'How often do you exercise?', type: 'select', options: ['Never', '1-2 times/week', '3-4 times/week', '5-6 times/week', 'Daily'] },
-  { key: 'diet_experience', q: 'Have you tried keto before?', type: 'select', options: ['Never', 'Tried briefly', 'A few months', 'Over a year', 'Currently on keto'] },
-  { key: 'health_conditions', q: 'Any health conditions? (optional)', type: 'text', placeholder: 'e.g. Diabetes, PCOS, None' },
-  { key: 'motivation', q: 'What motivates you most?', type: 'select', options: ['Lose Weight', 'More Energy', 'Better Health', 'Mental Clarity', 'Athletic Performance'] },
 ];
 
 const SIGNUP_STEP = QUIZ_STEPS.length;
 const REPORT_STEP = SIGNUP_STEP + 1;
 const TOTAL_STEPS = REPORT_STEP + 1;
+
+const DIET_OPTIONS: { value: DietPreference; label: string; icon: typeof Leaf }[] = [
+  { value: 'non_vegetarian', label: 'Non-Vegetarian', icon: Beef },
+  { value: 'vegetarian', label: 'Vegetarian', icon: Salad },
+  { value: 'vegan', label: 'Vegan', icon: Leaf },
+];
 
 const OnboardingSurvey = () => {
   const { signUp } = useAuth();
@@ -50,13 +50,13 @@ const OnboardingSurvey = () => {
   const { toast } = useToast();
   const [step, setStep] = useState(0);
   const [data, setData] = useState<SurveyData>({
-    current_weight: '', goal_weight: '', height: '', age: '',
-    gender: '', activity_level: '', diet_experience: '',
-    exercise_frequency: '', health_conditions: '', motivation: '',
-    email: '', password: '',
+    diet_preference: '', current_weight: '', goal_weight: '', height: '', age: '',
+    gender: '', activity_level: '', email: '', password: '',
   });
   const [submitting, setSubmitting] = useState(false);
   const [signupDone, setSignupDone] = useState(false);
+  const [mealPlan, setMealPlan] = useState<DayPlan[]>([]);
+  const [planLoading, setPlanLoading] = useState(false);
 
   const progress = ((step + 1) / TOTAL_STEPS) * 100;
 
@@ -79,13 +79,16 @@ const OnboardingSurvey = () => {
     const multiplier = activityMultipliers[data.activity_level] || 1.2;
     const tdee = Math.round(bmr * multiplier);
     const calories = tdee - 500;
+    const daily_calorie_target = Math.max(1200, calories);
+    const daily_carb_target = 25;
+    const daily_protein_target = Math.round(weight * 0.8);
     return {
       bmr: Math.round(bmr),
       tdee,
-      daily_calorie_target: Math.max(1200, calories),
-      daily_carb_target: 25,
-      daily_protein_target: Math.round(weight * 0.8),
-      daily_fat_target: Math.round(((calories - 25 * 4 - weight * 0.8 * 4)) / 9),
+      daily_calorie_target,
+      daily_carb_target,
+      daily_protein_target,
+      daily_fat_target: Math.round((daily_calorie_target - daily_carb_target * 4 - daily_protein_target * 4) / 9),
     };
   };
 
@@ -113,8 +116,7 @@ const OnboardingSurvey = () => {
         toast({ title: 'Signup Error', description: error.message, variant: 'destructive' });
       } else {
         setSignupDone(true);
-        trackLead('onboarding_survey', { motivation: data.motivation });
-        // Save survey data after signup
+        trackLead('onboarding_survey', { diet_preference: data.diet_preference });
         const { data: sessionData } = await supabase.auth.getSession();
         if (sessionData.session?.user) {
           const targets = calcTargets();
@@ -127,10 +129,7 @@ const OnboardingSurvey = () => {
             age: parseInt(data.age) || null,
             gender: data.gender,
             activity_level: data.activity_level,
-            diet_experience: data.diet_experience,
-            exercise_frequency: data.exercise_frequency,
-            health_conditions: data.health_conditions ? data.health_conditions.split(',').map(s => s.trim()) : [],
-            motivation: data.motivation,
+            diet_preference: data.diet_preference || null,
             daily_calorie_target: targets.daily_calorie_target,
             daily_carb_target: targets.daily_carb_target,
             daily_protein_target: targets.daily_protein_target,
@@ -143,6 +142,7 @@ const OnboardingSurvey = () => {
             height: parseFloat(data.height) || null,
             age: parseInt(data.age) || null,
             activity_level: data.activity_level,
+            diet_preference: data.diet_preference || null,
           }).eq('user_id', userId);
         }
         toast({ title: 'Account created!' });
@@ -155,20 +155,22 @@ const OnboardingSurvey = () => {
     }
   };
 
-  const weeklyPlan = [
-    { day: 'Monday', meals: 'Bacon & eggs • Chicken salad • Steak with asparagus' },
-    { day: 'Tuesday', meals: 'Keto smoothie • Tuna lettuce wraps • Salmon with broccoli' },
-    { day: 'Wednesday', meals: 'Avocado eggs • Cobb salad • Pork chops with green beans' },
-    { day: 'Thursday', meals: 'Cheese omelette • Caesar salad • Beef stir-fry' },
-    { day: 'Friday', meals: 'Keto pancakes • Shrimp bowl • Chicken thighs with spinach' },
-    { day: 'Saturday', meals: 'Egg muffins • BLT lettuce wraps • Lamb with roasted veggies' },
-    { day: 'Sunday', meals: 'Keto waffles • Greek salad • Grilled fish with cauliflower' },
-  ];
+  useEffect(() => {
+    if ((step === REPORT_STEP || signupDone) && data.diet_preference && mealPlan.length === 0) {
+      setPlanLoading(true);
+      generateWeeklyPlan(data.diet_preference as DietPreference, seedFromString(data.email || 'guest'))
+        .then(setMealPlan)
+        .finally(() => setPlanLoading(false));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, signupDone]);
 
-  // Quiz step rendering
   if (step < QUIZ_STEPS.length) {
     const currentStep = QUIZ_STEPS[step];
-    const canProceed = currentStep.key === 'health_conditions' || !!data[currentStep.key as keyof SurveyData];
+    const canProceed =
+      currentStep.type === 'weight_pair'
+        ? !!data.current_weight && !!data.goal_weight
+        : !!data[currentStep.key as keyof SurveyData];
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/5 flex items-center justify-center p-4">
@@ -181,7 +183,50 @@ const OnboardingSurvey = () => {
             <CardTitle className="text-xl">{currentStep.q}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {currentStep.type === 'select' ? (
+            {currentStep.type === 'diet' ? (
+              <div className="grid grid-cols-1 gap-3">
+                {DIET_OPTIONS.map((opt) => {
+                  const Icon = opt.icon;
+                  const selected = data.diet_preference === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setValue('diet_preference', opt.value)}
+                      className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-colors text-left ${
+                        selected ? 'border-primary bg-primary/10' : 'border-border hover:bg-muted'
+                      }`}
+                    >
+                      <Icon className={`h-5 w-5 ${selected ? 'text-primary' : 'text-muted-foreground'}`} />
+                      <span className="font-medium">{opt.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : currentStep.type === 'weight_pair' ? (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Current Weight</Label>
+                  <Input
+                    type="number"
+                    placeholder="e.g. 180"
+                    value={data.current_weight}
+                    onChange={(e) => setValue('current_weight', e.target.value)}
+                    className="text-lg py-6 mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>Goal Weight</Label>
+                  <Input
+                    type="number"
+                    placeholder="e.g. 150"
+                    value={data.goal_weight}
+                    onChange={(e) => setValue('goal_weight', e.target.value)}
+                    className="text-lg py-6 mt-1"
+                  />
+                </div>
+              </div>
+            ) : currentStep.type === 'select' ? (
               <Select value={data[currentStep.key as keyof SurveyData]} onValueChange={(v) => setValue(currentStep.key, v)}>
                 <SelectTrigger><SelectValue placeholder="Select an option" /></SelectTrigger>
                 <SelectContent>
@@ -222,7 +267,6 @@ const OnboardingSurvey = () => {
     );
   }
 
-  // Signup step
   if (step === SIGNUP_STEP && !signupDone) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/5 flex items-center justify-center p-4">
@@ -274,7 +318,6 @@ const OnboardingSurvey = () => {
     );
   }
 
-  // Report step - BMI + 1-week plan (shown immediately after signup, no email verification)
   if (step === REPORT_STEP || signupDone) {
     const targets = calcTargets();
     const bmi = parseFloat(calcBMI());
@@ -292,14 +335,12 @@ const OnboardingSurvey = () => {
             <CardTitle className="text-xl">Your Personalized Keto Report</CardTitle>
           </CardHeader>
           <CardContent className="space-y-5">
-            {/* BMI */}
             <div className="bg-secondary/30 rounded-xl p-4 text-center">
               <p className="text-sm text-muted-foreground mb-1">Your BMI</p>
               <p className={`text-4xl font-bold ${bmiCat.color}`}>{bmi}</p>
               <p className={`text-sm font-semibold ${bmiCat.color}`}>{bmiCat.label}</p>
             </div>
 
-            {/* Targets */}
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-secondary/30 rounded-lg p-3 text-center">
                 <p className="text-xs text-muted-foreground">Daily Calories</p>
@@ -319,27 +360,38 @@ const OnboardingSurvey = () => {
               </div>
             </div>
 
-            {/* 1-Week Plan Preview */}
             <div>
-              <h3 className="font-semibold text-sm mb-2">Your 1-Week Keto Meal Plan</h3>
-              <div className="space-y-1.5 max-h-40 overflow-y-auto">
-                {weeklyPlan.map(d => (
-                  <div key={d.day} className="flex gap-2 text-xs">
-                    <span className="font-semibold w-20 flex-shrink-0">{d.day}</span>
-                    <span className="text-muted-foreground">{d.meals}</span>
-                  </div>
-                ))}
-              </div>
+              <h3 className="font-semibold text-sm mb-2">
+                Your 1-Week {data.diet_preference === 'vegan' ? 'Vegan' : data.diet_preference === 'vegetarian' ? 'Vegetarian' : ''} Keto Meal Plan
+              </h3>
+              {planLoading ? (
+                <div className="flex justify-center py-6">
+                  <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                </div>
+              ) : mealPlan.length === 0 ? (
+                <p className="text-xs text-muted-foreground py-2">Your meal plan will be ready in your dashboard.</p>
+              ) : (
+                <div className="space-y-1.5 max-h-40 overflow-y-auto">
+                  {mealPlan.map((d) => (
+                    <div key={d.day} className="flex gap-2 text-xs">
+                      <span className="font-semibold w-20 flex-shrink-0">{d.day.slice(0, 3)}</span>
+                      <span className="text-muted-foreground truncate">
+                        {d.breakfast?.title} • {d.lunch?.title} • {d.dinner?.title}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <Button
               className="w-full bg-gradient-to-r from-primary to-primary/80 py-6 text-lg font-bold"
-              onClick={() => navigate('/auth')}
+              onClick={() => navigate('/progress')}
             >
-              Create Free Account & Get Full Access
+              Go to My Dashboard
             </Button>
             <p className="text-xs text-center text-muted-foreground">
-              100% free — unlock recipes, tracker, and meal plans
+              Your account is ready — track macros, get recipes, and follow your plan
             </p>
 
           </CardContent>

@@ -80,7 +80,7 @@ const Community = () => {
   const [searchParams] = useSearchParams();
   const initialMessageUser = searchParams.get('user');
   const isMobile = useIsMobile();
-  const [activeTab, setActiveTab] = useState<'discussion' | 'messages' | 'groups'>('discussion');
+  const [activeTab, setActiveTab] = useState<'discussion' | 'messages' | 'groups'>(initialMessageUser ? 'messages' : 'discussion');
   const [showSidePanel, setShowSidePanel] = useState(false);
 
   const [newPostContent, setNewPostContent] = useState("");

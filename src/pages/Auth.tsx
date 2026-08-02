@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -21,6 +21,8 @@ const Auth = () => {
   const { signIn, resetPassword } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get('redirect');
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,7 +50,7 @@ const Auth = () => {
         toast({ title: "Error signing in", description: error.message, variant: "destructive" });
       } else {
         toast({ title: "Welcome back!" });
-        navigate('/progress');
+        navigate(redirectTo || '/progress');
       }
     } catch {
       toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
