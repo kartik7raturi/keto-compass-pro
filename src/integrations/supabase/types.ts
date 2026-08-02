@@ -1745,6 +1745,7 @@ export type Database = {
           created_at: string
           current_weight: number | null
           diet_preference: string | null
+          share_progress_publicly: boolean
           diet_type: string | null
           display_name: string | null
           email: string | null
@@ -1768,6 +1769,7 @@ export type Database = {
           created_at?: string
           current_weight?: number | null
           diet_preference?: string | null
+          share_progress_publicly?: boolean
           diet_type?: string | null
           display_name?: string | null
           email?: string | null
@@ -1791,6 +1793,7 @@ export type Database = {
           created_at?: string
           current_weight?: number | null
           diet_preference?: string | null
+          share_progress_publicly?: boolean
           diet_type?: string | null
           display_name?: string | null
           email?: string | null

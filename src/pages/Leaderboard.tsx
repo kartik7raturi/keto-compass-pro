@@ -131,25 +131,28 @@ const Leaderboard = () => {
       // Get user profiles
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('user_id, display_name, avatar_url, current_weight')
+        .select('user_id, display_name, avatar_url, current_weight, share_progress_publicly')
         .in('user_id', Array.from(allUserIds));
 
       // Weight loss: compare each user's earliest logged weight to their current weight.
       // Shows only the amount lost (not raw body weight) to keep this less sensitive,
-      // and only for users who have logged weight at least once and are losing.
+      // and only for users who've explicitly opted in to sharing their progress.
       let weightLossByUser: Record<string, number> = {};
-      const { data: weightLogsData } = await supabase
-        .from('weight_logs')
-        .select('user_id, weight, logged_at')
-        .in('user_id', Array.from(allUserIds))
-        .order('logged_at', { ascending: true });
+      const optedInIds = new Set((profiles || []).filter(p => p.share_progress_publicly).map(p => p.user_id));
+      const { data: weightLogsData } = optedInIds.size > 0
+        ? await supabase
+            .from('weight_logs')
+            .select('user_id, weight, logged_at')
+            .in('user_id', Array.from(optedInIds))
+            .order('logged_at', { ascending: true })
+        : { data: [] as { user_id: string; weight: number; logged_at: string }[] };
 
       if (weightLogsData) {
         const firstByUser: Record<string, number> = {};
         weightLogsData.forEach((log) => {
           if (firstByUser[log.user_id] === undefined) firstByUser[log.user_id] = log.weight;
         });
-        Array.from(allUserIds).forEach((uid) => {
+        Array.from(optedInIds).forEach((uid) => {
           const profile = profiles?.find(p => p.user_id === uid);
           const first = firstByUser[uid];
           const current = profile?.current_weight;
@@ -314,7 +317,11 @@ const Leaderboard = () => {
                   ) : leaderboard.length === 0 ? (
                     <div className="text-center py-12 text-muted-foreground">
                       <Trophy className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p>No data yet. Start tracking to appear on the leaderboard!</p>
+                      <p>
+                        {category === 'weight_loss'
+                          ? "No one's shared their progress yet. Turn on \"Share progress publicly\" on your Progress page to be the first!"
+                          : 'No data yet. Start tracking to appear on the leaderboard!'}
+                      </p>
                     </div>
                   ) : (
                     <div className="space-y-3">

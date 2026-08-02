@@ -3,6 +3,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
 import { Plus, Edit } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,6 +40,7 @@ const ProgressDashboard = () => {
     avgCarbs: 0, avgProtein: 0, avgFat: 0, avgCalories: 0
   });
   const [targets, setTargets] = useState({ calories: 2000, carbs: 25, protein: 120, fat: 130 });
+  const [sharePublicly, setSharePublicly] = useState(false);
 
   useEffect(() => {
     if (user) fetchUserData();
@@ -140,6 +142,7 @@ const ProgressDashboard = () => {
       if (profileData) {
         setNewCurrentWeight(profileData.current_weight?.toString() || "");
         setNewGoalWeight(profileData.goal_weight?.toString() || "");
+        setSharePublicly(!!profileData.share_progress_publicly);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -178,6 +181,22 @@ const ProgressDashboard = () => {
       toast({ title: "Goal weight updated successfully!" });
     } catch (error) {
       toast({ title: "Error updating goal weight", variant: "destructive" });
+    }
+  };
+
+  const toggleSharePublicly = async (value: boolean) => {
+    setSharePublicly(value);
+    try {
+      await supabase.from('profiles').update({ share_progress_publicly: value }).eq('user_id', user?.id);
+      toast({
+        title: value ? "Now sharing on the leaderboard" : "Sharing turned off",
+        description: value
+          ? "Your weight-loss progress (pounds lost, not your actual weight) will show on the Weight Loss leaderboard."
+          : "Your progress is private again.",
+      });
+    } catch (error) {
+      setSharePublicly(!value);
+      toast({ title: "Couldn't update setting", variant: "destructive" });
     }
   };
 
@@ -295,6 +314,14 @@ const ProgressDashboard = () => {
                 Set a goal weight to track your journey and stay motivated.
               </p>
             )}
+
+            <div className="flex items-center justify-between mt-4 pt-4 border-t">
+              <div>
+                <p className="text-sm font-medium">Share progress publicly</p>
+                <p className="text-xs text-muted-foreground">Show pounds lost (not your weight) on the leaderboard</p>
+              </div>
+              <Switch checked={sharePublicly} onCheckedChange={toggleSharePublicly} />
+            </div>
           </CardContent>
         </Card>
 
