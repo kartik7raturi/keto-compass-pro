@@ -11,6 +11,7 @@ import AnalyticsTracker from "@/components/AnalyticsTracker";
 import { AuthProvider } from "@/components/auth/AuthContext";
 import { DietModeProvider } from "@/components/DietModeProvider";
 import { SupportChatButton } from "@/components/SupportChat";
+import { ErrorBoundary, setupChunkErrorRecovery } from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Header from "./components/Header";
@@ -66,6 +67,7 @@ const Leaderboard = lazy(() => import("./pages/Leaderboard"));
 const JoinGroup = lazy(() => import("./pages/JoinGroup"));
 
 const queryClient = new QueryClient();
+setupChunkErrorRecovery();
 
 const PageFallback = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
@@ -74,6 +76,7 @@ const PageFallback = () => (
 );
 
 const App = () => (
+  <ErrorBoundary>
   <HelmetProvider>
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -152,6 +155,7 @@ const App = () => (
     </AuthProvider>
   </QueryClientProvider>
   </HelmetProvider>
+  </ErrorBoundary>
 );
 
 export default App;
