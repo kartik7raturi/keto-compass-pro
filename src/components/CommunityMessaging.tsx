@@ -79,9 +79,16 @@ export const CommunityMessaging = ({ initialUserId, onClose }: CommunityMessagin
           
           if (selectedConversation?.other_user_id === newMsg.sender_id) {
             setMessages(prev => [...prev, newMsg]);
+            // The conversation is already open, so mark this message read right away
+            // instead of leaving a stale unread badge until the user reopens it.
+            supabase
+              .from('direct_messages')
+              .update({ is_read: true })
+              .eq('id', newMsg.id)
+              .then(() => fetchConversations());
+          } else {
+            fetchConversations();
           }
-          
-          fetchConversations();
         }
       )
       .subscribe();
@@ -124,24 +131,24 @@ export const CommunityMessaging = ({ initialUserId, onClose }: CommunityMessagin
         }
       }
 
-      const convos: Conversation[] = [];
-      for (const [otherId, data] of conversationMap) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('display_name, avatar_url')
-          .eq('user_id', otherId)
-          .maybeSingle();
-        
-        convos.push({
+      const otherIds = Array.from(conversationMap.keys());
+      const { data: profilesData } = otherIds.length > 0
+        ? await supabase.from('profiles').select('user_id, display_name, avatar_url').in('user_id', otherIds)
+        : { data: [] as { user_id: string; display_name: string; avatar_url: string | null }[] };
+
+      const convos: Conversation[] = otherIds.map((otherId) => {
+        const data = conversationMap.get(otherId);
+        const profile = profilesData?.find(p => p.user_id === otherId);
+        return {
           id: otherId,
           other_user_id: otherId,
           other_user_name: profile?.display_name || 'User',
-          other_user_avatar: profile?.avatar_url,
+          other_user_avatar: profile?.avatar_url || null,
           last_message: data.last_message,
           last_message_at: data.last_message_at,
-          unread_count: data.unread_count
-        });
-      }
+          unread_count: data.unread_count,
+        };
+      });
 
       setConversations(convos.sort((a, b) => 
         new Date(b.last_message_at).getTime() - new Date(a.last_message_at).getTime()

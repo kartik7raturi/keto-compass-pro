@@ -23,7 +23,7 @@ interface Group {
 }
 
 interface UserGroupsProps {
-  onSelectGroup: (groupId: string) => void;
+  onSelectGroup: (groupId: string | null) => void;
   selectedGroupId: string | null;
 }
 
@@ -153,6 +153,7 @@ export const UserGroups = ({ onSelectGroup, selectedGroupId }: UserGroupsProps) 
 
   const deleteGroup = async (groupId: string) => {
     if (!user) return;
+    if (!window.confirm('Delete this group permanently? This removes it for all members and cannot be undone.')) return;
     try {
       // Delete members first, then group
       await supabase.from('group_members').delete().eq('group_id', groupId);
@@ -172,6 +173,24 @@ export const UserGroups = ({ onSelectGroup, selectedGroupId }: UserGroupsProps) 
       fetchGroups();
     } catch (error) {
       toast({ title: 'Error joining group', variant: 'destructive' });
+    }
+  };
+
+  const leaveGroup = async (groupId: string) => {
+    if (!user) return;
+    if (!window.confirm('Leave this group?')) return;
+    try {
+      const { error } = await supabase
+        .from('group_members')
+        .delete()
+        .eq('group_id', groupId)
+        .eq('user_id', user.id);
+      if (error) throw error;
+      toast({ title: 'Left group' });
+      if (selectedGroupId === groupId) onSelectGroup(null);
+      fetchGroups();
+    } catch (error) {
+      toast({ title: 'Error leaving group', variant: 'destructive' });
     }
   };
 
@@ -204,7 +223,7 @@ export const UserGroups = ({ onSelectGroup, selectedGroupId }: UserGroupsProps) 
                       </div>
                       <span className="text-xs text-muted-foreground">{group.member_count} members</span>
                     </div>
-                    {group.owner_id === user?.id && (
+                    {group.owner_id === user?.id ? (
                       <div className="flex gap-1">
                         <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={(e) => { e.stopPropagation(); openEditGroup(group); }}>
                           <Edit className="h-3 w-3" />
@@ -213,6 +232,10 @@ export const UserGroups = ({ onSelectGroup, selectedGroupId }: UserGroupsProps) 
                           <Trash2 className="h-3 w-3" />
                         </Button>
                       </div>
+                    ) : (
+                      <Button size="sm" variant="ghost" className="h-6 px-2 text-xs text-muted-foreground" onClick={(e) => { e.stopPropagation(); leaveGroup(group.id); }}>
+                        Leave
+                      </Button>
                     )}
                     <MessageCircle className="h-4 w-4 text-muted-foreground" />
                   </div>

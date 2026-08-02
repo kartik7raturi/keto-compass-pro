@@ -51,7 +51,8 @@ export const GroupChat = ({ groupId, onBack }: GroupChatProps) => {
   const [group, setGroup] = useState<GroupInfo | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
-  const [inviteUserId, setInviteUserId] = useState('');
+  const [inviteQuery, setInviteQuery] = useState('');
+  const [inviteResults, setInviteResults] = useState<{ user_id: string; display_name: string; avatar_url: string | null }[]>([]);
   const [showMembers, setShowMembers] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -156,18 +157,32 @@ export const GroupChat = ({ groupId, onBack }: GroupChatProps) => {
     }
   };
 
-  const inviteUser = async () => {
-    if (!user || !inviteUserId.trim()) return;
+  const searchInviteUsers = async (q: string) => {
+    setInviteQuery(q);
+    if (!q.trim()) { setInviteResults([]); return; }
+    const memberIds = new Set(members.map(m => m.user_id));
+    const { data } = await supabase
+      .from('profiles')
+      .select('user_id, display_name, avatar_url')
+      .or(`display_name.ilike.%${q.trim()}%,username.ilike.%${q.trim()}%`)
+      .neq('user_id', user?.id || '')
+      .limit(10);
+    setInviteResults((data || []).filter(p => !memberIds.has(p.user_id)));
+  };
+
+  const inviteUser = async (inviteeId: string) => {
+    if (!user) return;
 
     try {
       await supabase.from('group_invites').insert({
         group_id: groupId,
         inviter_id: user.id,
-        invitee_id: inviteUserId.trim()
+        invitee_id: inviteeId
       });
 
       toast({ title: 'Invite sent!' });
-      setInviteUserId('');
+      setInviteQuery('');
+      setInviteResults([]);
     } catch (error) {
       console.error('Error sending invite:', error);
       toast({ title: 'Error sending invite', variant: 'destructive' });
@@ -223,17 +238,32 @@ export const GroupChat = ({ groupId, onBack }: GroupChatProps) => {
               </ScrollArea>
               {isOwner && (
                 <div className="pt-4 border-t">
-                  <label className="text-sm font-medium">Invite User (User ID)</label>
-                  <div className="flex gap-2 mt-1">
-                    <Input
-                      value={inviteUserId}
-                      onChange={(e) => setInviteUserId(e.target.value)}
-                      placeholder="Enter user ID..."
-                    />
-                    <Button onClick={inviteUser} size="icon">
-                      <UserPlus className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <label className="text-sm font-medium">Invite by name or @username</label>
+                  <Input
+                    value={inviteQuery}
+                    onChange={(e) => searchInviteUsers(e.target.value)}
+                    placeholder="Search people to invite..."
+                    className="mt-1"
+                  />
+                  {inviteResults.length > 0 && (
+                    <div className="mt-2 space-y-1 max-h-40 overflow-y-auto">
+                      {inviteResults.map((p) => (
+                        <div key={p.user_id} className="flex items-center gap-2 p-1.5 rounded hover:bg-muted">
+                          <Avatar className="h-6 w-6">
+                            <AvatarImage src={p.avatar_url || ''} />
+                            <AvatarFallback className="text-xs">{p.display_name?.[0] || '?'}</AvatarFallback>
+                          </Avatar>
+                          <span className="flex-1 text-sm truncate">{p.display_name}</span>
+                          <Button size="sm" variant="ghost" className="h-6 px-2" onClick={() => inviteUser(p.user_id)}>
+                            <UserPlus className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {inviteQuery.trim() && inviteResults.length === 0 && (
+                    <p className="text-xs text-muted-foreground mt-2">No matching users found.</p>
+                  )}
                 </div>
               )}
             </DialogContent>
