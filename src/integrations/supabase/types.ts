@@ -1745,6 +1745,7 @@ export type Database = {
           created_at: string
           current_weight: number | null
           diet_preference: string | null
+          budget_preference: string | null
           share_progress_publicly: boolean
           diet_type: string | null
           display_name: string | null
@@ -1769,6 +1770,7 @@ export type Database = {
           created_at?: string
           current_weight?: number | null
           diet_preference?: string | null
+          budget_preference?: string | null
           share_progress_publicly?: boolean
           diet_type?: string | null
           display_name?: string | null
@@ -1793,6 +1795,7 @@ export type Database = {
           created_at?: string
           current_weight?: number | null
           diet_preference?: string | null
+          budget_preference?: string | null
           share_progress_publicly?: boolean
           diet_type?: string | null
           display_name?: string | null
@@ -1969,6 +1972,7 @@ export type Database = {
           cook_time: number | null
           created_at: string
           description: string | null
+          cost_tier: string
           diet_category: string
           diet_type: string | null
           difficulty: string | null
@@ -1993,6 +1997,7 @@ export type Database = {
           cook_time?: number | null
           created_at?: string
           description?: string | null
+          cost_tier?: string
           diet_category?: string
           diet_type?: string | null
           difficulty?: string | null
@@ -2017,6 +2022,7 @@ export type Database = {
           cook_time?: number | null
           created_at?: string
           description?: string | null
+          cost_tier?: string
           diet_category?: string
           diet_type?: string | null
           difficulty?: string | null
@@ -2623,6 +2629,7 @@ export type Database = {
           daily_fat_target: number | null
           daily_protein_target: number | null
           diet_experience: string | null
+          budget_preference: string | null
           diet_preference: string | null
           exercise_frequency: string | null
           gender: string | null
@@ -2644,6 +2651,7 @@ export type Database = {
           daily_fat_target?: number | null
           daily_protein_target?: number | null
           diet_experience?: string | null
+          budget_preference?: string | null
           diet_preference?: string | null
           exercise_frequency?: string | null
           gender?: string | null
@@ -2665,6 +2673,7 @@ export type Database = {
           daily_fat_target?: number | null
           daily_protein_target?: number | null
           diet_experience?: string | null
+          budget_preference?: string | null
           diet_preference?: string | null
           exercise_frequency?: string | null
           gender?: string | null

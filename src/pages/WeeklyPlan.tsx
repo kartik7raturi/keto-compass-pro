@@ -55,6 +55,7 @@ const WeeklyPlan = () => {
   const { dietMode } = useDietMode();
   const { user } = useAuth();
   const [dietPreference, setDietPreference] = useState<string | null>(null);
+  const [budgetPreference, setBudgetPreference] = useState<string | null>(null);
   const isMobile = useIsMobile();
 
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -70,16 +71,19 @@ const WeeklyPlan = () => {
     if (!user) return;
     supabase
       .from('profiles')
-      .select('diet_preference')
+      .select('diet_preference, budget_preference')
       .eq('user_id', user.id)
       .maybeSingle()
-      .then(({ data }) => setDietPreference(data?.diet_preference || null));
+      .then(({ data }) => {
+        setDietPreference(data?.diet_preference || null);
+        setBudgetPreference(data?.budget_preference || null);
+      });
   }, [user]);
 
   useEffect(() => {
     fetchMeals();
     fetchWeeklyPlan();
-  }, [dietMode, dietPreference]);
+  }, [dietMode, dietPreference, budgetPreference]);
 
   const fetchMeals = async () => {
     let query = supabase
@@ -92,6 +96,13 @@ const WeeklyPlan = () => {
       query = query.eq('diet_category', 'vegan');
     } else if (dietPreference === 'vegetarian') {
       query = query.in('diet_category', ['vegan', 'vegetarian']);
+    }
+
+    // Respect weekly grocery budget, but don't let it filter down to nothing
+    if (budgetPreference === 'budget') {
+      query = query.in('cost_tier', ['budget']);
+    } else if (budgetPreference === 'moderate') {
+      query = query.in('cost_tier', ['budget', 'moderate']);
     }
 
     const { data: recipesData, error: recipesError } = await query.order('title');

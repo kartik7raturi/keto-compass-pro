@@ -8,13 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAuth } from '@/components/auth/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { ChevronRight, ChevronLeft, Loader2, Leaf, Beef, Salad } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Loader2, Leaf, Beef, Salad, DollarSign } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { trackLead } from '@/lib/tracking';
-import { generateWeeklyPlan, seedFromString, type DayPlan, type DietPreference } from '@/lib/mealPlanGenerator';
+import { generateWeeklyPlan, seedFromString, type DayPlan, type DietPreference, type BudgetPreference } from '@/lib/mealPlanGenerator';
 
 interface SurveyData {
   diet_preference: DietPreference | '';
+  budget_preference: BudgetPreference | '';
   current_weight: string;
   goal_weight: string;
   height: string;
@@ -32,6 +33,7 @@ const QUIZ_STEPS = [
   { key: 'height', q: 'What is your height (inches)?', type: 'number', placeholder: 'e.g. 68' },
   { key: 'weight', q: 'Your current & goal weight (lbs)', type: 'weight_pair' },
   { key: 'activity_level', q: 'How active are you?', type: 'select', options: ['Sedentary', 'Lightly Active', 'Moderately Active', 'Very Active', 'Extra Active'] },
+  { key: 'budget_preference', q: 'What is your weekly grocery budget?', type: 'budget' },
 ];
 
 const SIGNUP_STEP = QUIZ_STEPS.length;
@@ -44,13 +46,19 @@ const DIET_OPTIONS: { value: DietPreference; label: string; icon: typeof Leaf }[
   { value: 'vegan', label: 'Vegan', icon: Leaf },
 ];
 
+const BUDGET_OPTIONS: { value: BudgetPreference; label: string; sub: string }[] = [
+  { value: 'budget', label: 'Under $75/week', sub: 'Budget-friendly staples' },
+  { value: 'moderate', label: '$75–150/week', sub: 'A good balance' },
+  { value: 'premium', label: '$150+/week', sub: 'No limits — premium ingredients ok' },
+];
+
 const OnboardingSurvey = () => {
   const { signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [step, setStep] = useState(0);
   const [data, setData] = useState<SurveyData>({
-    diet_preference: '', current_weight: '', goal_weight: '', height: '', age: '',
+    diet_preference: '', budget_preference: '', current_weight: '', goal_weight: '', height: '', age: '',
     gender: '', activity_level: '', email: '', password: '',
   });
   const [submitting, setSubmitting] = useState(false);
@@ -130,6 +138,7 @@ const OnboardingSurvey = () => {
             gender: data.gender,
             activity_level: data.activity_level,
             diet_preference: data.diet_preference || null,
+            budget_preference: data.budget_preference || null,
             daily_calorie_target: targets.daily_calorie_target,
             daily_carb_target: targets.daily_carb_target,
             daily_protein_target: targets.daily_protein_target,
@@ -143,6 +152,7 @@ const OnboardingSurvey = () => {
             age: parseInt(data.age) || null,
             activity_level: data.activity_level,
             diet_preference: data.diet_preference || null,
+            budget_preference: data.budget_preference || null,
           }).eq('user_id', userId);
         }
         toast({ title: 'Account created!' });
@@ -158,7 +168,7 @@ const OnboardingSurvey = () => {
   useEffect(() => {
     if ((step === REPORT_STEP || signupDone) && data.diet_preference && mealPlan.length === 0) {
       setPlanLoading(true);
-      generateWeeklyPlan(data.diet_preference as DietPreference, seedFromString(data.email || 'guest'))
+      generateWeeklyPlan(data.diet_preference as DietPreference, seedFromString(data.email || 'guest'), data.budget_preference || null)
         .then(setMealPlan)
         .finally(() => setPlanLoading(false));
     }
@@ -199,6 +209,28 @@ const OnboardingSurvey = () => {
                     >
                       <Icon className={`h-5 w-5 ${selected ? 'text-primary' : 'text-muted-foreground'}`} />
                       <span className="font-medium">{opt.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : currentStep.type === 'budget' ? (
+              <div className="grid grid-cols-1 gap-3">
+                {BUDGET_OPTIONS.map((opt) => {
+                  const selected = data.budget_preference === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setValue('budget_preference', opt.value)}
+                      className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-colors text-left ${
+                        selected ? 'border-primary bg-primary/10' : 'border-border hover:bg-muted'
+                      }`}
+                    >
+                      <DollarSign className={`h-5 w-5 flex-shrink-0 ${selected ? 'text-primary' : 'text-muted-foreground'}`} />
+                      <span>
+                        <span className="font-medium block">{opt.label}</span>
+                        <span className="text-xs text-muted-foreground">{opt.sub}</span>
+                      </span>
                     </button>
                   );
                 })}
