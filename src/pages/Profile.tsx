@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -27,6 +28,7 @@ interface ProfileStats {
 const Profile = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const { userProgress } = usePointsSystem();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -348,9 +350,9 @@ const Profile = () => {
                       <p className="text-muted-foreground text-sm mb-4">
                         Share your progress with the community and inspire others on their diet journey
                       </p>
-                      <Button variant="outline">
+                      <Button variant="outline" onClick={() => navigate('/transformations')}>
                         <Upload className="h-4 w-4 mr-2" />
-                        Upload Photos
+                        Share Your Transformation
                       </Button>
                     </div>
                   </div>
@@ -438,7 +440,7 @@ const Profile = () => {
                   <Button 
                     variant="outline" 
                     className="w-full"
-                    onClick={() => window.location.href = '/contact'}
+                    onClick={() => navigate('/contact')}
                   >
                     <MessageCircle className="h-4 w-4 mr-2" />
                     24/7 Chat Support
@@ -446,7 +448,7 @@ const Profile = () => {
                   <Button 
                     variant="ghost" 
                     className="w-full"
-                    onClick={() => window.location.href = '/support'}
+                    onClick={() => navigate('/support')}
                   >
                     <ExternalLink className="h-4 w-4 mr-2" />
                     Help Center
