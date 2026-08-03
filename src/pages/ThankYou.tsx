@@ -1,9 +1,9 @@
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Check, Crown, PartyPopper, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Check, Crown, PartyPopper, ShoppingBag, ArrowRight, Loader2 } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useButtonLinks } from '@/hooks/useButtonLinks';
 import { trackPurchase } from '@/lib/tracking';
@@ -11,27 +11,36 @@ import { trackPurchase } from '@/lib/tracking';
 const ThankYou = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { upgradePlan, refetch } = useSubscription();
+  const { subscription, loading: subLoading, refetch } = useSubscription();
   const { getUrl } = useButtonLinks();
   const plan = searchParams.get('plan') || 'basic';
+  const [timedOut, setTimedOut] = useState(false);
+
+  const expectedPlan = plan === 'basic' ? 'basic' : plan === 'vip-monthly' ? 'vip' : 'vip_lifetime';
+  // The real access grant happens server-side via the JVZoo IPN webhook (which
+  // verifies a cryptographic signature) — this page never grants access on its
+  // own. It just waits for that webhook to land and reflects the real state,
+  // so visiting this URL directly can't hand out free access.
+  const confirmed = subscription?.is_active && subscription.plan_type === expectedPlan;
 
   useEffect(() => {
-    if (plan === 'basic') {
-      upgradePlan('basic', 'one_time', 19);
-      trackPurchase('keto_starter', 19, 'USD', { plan: 'basic' });
-    } else if (plan === 'vip-monthly') {
-      upgradePlan('vip', 'monthly', 29);
-      trackPurchase('vip_monthly', 29, 'USD', { plan: 'vip-monthly' });
-    } else if (plan === 'vip-lifetime' || plan === 'vip-yearly') {
-      // $99 yearly plan — stored as vip_lifetime internally; expiry now 365 days
-      upgradePlan('vip_lifetime', 'one_time', 99);
-      trackPurchase('vip_yearly', 99, 'USD', { plan: 'vip-yearly' });
-    }
-    // Re-poll a few times so the IPN processor's update lands.
-    const tries = [2000, 5000, 10000];
-    const timers = tries.map(t => setTimeout(() => refetch(), t));
-    return () => timers.forEach(clearTimeout);
+    trackPurchase(
+      plan === 'basic' ? 'keto_starter' : plan === 'vip-monthly' ? 'vip_monthly' : 'vip_yearly',
+      plan === 'basic' ? 19 : plan === 'vip-monthly' ? 29 : 99,
+      'USD',
+      { plan }
+    );
   }, [plan]);
+
+  useEffect(() => {
+    if (confirmed) return;
+    const pollInterval = setInterval(() => refetch(), 2500);
+    const timeout = setTimeout(() => setTimedOut(true), 30000);
+    return () => {
+      clearInterval(pollInterval);
+      clearTimeout(timeout);
+    };
+  }, [confirmed]);
 
   const isVip = plan.startsWith('vip');
 
@@ -56,6 +65,39 @@ const ThankYou = () => {
     if (url.startsWith('/')) navigate(url);
     else window.open(url, '_blank');
   };
+
+  // Waiting for the real webhook-confirmed subscription before showing any
+  // unlocked content or upsells.
+  if (!confirmed) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container mx-auto px-4 py-16 flex items-center justify-center">
+          <div className="max-w-md text-center">
+            {!timedOut ? (
+              <>
+                <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto mb-4" />
+                <h1 className="text-xl font-bold mb-2">Confirming your purchase…</h1>
+                <p className="text-sm text-muted-foreground">
+                  This usually takes just a few seconds. Please don't close this page.
+                </p>
+              </>
+            ) : (
+              <>
+                <h1 className="text-xl font-bold mb-2">Still processing</h1>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Your purchase confirmation is taking longer than usual. If you completed checkout,
+                  your account will unlock automatically within a few minutes. If it doesn't, contact
+                  support with your receipt and we'll sort it out right away.
+                </p>
+                <Button variant="outline" onClick={() => navigate('/support')}>Contact Support</Button>
+              </>
+            )}
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">

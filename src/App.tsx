@@ -55,7 +55,6 @@ const OnboardingSurvey = lazy(() => import("./pages/OnboardingSurvey"));
 const Shop = lazy(() => import("./pages/Shop"));
 const Pricing = lazy(() => import("./pages/Pricing"));
 const KetopiaPLR = lazy(() => import("./pages/KetopiaPLR"));
-const KetopiaPLRDownloads = lazy(() => import("./pages/KetopiaPLRDownloads"));
 const Imprint = lazy(() => import("./pages/Imprint"));
 const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
 const Course = lazy(() => import("./pages/Course"));
@@ -94,7 +93,6 @@ const App = () => (
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/pricing" element={<Navigate to="/vip-upgrade" replace />} />
                 <Route path="/ketopia-plr" element={<KetopiaPLR />} />
-                <Route path="/ketopia-plr-downloads" element={<KetopiaPLRDownloads />} />
                 <Route path="/onboarding" element={<OnboardingSurvey />} />
                 <Route path="/vip-upgrade" element={<VipUpgrade />} />
                 <Route path="/thank-you" element={<ThankYou />} />

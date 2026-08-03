@@ -93,21 +93,5 @@ export const useSubscription = () => {
     return subscription.is_active && ['basic', 'vip', 'vip_lifetime'].includes(subscription.plan_type);
   };
 
-  const upgradePlan = async (planType: PlanType, paymentType: string, amount: number) => {
-    if (!user?.id) return;
-    await supabase
-      .from('user_subscriptions')
-      .upsert({
-        user_id: user.id,
-        plan_type: planType,
-        payment_type: paymentType,
-        amount_paid: amount,
-        is_active: true,
-        started_at: new Date().toISOString(),
-      }, { onConflict: 'user_id' });
-    // Immediately refetch to update local state
-    await fetchSubscription();
-  };
-
-  return { subscription, loading, hasAccess, hasPaidPlan, upgradePlan, surveyCompleted, refetch: fetchSubscription };
+  return { subscription, loading, hasAccess, hasPaidPlan, surveyCompleted, refetch: fetchSubscription };
 };
