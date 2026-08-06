@@ -14,7 +14,13 @@ const FeatureGate: React.FC<FeatureGateProps> = ({ feature, children, fallbackMe
   const { hasAccess, loading, subscription } = useSubscription();
   const navigate = useNavigate();
 
-  if (loading) return <>{children}</>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   if (!hasAccess(feature)) {
     const isBasicUser = subscription?.is_active && subscription?.plan_type === 'basic';
