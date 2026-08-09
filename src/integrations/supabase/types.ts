@@ -1373,6 +1373,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
           },
+          {
+            foreignKeyName: "macro_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       meal_plan_items: {
@@ -1874,6 +1881,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
           },
+          {
+            foreignKeyName: "recipe_favorites_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       recipe_of_the_day: {
@@ -2298,6 +2312,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "user_challenges_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
             referencedColumns: ["user_id"]
           },
         ]
@@ -2749,6 +2770,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
           },
+          {
+            foreignKeyName: "weight_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       workout_logs: {
@@ -2783,7 +2811,60 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_profiles: {
+        Row: {
+          avatar_url: string | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          current_weight: number | null
+          diet_preference: string | null
+          diet_type: string | null
+          display_name: string | null
+          follower_count: number | null
+          following_count: number | null
+          share_progress_publicly: boolean | null
+          state: string | null
+          town: string | null
+          user_id: string | null
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          current_weight?: never
+          diet_preference?: string | null
+          diet_type?: string | null
+          display_name?: string | null
+          follower_count?: number | null
+          following_count?: number | null
+          share_progress_publicly?: boolean | null
+          state?: string | null
+          town?: string | null
+          user_id?: string | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          current_weight?: never
+          diet_preference?: string | null
+          diet_type?: string | null
+          display_name?: string | null
+          follower_count?: number | null
+          following_count?: number | null
+          share_progress_publicly?: boolean | null
+          state?: string | null
+          town?: string | null
+          user_id?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       award_points: { Args: { points_to_add: number }; Returns: undefined }
