@@ -1740,13 +1740,12 @@ export type Database = {
           activity_level: string | null
           age: number | null
           avatar_url: string | null
+          budget_preference: string | null
           city: string | null
           country: string | null
           created_at: string
           current_weight: number | null
           diet_preference: string | null
-          budget_preference: string | null
-          share_progress_publicly: boolean
           diet_type: string | null
           display_name: string | null
           email: string | null
@@ -1755,6 +1754,7 @@ export type Database = {
           goal_weight: number | null
           height: number | null
           id: string
+          share_progress_publicly: boolean
           state: string | null
           town: string | null
           updated_at: string
@@ -1765,13 +1765,12 @@ export type Database = {
           activity_level?: string | null
           age?: number | null
           avatar_url?: string | null
+          budget_preference?: string | null
           city?: string | null
           country?: string | null
           created_at?: string
           current_weight?: number | null
           diet_preference?: string | null
-          budget_preference?: string | null
-          share_progress_publicly?: boolean
           diet_type?: string | null
           display_name?: string | null
           email?: string | null
@@ -1780,6 +1779,7 @@ export type Database = {
           goal_weight?: number | null
           height?: number | null
           id?: string
+          share_progress_publicly?: boolean
           state?: string | null
           town?: string | null
           updated_at?: string
@@ -1790,13 +1790,12 @@ export type Database = {
           activity_level?: string | null
           age?: number | null
           avatar_url?: string | null
+          budget_preference?: string | null
           city?: string | null
           country?: string | null
           created_at?: string
           current_weight?: number | null
           diet_preference?: string | null
-          budget_preference?: string | null
-          share_progress_publicly?: boolean
           diet_type?: string | null
           display_name?: string | null
           email?: string | null
@@ -1805,6 +1804,7 @@ export type Database = {
           goal_weight?: number | null
           height?: number | null
           id?: string
+          share_progress_publicly?: boolean
           state?: string | null
           town?: string | null
           updated_at?: string
@@ -1970,9 +1970,9 @@ export type Database = {
           carbs: number | null
           category: string | null
           cook_time: number | null
+          cost_tier: string
           created_at: string
           description: string | null
-          cost_tier: string
           diet_category: string
           diet_type: string | null
           difficulty: string | null
@@ -1995,9 +1995,9 @@ export type Database = {
           carbs?: number | null
           category?: string | null
           cook_time?: number | null
+          cost_tier?: string
           created_at?: string
           description?: string | null
-          cost_tier?: string
           diet_category?: string
           diet_type?: string | null
           difficulty?: string | null
@@ -2020,9 +2020,9 @@ export type Database = {
           carbs?: number | null
           category?: string | null
           cook_time?: number | null
+          cost_tier?: string
           created_at?: string
           description?: string | null
-          cost_tier?: string
           diet_category?: string
           diet_type?: string | null
           difficulty?: string | null
@@ -2621,6 +2621,7 @@ export type Database = {
         Row: {
           activity_level: string | null
           age: number | null
+          budget_preference: string | null
           completed_at: string | null
           created_at: string | null
           current_weight: number | null
@@ -2629,7 +2630,6 @@ export type Database = {
           daily_fat_target: number | null
           daily_protein_target: number | null
           diet_experience: string | null
-          budget_preference: string | null
           diet_preference: string | null
           exercise_frequency: string | null
           gender: string | null
@@ -2643,6 +2643,7 @@ export type Database = {
         Insert: {
           activity_level?: string | null
           age?: number | null
+          budget_preference?: string | null
           completed_at?: string | null
           created_at?: string | null
           current_weight?: number | null
@@ -2651,7 +2652,6 @@ export type Database = {
           daily_fat_target?: number | null
           daily_protein_target?: number | null
           diet_experience?: string | null
-          budget_preference?: string | null
           diet_preference?: string | null
           exercise_frequency?: string | null
           gender?: string | null
@@ -2665,6 +2665,7 @@ export type Database = {
         Update: {
           activity_level?: string | null
           age?: number | null
+          budget_preference?: string | null
           completed_at?: string | null
           created_at?: string | null
           current_weight?: number | null
@@ -2673,7 +2674,6 @@ export type Database = {
           daily_fat_target?: number | null
           daily_protein_target?: number | null
           diet_experience?: string | null
-          budget_preference?: string | null
           diet_preference?: string | null
           exercise_frequency?: string | null
           gender?: string | null

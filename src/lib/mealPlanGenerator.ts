@@ -91,9 +91,9 @@ export const generateWeeklyPlan = async (
 
   return DAYS.map((day, i) => ({
     day,
-    breakfast: pick(breakfasts, i) as PlannedMeal,
-    lunch: pick(lunches, i + 2) as PlannedMeal,
-    dinner: pick(dinners, i + 4) as PlannedMeal,
+    breakfast: pick(breakfasts, i) as unknown as PlannedMeal,
+    lunch: pick(lunches, i + 2) as unknown as PlannedMeal,
+    dinner: pick(dinners, i + 4) as unknown as PlannedMeal,
   }));
 };
 
