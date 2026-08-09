@@ -32,7 +32,6 @@ interface UserProfileDialogProps {
 interface UserProfile {
   display_name: string;
   avatar_url: string | null;
-  email: string | null;
 }
 
 interface UserBadge {
