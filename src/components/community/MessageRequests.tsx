@@ -69,7 +69,7 @@ export const MessageRequests = ({ onAcceptRequest }: MessageRequestsProps = {}) 
       if (msgRequests && msgRequests.length > 0) {
         const senderIds = msgRequests.map(r => r.sender_id);
         const { data: profiles } = await supabase
-          .from('profiles')
+          .from('public_profiles')
           .select('user_id, display_name, avatar_url')
           .in('user_id', senderIds);
 
@@ -96,7 +96,7 @@ export const MessageRequests = ({ onAcceptRequest }: MessageRequestsProps = {}) 
 
         const [{ data: groups }, { data: profiles }] = await Promise.all([
           supabase.from('user_groups').select('id, name, image_url').in('id', groupIds),
-          supabase.from('profiles').select('user_id, display_name').in('user_id', inviterIds)
+          supabase.from('public_profiles').select('user_id, display_name').in('user_id', inviterIds)
         ]);
 
         const invitesWithData = invites.map(inv => ({

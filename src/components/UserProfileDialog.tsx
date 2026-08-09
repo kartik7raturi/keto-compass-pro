@@ -116,8 +116,8 @@ export const UserProfileDialog = ({ open, onClose, userId }: UserProfileDialogPr
     try {
       // Fetch profile
       const { data: profileData } = await supabase
-        .from('profiles')
-        .select('display_name, avatar_url, email')
+        .from('public_profiles')
+        .select('display_name, avatar_url')
         .eq('user_id', userId)
         .maybeSingle();
       setProfile(profileData);
