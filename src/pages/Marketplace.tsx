@@ -322,8 +322,11 @@ const Marketplace = () => {
 
   const fetchListings = async () => {
     try {
+      // Public browse never selects seller contact columns (not readable by anonymous visitors)
       const { data, error } = await supabase
-        .from('food_listings').select('*').eq('is_available', true).order('created_at', { ascending: false });
+        .from('food_listings')
+        .select('id, seller_id, title, description, price, quantity, category, is_vegetarian, calories, carbs, protein, fat, ingredients, image_url, country, state, city, town, latitude, longitude, is_available, is_sold_out, delivery_type, google_maps_link, food_tag, is_verified, views_count, view_count, keto_certified, delivery_radius_km, min_order_amount, created_at, updated_at')
+        .eq('is_available', true).order('created_at', { ascending: false });
       if (error) throw error;
       if (data && data.length > 0) {
         const sellerIds = [...new Set(data.map(l => l.seller_id))];
