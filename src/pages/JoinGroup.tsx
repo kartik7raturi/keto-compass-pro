@@ -89,7 +89,7 @@ const JoinGroup = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <SEO title="Join Group" description="You've been invited to join a Ketopia community group." noindex />
+      <SEO path="/join-group" title="Join Group" description="You've been invited to join a Ketopia community group." noindex />
       <Header />
       <main className="flex-1 container mx-auto px-4 py-16 flex items-center justify-center">
         <Card className="w-full max-w-md">
