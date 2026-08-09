@@ -117,7 +117,7 @@ const LeaderboardWidget = () => {
       }
 
       const { data: profiles } = await supabase
-        .from('profiles')
+        .from('public_profiles')
         .select('user_id, display_name, avatar_url')
         .in('user_id', Array.from(allUserIds));
 

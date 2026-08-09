@@ -48,7 +48,7 @@ export const RecipeReviews = ({ recipeId }: RecipeReviewsProps) => {
       // Fetch profiles for all unique user IDs
       const userIds = [...new Set(reviewsData.map(r => r.user_id))];
       const { data: profilesData } = await supabase
-        .from('profiles')
+        .from('public_profiles')
         .select('user_id, display_name, avatar_url')
         .in('user_id', userIds);
 

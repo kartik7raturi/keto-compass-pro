@@ -130,7 +130,7 @@ const Leaderboard = () => {
 
       // Get user profiles
       const { data: profiles } = await supabase
-        .from('profiles')
+        .from('public_profiles')
         .select('user_id, display_name, avatar_url, current_weight, share_progress_publicly')
         .in('user_id', Array.from(allUserIds));
 

@@ -178,7 +178,7 @@ const RecipeLibrary = () => {
       let profilesMap: Record<string, any> = {};
       if (userIds.length > 0) {
         const { data: profiles } = await supabase
-          .from('profiles')
+          .from('public_profiles')
           .select('user_id, display_name, avatar_url')
           .in('user_id', userIds);
         profilesMap = (profiles || []).reduce((acc: any, p: any) => {
@@ -214,7 +214,7 @@ const RecipeLibrary = () => {
       if (recipes && recipes.length > 0) {
         const userIds = [...new Set(recipes.map(r => r.user_id))];
         const { data: profiles } = await supabase
-          .from('profiles')
+          .from('public_profiles')
           .select('user_id, display_name, avatar_url')
           .in('user_id', userIds);
         

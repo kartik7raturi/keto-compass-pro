@@ -115,7 +115,7 @@ const Community = () => {
       if (follows && follows.length > 0) {
         const followingIds = follows.map(f => f.following_id);
         const { data: profiles } = await supabase
-          .from('profiles')
+          .from('public_profiles')
           .select('user_id, display_name, avatar_url')
           .in('user_id', followingIds);
         
@@ -197,7 +197,7 @@ const Community = () => {
       if (data && data.length > 0) {
         const userIds = data.map(m => m.user_id);
         const { data: profiles } = await supabase
-          .from('profiles')
+          .from('public_profiles')
           .select('user_id, display_name, avatar_url')
           .in('user_id', userIds);
         
@@ -259,7 +259,7 @@ const Community = () => {
       if (imageFile) imageUrl = await uploadToStorage(imageFile);
 
       const { data: profile } = await supabase
-        .from('profiles')
+        .from('public_profiles')
         .select('display_name, avatar_url')
         .eq('user_id', user.id)
         .maybeSingle();

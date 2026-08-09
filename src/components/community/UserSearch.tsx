@@ -36,7 +36,7 @@ export const UserSearch = ({ onStartChat }: UserSearchProps) => {
       
       // Search by display name or username only (not UUID)
       const { data, error } = await supabase
-        .from('profiles')
+        .from('public_profiles')
         .select('user_id, display_name, avatar_url, username')
         .or(`display_name.ilike.%${cleanQuery}%,username.ilike.%${cleanQuery}%`)
         .neq('user_id', user.id)

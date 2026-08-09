@@ -94,7 +94,7 @@ export const GroupChat = ({ groupId, onBack }: GroupChatProps) => {
       if (membersData && membersData.length > 0) {
         const userIds = membersData.map(m => m.user_id);
         const { data: profiles } = await supabase
-          .from('profiles')
+          .from('public_profiles')
           .select('user_id, display_name, avatar_url')
           .in('user_id', userIds);
 
@@ -121,7 +121,7 @@ export const GroupChat = ({ groupId, onBack }: GroupChatProps) => {
       if (messagesData && messagesData.length > 0) {
         const senderIds = [...new Set(messagesData.map(m => m.sender_id))];
         const { data: profiles } = await supabase
-          .from('profiles')
+          .from('public_profiles')
           .select('user_id, display_name, avatar_url')
           .in('user_id', senderIds);
 
@@ -162,7 +162,7 @@ export const GroupChat = ({ groupId, onBack }: GroupChatProps) => {
     if (!q.trim()) { setInviteResults([]); return; }
     const memberIds = new Set(members.map(m => m.user_id));
     const { data } = await supabase
-      .from('profiles')
+      .from('public_profiles')
       .select('user_id, display_name, avatar_url')
       .or(`display_name.ilike.%${q.trim()}%,username.ilike.%${q.trim()}%`)
       .neq('user_id', user?.id || '')

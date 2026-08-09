@@ -133,7 +133,7 @@ export const CommunityMessaging = ({ initialUserId, onClose }: CommunityMessagin
 
       const otherIds = Array.from(conversationMap.keys());
       const { data: profilesData } = otherIds.length > 0
-        ? await supabase.from('profiles').select('user_id, display_name, avatar_url').in('user_id', otherIds)
+        ? await supabase.from('public_profiles').select('user_id, display_name, avatar_url').in('user_id', otherIds)
         : { data: [] as { user_id: string; display_name: string; avatar_url: string | null }[] };
 
       const convos: Conversation[] = otherIds.map((otherId) => {
@@ -162,7 +162,7 @@ export const CommunityMessaging = ({ initialUserId, onClose }: CommunityMessagin
 
   const startConversationWith = async (userId: string) => {
     const { data: profile } = await supabase
-      .from('profiles')
+      .from('public_profiles')
       .select('display_name, avatar_url')
       .eq('user_id', userId)
       .maybeSingle();

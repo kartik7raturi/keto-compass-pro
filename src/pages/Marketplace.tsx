@@ -322,13 +322,16 @@ const Marketplace = () => {
 
   const fetchListings = async () => {
     try {
+      // Public browse never selects seller contact columns (not readable by anonymous visitors)
       const { data, error } = await supabase
-        .from('food_listings').select('*').eq('is_available', true).order('created_at', { ascending: false });
+        .from('food_listings')
+        .select('id, seller_id, title, description, price, quantity, category, is_vegetarian, calories, carbs, protein, fat, ingredients, image_url, country, state, city, town, latitude, longitude, is_available, is_sold_out, delivery_type, google_maps_link, food_tag, is_verified, views_count, view_count, keto_certified, delivery_radius_km, min_order_amount, created_at, updated_at')
+        .eq('is_available', true).order('created_at', { ascending: false });
       if (error) throw error;
       if (data && data.length > 0) {
         const sellerIds = [...new Set(data.map(l => l.seller_id))];
         const { data: profiles } = await supabase
-          .from('profiles').select('user_id, display_name, avatar_url').in('user_id', sellerIds);
+          .from('public_profiles').select('user_id, display_name, avatar_url').in('user_id', sellerIds);
         const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
         setListings(data.map(listing => ({
           ...listing,
@@ -372,7 +375,7 @@ const Marketplace = () => {
       for (const [, conv] of convMap) {
         const { data: listing } = await supabase.from('food_listings').select('*').eq('id', conv.listingId).maybeSingle();
         if (!listing) continue;
-        const { data: profile } = await supabase.from('profiles').select('display_name, avatar_url').eq('user_id', conv.otherUserId).maybeSingle();
+        const { data: profile } = await supabase.from('public_profiles').select('display_name, avatar_url').eq('user_id', conv.otherUserId).maybeSingle();
         const isSeller = listing.seller_id === user.id;
         const unread = conv.messages.filter(m => m.receiver_id === user.id && !m.is_read).length;
         const sorted = conv.messages.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
@@ -661,7 +664,7 @@ const Marketplace = () => {
         const pickupTime = pickupMatch ? pickupMatch[1].trim() : '';
         const isDelivery = msg.content.includes('Home Delivery');
         
-        const { data: buyerProfile } = await supabase.from('profiles').select('display_name, avatar_url').eq('user_id', conv.otherUserId).maybeSingle();
+        const { data: buyerProfile } = await supabase.from('public_profiles').select('display_name, avatar_url').eq('user_id', conv.otherUserId).maybeSingle();
         
         orders.push({
           buyerName: buyerProfile?.display_name || conv.otherUserName,
@@ -692,7 +695,7 @@ const Marketplace = () => {
     const { data } = await supabase.from('food_listing_reviews').select('*').eq('listing_id', listingId).order('created_at', { ascending: false });
     if (data) {
       const reviewerIds = [...new Set(data.map(r => r.reviewer_id))];
-      const { data: profiles } = await supabase.from('profiles').select('user_id, display_name, avatar_url').in('user_id', reviewerIds);
+      const { data: profiles } = await supabase.from('public_profiles').select('user_id, display_name, avatar_url').in('user_id', reviewerIds);
       const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
       setReviews(data.map(r => ({
         ...r, reviewer_name: profileMap.get(r.reviewer_id)?.display_name || 'User',
