@@ -149,20 +149,22 @@ const RecipeLibrary = () => {
         return q;
       };
 
-      // Weekly top (last 7 days, highest upvotes)
+      // Weekly top (last 7 days, highest upvotes) - approved only
       let weeklyQuery = applyBaseFilters(
         supabase
           .from('user_recipes')
           .select('*')
+          .eq('is_approved', true)
           .gte('created_at', oneWeekAgo.toISOString())
           .order('upvotes', { ascending: false })
       );
 
-      // All submitted (no time filter), newest first
+      // All submitted (no time filter), newest first - approved only
       let allQuery = applyBaseFilters(
         supabase
           .from('user_recipes')
           .select('*')
+          .eq('is_approved', true)
           .order('created_at', { ascending: false })
       );
 
@@ -206,6 +208,7 @@ const RecipeLibrary = () => {
       const { data: recipes } = await supabase
         .from('user_recipes')
         .select('user_id')
+        .eq('is_approved', true)
         .eq('diet_type', dietType);
       
       if (recipes && recipes.length > 0) {
