@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -41,7 +42,9 @@ interface Article {
 const ArticleManager = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [articles, setArticles] = useState<Article[]>([]);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Partial<Article>>({
     title: "",
@@ -54,10 +57,27 @@ const ArticleManager = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user) {
+    const checkAdmin = async () => {
+      if (!user) {
+        setIsAdmin(false);
+        return;
+      }
+      const { data } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin')
+        .maybeSingle();
+      setIsAdmin(!!data);
+    };
+    checkAdmin();
+  }, [user]);
+
+  useEffect(() => {
+    if (isAdmin) {
       fetchArticles();
     }
-  }, [user]);
+  }, [isAdmin]);
 
   const fetchArticles = async () => {
     if (!user) return;
@@ -192,15 +212,25 @@ const ArticleManager = () => {
     }
   };
 
-  if (!user) {
+  if (isAdmin === null) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
         <main className="container mx-auto px-4 py-8">
           <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Please sign in to manage articles</h1>
-            <Button onClick={() => window.location.href = '/auth'}>
-              Sign In
+            <h1 className="text-2xl font-bold mb-4">
+              {user ? "You don't have access to this page" : "Please sign in to continue"}
+            </h1>
+            <Button onClick={() => navigate(user ? '/' : '/auth')}>
+              {user ? 'Back to Home' : 'Sign In'}
             </Button>
           </div>
         </main>
