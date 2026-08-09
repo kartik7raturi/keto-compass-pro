@@ -110,15 +110,15 @@ const Stories = () => {
           duration_months: durationMonths ? parseInt(durationMonths) : null,
           before_image_url: beforeUrl,
           after_image_url: afterUrl,
-          is_approved: true,
+          is_approved: false,
           is_featured: false
         });
 
       if (error) throw error;
 
       toast({ 
-        title: 'Story published!', 
-        description: 'Your transformation is now live for the community to see.' 
+        title: 'Story submitted!', 
+        description: "Thanks for sharing! We'll review it and it'll appear here once approved." 
       });
       
       // Reset form
