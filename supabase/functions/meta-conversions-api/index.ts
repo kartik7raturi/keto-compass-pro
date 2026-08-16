@@ -31,8 +31,9 @@ Deno.serve(async (req) => {
 
   const accessToken = Deno.env.get("META_CAPI_ACCESS_TOKEN");
   if (!accessToken) {
-    return new Response(JSON.stringify({ error: "META_CAPI_ACCESS_TOKEN is not configured" }), {
-      status: 500,
+    // Server-side tracking not configured — no-op instead of erroring on every page view.
+    return new Response(JSON.stringify({ skipped: true, reason: "capi_not_configured" }), {
+      status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
