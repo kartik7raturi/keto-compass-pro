@@ -12,6 +12,8 @@ import { ChevronRight, ChevronLeft, Loader2, Leaf, Beef, Salad, DollarSign } fro
 import { Progress } from '@/components/ui/progress';
 import { trackLead } from '@/lib/tracking';
 import { generateWeeklyPlan, seedFromString, type DayPlan, type DietPreference, type BudgetPreference } from '@/lib/mealPlanGenerator';
+import { isRateLimitError, getRetryAfterSeconds } from '@/lib/authRateLimit';
+import { SignupRateLimitNotice } from '@/components/auth/SignupRateLimitNotice';
 
 interface SurveyData {
   diet_preference: DietPreference | '';
@@ -63,6 +65,14 @@ const OnboardingSurvey = () => {
   });
   const [submitting, setSubmitting] = useState(false);
   const [signupDone, setSignupDone] = useState(false);
+  const [rateLimitUntil, setRateLimitUntil] = useState(0);
+  const [, setTick] = useState(0);
+  const rateLimitWaiting = rateLimitUntil > Date.now();
+  useEffect(() => {
+    if (!rateLimitWaiting) return;
+    const t = setInterval(() => setTick((n) => n + 1), 1000);
+    return () => clearInterval(t);
+  }, [rateLimitWaiting]);
   const [mealPlan, setMealPlan] = useState<DayPlan[]>([]);
   const [planLoading, setPlanLoading] = useState(false);
 
@@ -121,7 +131,11 @@ const OnboardingSurvey = () => {
     try {
       const { error } = await signUp(data.email, data.password, data.email.split('@')[0]);
       if (error) {
-        toast({ title: 'Signup Error', description: error.message, variant: 'destructive' });
+        if (isRateLimitError(error)) {
+          setRateLimitUntil(Date.now() + getRetryAfterSeconds(error) * 1000);
+        } else {
+          toast({ title: 'Signup Error', description: error.message, variant: 'destructive' });
+        }
       } else {
         setSignupDone(true);
         trackLead('onboarding_survey', { diet_preference: data.diet_preference });
@@ -332,16 +346,19 @@ const OnboardingSurvey = () => {
                 className="text-lg py-6"
               />
             </div>
+            {rateLimitUntil > 0 && (
+              <SignupRateLimitNotice email={data.email} until={rateLimitUntil} onUntilChange={setRateLimitUntil} />
+            )}
             <div className="flex gap-3">
               <Button variant="outline" onClick={() => setStep(step - 1)} className="flex-1">
                 <ChevronLeft className="h-4 w-4 mr-1" /> Back
               </Button>
               <Button
                 onClick={handleSignup}
-                disabled={!data.email || !data.password || data.password.length < 6 || submitting}
+                disabled={!data.email || !data.password || data.password.length < 6 || submitting || rateLimitWaiting}
                 className="flex-1 bg-gradient-to-r from-primary to-primary/80"
               >
-                {submitting ? 'Creating...' : 'Create Account'}
+                {submitting ? 'Creating...' : rateLimitWaiting ? 'Please wait…' : 'Create Account'}
               </Button>
             </div>
           </CardContent>
