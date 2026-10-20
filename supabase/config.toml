@@ -7,3 +7,9 @@ verify_jwt = false
 verify_jwt = false
 [functions.meta-conversions-api]
 verify_jwt = false
+
+[functions.ai-meal-plan]
+verify_jwt = false
+
+[functions.meta-capi-status]
+verify_jwt = false

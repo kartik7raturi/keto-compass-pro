@@ -36,6 +36,7 @@ const Workout = lazy(() => import("./pages/Workout"));
 const Water = lazy(() => import("./pages/Water"));
 const PeriodTracker = lazy(() => import("./pages/PeriodTracker"));
 const WeeklyPlan = lazy(() => import("./pages/WeeklyPlan"));
+const AiMealPlan = lazy(() => import("./pages/AiMealPlan"));
 const QuickMeals = lazy(() => import("./pages/QuickMeals"));
 const CustomPlan = lazy(() => import("./pages/CustomPlan"));
 const Guide = lazy(() => import("./pages/Guide"));
@@ -119,6 +120,7 @@ const App = () => (
                 <Route path="/progress" element={<Progress />} />
                 <Route path="/challenges" element={<Challenges />} />
                 <Route path="/marketplace" element={<Marketplace />} />
+                <Route path="/ai-meal-plan" element={<AiMealPlan />} />
                 <Route path="/weekly-plan" element={<RequirePlan required="vip"><WeeklyPlan /></RequirePlan>} />
                 <Route path="/quick-meals" element={<QuickMeals />} />
                 <Route path="/custom-plan" element={<RequirePlan required="vip"><CustomPlan /></RequirePlan>} />
