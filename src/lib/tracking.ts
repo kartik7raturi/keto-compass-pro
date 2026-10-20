@@ -100,7 +100,10 @@ async function sendConversionsApiEvent(
         event_source_url: getMetaEventSourceUrl(),
         action_source: actionSource,
         custom_data: params,
-        test_event_code: META_TEST_EVENT_CODE,
+        // Only tag events as "test" outside the live domain so real purchases count.
+        test_event_code: typeof window !== 'undefined' && window.location.hostname.endsWith('ketopia.online')
+          ? undefined
+          : META_TEST_EVENT_CODE,
         attribution: utm,
         user_data: {
           client_user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
