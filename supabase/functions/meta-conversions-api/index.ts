@@ -62,7 +62,7 @@ Deno.serve(async (req) => {
           },
         },
       ],
-      test_event_code: payload.test_event_code || DEFAULT_TEST_EVENT_CODE,
+      ...(payload.test_event_code ? { test_event_code: payload.test_event_code } : {}),
     };
 
     const metaResponse = await fetch(
