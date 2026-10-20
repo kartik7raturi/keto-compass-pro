@@ -22,6 +22,7 @@ import { AdminSupportChats } from "@/components/admin/AdminSupportChats";
 import { AdminButtonLinks } from "@/components/admin/AdminButtonLinks";
 import { AdminProducts } from "@/components/admin/AdminProducts";
 import { AdminCourse } from "@/components/admin/AdminCourse";
+import { AdminTrackingStatus } from "@/components/admin/AdminTrackingStatus";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -275,6 +276,9 @@ const Admin = () => {
             <TabsTrigger value="webhooks" className="flex items-center gap-1 text-xs">
               <Webhook className="h-3.5 w-3.5" /><span className="hidden sm:inline">Webhooks</span>
             </TabsTrigger>
+            <TabsTrigger value="tracking" className="flex items-center gap-1 text-xs">
+              <Target className="h-3.5 w-3.5" /><span className="hidden sm:inline">Tracking</span>
+            </TabsTrigger>
 
           </TabsList>
 
@@ -294,6 +298,7 @@ const Admin = () => {
           <TabsContent value="course"><AdminCourse /></TabsContent>
           <TabsContent value="vipvideo"><AdminVipVideo /></TabsContent>
           <TabsContent value="webhooks"><AdminWebhookLogs /></TabsContent>
+          <TabsContent value="tracking"><AdminTrackingStatus /></TabsContent>
 
         </Tabs>
       </main>

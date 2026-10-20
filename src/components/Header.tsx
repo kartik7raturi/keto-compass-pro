@@ -88,6 +88,7 @@ const Header = () => {
       {
         label: 'Eat', path: '/recipes', items: [
           { label: 'Recipes', path: '/recipes' },
+          { label: 'AI Meal Planner', path: '/ai-meal-plan' },
           { label: 'Weekly Plan', path: '/weekly-plan' },
           { label: 'Quick Meals', path: '/quick-meals' },
           { label: 'Custom Plan', path: '/custom-plan' },
